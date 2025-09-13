@@ -1,0 +1,48 @@
+/*
+%name - reusable styles (used @extend %name)
+@mixin name - function (used @include name(param))
+$name - variable
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+$gray-0: #070707;
+$gray-1: #191919;
+$gray-2: #1e1e1e;
+$gray-3: #282828;
+$gray-4: #303030;
+$gray-5: #3d3d3d;
+$gray-6: #636363;
+$gray-7: #858585;
+$gray-8: #dbdbdb;
+$gray-9: #f9f9f9;
+
+$white-0: #dbdbdb;
+$white-1: #f9f9f9;
+
+$blue-0: #006b8c;
+$blue-1: #0084b8;
+$blue-2: #00b7ff;
+
+$purple-0: #382251;
+$purple-1: #482a65;
+$purple-2: #54347a;
+$purple-3: #5d3c8c;
+$purple-4: #9061bd;
+$purple-5: #ebe2f3;
+
+$green-0: #2f914d;
+$green-1: #36a355;
+$green-2: #76ce91;
+
+$red-0: #ad3b25;
+$red-1: #ca452b;
+$red-2: #d85e46;
+
+$yellow-0: #fd9d0d;
+$yellow-1: #fea520;
+$yellow-2: #feb548;
+
+$font-name: "Ubuntu", "Segoe UI", sans-serif, monospace;
+$font-heading: "Inter", "Ubuntu", "Segoe UI", sans-serif, monospace;
+$font-regular: "Inter", "Ubuntu", "Segoe UI", sans-serif, monospace;
