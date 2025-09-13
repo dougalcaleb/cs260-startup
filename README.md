@@ -56,15 +56,15 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **HTML pages** - I did not complete this part of the deliverable.
-- [ ] **Proper HTML element usage** - I did not complete this part of the deliverable.
-- [ ] **Links** - I did not complete this part of the deliverable.
-- [ ] **Text** - I did not complete this part of the deliverable.
-- [ ] **3rd party API placeholder** - I did not complete this part of the deliverable.
-- [ ] **Images** - I did not complete this part of the deliverable.
-- [ ] **Login placeholder** - I did not complete this part of the deliverable.
-- [ ] **DB data placeholder** - I did not complete this part of the deliverable.
-- [ ] **WebSocket placeholder** - I did not complete this part of the deliverable.
+- [x] **HTML pages** - Added landing, login, library, connect, nearby search, and user search pages
+- [x] **Proper HTML element usage** - Used proper HTML elements for appropriate page sections
+- [x] **Links** - Included links from landing page to each other page, and from each individual page back to landing page
+- [x] **Text** - Headers for each page, along with placeholder text for informational parts
+- [x] **3rd party API placeholder** - Images fetched on both the Library and Connect pages
+- [x] **Images** - Images on Library and Connect pages
+- [x] **Login placeholder** - Login page with username and password input
+- [x] **DB data placeholder** - User's Library page
+- [x] **WebSocket placeholder** - Nearby Search page
 
 ## 🚀 CSS deliverable
 
