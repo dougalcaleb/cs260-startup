@@ -1,0 +1,42 @@
+@use "ext";
+
+// * {
+//     user-select: none;
+// }
+html,body {
+	margin: 0;
+	height: auto;
+}
+
+.font-header {
+	font-family: ext.$font-heading;
+	font-weight: 900;
+}
+
+.font-name {
+	font-family: ext.$font-name;
+}
+
+.text-green {
+	color: ext.$green-2;
+}
+
+.text-gray-6 {
+	color: ext.$gray-6;
+}
+
+.text-gray-3 {
+	color: ext.$gray-3;
+}
+
+.text-white {
+	color: ext.$white-0;
+}
+
+p {
+	margin: 0;
+}
+
+.sticky {
+	position: sticky;
+}

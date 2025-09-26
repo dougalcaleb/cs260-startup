@@ -2,14 +2,69 @@
 <html>
 <head>
     <title>Parallel v0.2.0 (Styled)</title>
-    <link rel="stylesheet" type="text/css" href="./css/style.css">
+    <link rel="stylesheet" type="text/css" href="./css/generic.css">
+    <link rel="stylesheet" type="text/css" href="./css/specific.css">
+    <link rel="stylesheet" type="text/css" href="./css/anim.css">
+
+	<!-- inlined to help prevent FOUC -->
+	<style>
+		.load-screen {
+			position: fixed;
+			height: 100%;
+			width: 100%;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			z-index: 100;
+			background: #1e1e1e;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		.load-screen p {
+			font-size: 2rem;
+			clip-path: inset(0 100% 0 0);
+		}
+	</style>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 </head>
 <body>
+	<div class="load-screen">
+		<p class="load-text text-green font-header">PARALLEL</p>
+	</div>
 
+	<header class="sticky">
+		<img src="./svg/parallel-icon.svg" class="parallel-icon" />
+		<p class="font-header text-white header-title">PARALLEL</p>
+		<!-- <p class="font-name text-white header-user">Caleb Dougal</p> -->
+	</header>
 
+	<main class="main">
+		<div class="rounded-corners">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" class="corner-mask text-gray-3">
+				<path fill="currentColor" d="M500,0C223.86,0,0,223.86,0,500V0h500Z"/>
+			</svg>
 
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" class="corner-mask text-gray-3">
+				<path fill="currentColor" d="M500,500C500,223.86,276.14,0,0,0h500v500Z"/>
+			</svg>
+		</div>
+		<p class="font-header text-gray-6">LIBRARY</p>
+		<div class="library-content">
+			<img src="https://picsum.photos/200" alt="Image 1">
+			<img src="https://picsum.photos/200" alt="Image 1">
+			<img src="https://picsum.photos/200" alt="Image 1">
+			<img src="https://picsum.photos/200" alt="Image 1">
+			<img src="https://picsum.photos/200" alt="Image 1">
+			<img src="https://picsum.photos/200" alt="Image 1">
+			<img src="https://picsum.photos/200" alt="Image 1">
+		</div>
+	</main>
 </body>
+
+<script type="text/javascript" src="./javascript/script.js"></script>
+
 </html>
