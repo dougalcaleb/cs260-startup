@@ -2,39 +2,41 @@
 
 header {
 	width: 100%;
-	background: ext.$gray-3;
-	// background: red;
 	margin: 0;
 	height: 7vh;
-	margin-top: 20vh;
-	top: 0;
 	display: flex;
-	// flex-direction: column;
-	// justify-content: center;
+	justify-content: space-between;
+	@media screen and (width <= 900px) {
+		margin-top: 20vh;
+	}
+	top: 0;
 	align-items: center;
-	// justify-content: space-between;
-	// padding-left: 30px;
-	// padding-left: 30px;
-	.header-title {
-		margin-left: 10px;
+	#header-logo-wrap {
+		display: flex;
+		.header-title {
+			margin-left: 10px;
+		}
+		.header-user {
+			margin-right: 30px;
+		}
+		.parallel-icon {
+			margin-left: 20px;
+			height: 15px;
+		}
 	}
-	.header-user {
+	
+	#desktop-nav-wrap {
+		width: 30vw;
 		margin-right: 30px;
+		nav {
+			width: 100%;
+		}
 	}
-	.parallel-icon {
-		margin-left: 20px;
-		height: 15px;
-	}
-}
-
-body {
-	background: ext.$gray-3;
 }
 
 main {
-	background: orange;
-	background: ext.$gray-1;
 	width: 100%;
+	min-height: 93vh;
 	.rounded-corners {
 		display: flex;
 		justify-content: space-between;
@@ -54,9 +56,75 @@ main {
 		margin-top: -30px;
 		padding-top: 15px;
 		padding-bottom: 15px;
-		width: 100%;
-		text-align: center;
+		@media screen and (width <= 900px) {
+			text-align: center;
+			width: 100%;
+		}
+		@media screen and (width > 900px) {
+			margin-left: 30px;
+		}
 		font-size: 1rem;
 	}
 }
 
+#add-button {
+	font-size: 3rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	right: 1rem;
+	bottom: 6rem;
+	@media screen and (width <= 900px) {
+		bottom: 6rem;
+	}
+	@media screen and (width > 900px) {
+		top: calc(7vh + 15px);
+	}
+	border-radius: 100%;
+	height: 3rem;
+	width: 3rem;
+	font-weight: 900;
+	cursor: pointer;
+}
+
+footer {
+	position: fixed;
+	border-top-right-radius: 30px;
+	border-top-left-radius: 30px;
+	height: 5rem;
+	width: 100%;
+	bottom: 0;
+	left: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	nav {
+		width: 80%; 
+	}
+}
+
+nav {
+	height: 1.5rem;
+	border-radius: 30px;
+	justify-content: space-between;
+	align-items: center;
+	div {
+		height: 100%;
+		width: 30%;
+		color: ext.$white-0;
+		font-family: ext.$font-heading;
+		border-radius: 30px;
+		text-align: center;
+		font-weight: 900;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.8rem;
+		cursor: pointer;
+		&.selected {
+			background: ext.$green-2;
+			color: ext.$gray-1;
+		}
+	}
+}

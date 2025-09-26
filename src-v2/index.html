@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="./css/generic.css">
     <link rel="stylesheet" type="text/css" href="./css/specific.css">
     <link rel="stylesheet" type="text/css" href="./css/anim.css">
+    <link rel="stylesheet" type="text/css" href="./css/responsive.css">
 
 	<!-- inlined to help prevent FOUC -->
 	<style>
@@ -31,18 +32,33 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 </head>
-<body>
+<body class="bg-gray-3">
 	<div class="load-screen">
 		<p class="load-text text-green font-header">PARALLEL</p>
 	</div>
 
-	<header class="sticky">
-		<img src="./svg/parallel-icon.svg" class="parallel-icon" />
-		<p class="font-header text-white header-title">PARALLEL</p>
-		<!-- <p class="font-name text-white header-user">Caleb Dougal</p> -->
+	<header class="sticky bg-gray-3">
+		<div id="header-logo-wrap">
+			<img src="./svg/parallel-icon.svg" class="parallel-icon" />
+			<p class="font-header text-white header-title">PARALLEL</p>
+		</div>
+		
+		<div id="desktop-nav-wrap">
+			<nav id="nav-desktop" class="bg-gray-1">
+				<div class="selected">
+					<span>YOU</span>
+				</div>
+				<div>
+					<span>NEARBY</span>
+				</div>
+				<div>
+					<span>SEARCH</span>
+				</div>
+			</nav>
+		</div>
 	</header>
 
-	<main class="main">
+	<main class="main bg-gray-1">
 		<div class="rounded-corners">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" class="corner-mask text-gray-3">
 				<path fill="currentColor" d="M500,0C223.86,0,0,223.86,0,500V0h500Z"/>
@@ -62,7 +78,25 @@
 			<img src="https://picsum.photos/200" alt="Image 1">
 			<img src="https://picsum.photos/200" alt="Image 1">
 		</div>
+
+		<div id="add-button" class="bg-green-2 text-white">
+			<span>+</span>
+		</div>
 	</main>
+
+	<footer class="bg-gray-3">
+		<nav id="nav-mobile" class="bg-gray-1">
+			<div class="selected">
+				<span>YOU</span>
+			</div>
+			<div>
+				<span>NEARBY</span>
+			</div>
+			<div>
+				<span>SEARCH</span>
+			</div>
+		</nav>
+	</footer>
 </body>
 
 <script type="text/javascript" src="./javascript/script.js"></script>

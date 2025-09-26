@@ -1,3 +1,5 @@
+document.querySelector(".load-screen").style.display = "none";
+
 if (sessionStorage.getItem("has-loaded")) {
 	document.querySelector(".load-screen").style.display = "none";
 } else {

@@ -34,6 +34,18 @@ html, body {
   color: #dbdbdb;
 }
 
+.bg-green-2 {
+  background: #76ce91;
+}
+
+.bg-gray-3 {
+  background: #282828;
+}
+
+.bg-gray-1 {
+  background: #191919;
+}
+
 p {
   margin: 0;
 }
