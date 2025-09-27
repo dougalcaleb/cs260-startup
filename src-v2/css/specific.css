@@ -80,6 +80,11 @@ main {
   width: 100%;
   min-height: 93vh;
 }
+@media screen and (width < 900px) {
+  main {
+    padding-bottom: 5rem;
+  }
+}
 main .rounded-corners {
   display: flex;
   justify-content: space-between;

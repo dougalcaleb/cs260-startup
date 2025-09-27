@@ -68,6 +68,9 @@ header {
 main {
 	width: 100%;
 	min-height: 93vh;
+	@media screen and (width < 900px) {
+		padding-bottom: 5rem;
+	}
 	.rounded-corners {
 		display: flex;
 		justify-content: space-between;
