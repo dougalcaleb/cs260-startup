@@ -57,3 +57,7 @@ p {
 .sticky {
   position: sticky;
 }
+
+.fixed {
+  position: fixed;
+}
