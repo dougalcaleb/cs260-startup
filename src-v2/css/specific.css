@@ -195,7 +195,7 @@ nav {
   justify-content: space-between;
   align-items: center;
 }
-nav div {
+nav a {
   height: 100%;
   width: 30%;
   color: #dbdbdb;
@@ -209,7 +209,13 @@ nav div {
   font-size: 0.8rem;
   cursor: pointer;
 }
-nav div.selected {
+nav a.selected {
   background: #76ce91;
   color: #191919;
+}
+nav a {
+  text-decoration: none;
+}
+nav a:not(.selected) {
+  color: #dbdbdb;
 }

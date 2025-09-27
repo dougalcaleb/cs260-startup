@@ -169,7 +169,7 @@ nav {
 	border-radius: 30px;
 	justify-content: space-between;
 	align-items: center;
-	div {
+	a {
 		height: 100%;
 		width: 30%;
 		color: ext.$white-0;
@@ -185,6 +185,12 @@ nav {
 		&.selected {
 			background: ext.$green-2;
 			color: ext.$gray-1;
+		}
+	}
+	a {
+		text-decoration: none;
+		&:not(.selected) {
+			color: ext.$white-0;
 		}
 	}
 }
