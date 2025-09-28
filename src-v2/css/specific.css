@@ -165,7 +165,7 @@ main #library-content img {
 }
 @media screen and (width > 900px) {
   #add-button {
-    top: calc(7vh + 15px);
+    top: calc(max(7vh, 70px) + 1rem);
   }
 }
 #add-button svg {
@@ -218,4 +218,47 @@ nav a {
 }
 nav a:not(.selected) {
   color: #dbdbdb;
+}
+
+.nearby-person {
+  width: min(90%, 500px);
+  background: #76ce91;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  font-family: "Inter", "Ubuntu", "Segoe UI", sans-serif, monospace;
+  color: #f9f9f9;
+  font-weight: 900;
+  overflow: hidden;
+  margin-bottom: 15px;
+  align-items: center;
+}
+@media screen and (width < 900px) {
+  .nearby-person {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+@media screen and (width >= 900px) {
+  .nearby-person {
+    margin-left: 30px;
+  }
+}
+.nearby-person .nearby-name {
+  background: #36a355;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  font-size: 1.2rem;
+  word-break: break-word;
+}
+.nearby-person .nearby-detail {
+  padding-left: 20px;
+  padding-right: 20px;
+  word-break: keep-all;
+  text-align: center;
 }
