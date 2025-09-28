@@ -233,3 +233,21 @@ nav {
 		text-align: center;
 	}
 }
+
+#person-search-wrap {
+	display: flex;
+	@media screen and (width < 900px) {
+		justify-content: center;
+		margin-bottom: 60px;
+	}
+	@media screen and (width >= 900px) {
+		position: fixed;
+		right: 1rem;
+		top: calc(max(7vh, 70px) + 1rem);
+	}
+	#person-search {
+		@media screen and (width >= 900px) {
+			width: 30rem;
+		}
+	}
+}

@@ -262,3 +262,25 @@ nav a:not(.selected) {
   word-break: keep-all;
   text-align: center;
 }
+
+#person-search-wrap {
+  display: flex;
+}
+@media screen and (width < 900px) {
+  #person-search-wrap {
+    justify-content: center;
+    margin-bottom: 60px;
+  }
+}
+@media screen and (width >= 900px) {
+  #person-search-wrap {
+    position: fixed;
+    right: 1rem;
+    top: calc(max(7vh, 70px) + 1rem);
+  }
+}
+@media screen and (width >= 900px) {
+  #person-search-wrap #person-search {
+    width: 30rem;
+  }
+}

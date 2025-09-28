@@ -61,3 +61,16 @@ p {
 .fixed {
   position: fixed;
 }
+
+input {
+  border: none;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 15px;
+  padding-right: 15px;
+  font-family: "Inter", "Ubuntu", "Segoe UI", sans-serif, monospace;
+  background: #f9f9f9;
+  border-radius: 5px;
+  font-size: 1rem;
+  outline-color: #2f914d;
+}

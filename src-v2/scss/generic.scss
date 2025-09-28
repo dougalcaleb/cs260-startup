@@ -60,3 +60,16 @@ p {
 .fixed {
 	position: fixed;
 }
+
+input {
+	border: none;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	font-family: ext.$font-regular;
+	background: ext.$white-1;
+	border-radius: 5px;
+	font-size: 1rem;
+	outline-color: ext.$green-0;
+}
