@@ -7,6 +7,16 @@
 	#nav-mobile {
 		display: flex;
 	}
+	html {
+		// scroll-snap-type: y mandatory;
+	}
+	main {
+		// scroll-snap-align: start; // requires PWA to be usable
+		// scroll-margin: 7vh;
+	}
+	body {
+		// scroll-snap-align: start;
+	}
 }
 
 @media screen and (width > 900px) {
