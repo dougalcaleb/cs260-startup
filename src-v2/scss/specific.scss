@@ -256,3 +256,60 @@ nav {
 		}
 	}
 }
+
+#login-footer {
+	// background: orange;
+	width: 100%;
+	bottom: 0;
+	height: 30vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	#footer-logo {
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		.parallel-icon {
+			height: 2rem;
+		}
+		p {
+			font-size: 2rem;
+			margin-top: 15px;
+		}
+	}
+	#credit {
+		display: flex;
+		a {
+			text-decoration: none;
+			color: ext.$green-2;
+			div {
+				display: flex;
+				align-items: center;
+				svg {
+					height: 20px;
+					margin-left: 10px;
+					margin-right: 5px;
+				}
+			}
+		}
+	}
+}
+main#login-main {
+	height: max-content;
+	min-height: 0;
+	// background: orange;
+	position: absolute;
+	margin: auto;
+	top: 0;
+	bottom: 0;
+}
+#login-inputs {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	* {
+		margin-bottom: 15px;
+	}
+}

@@ -284,3 +284,60 @@ nav a:not(.selected) {
     width: 30rem;
   }
 }
+
+#login-footer {
+  width: 100%;
+  bottom: 0;
+  height: 30vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+#login-footer #footer-logo {
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+#login-footer #footer-logo .parallel-icon {
+  height: 2rem;
+}
+#login-footer #footer-logo p {
+  font-size: 2rem;
+  margin-top: 15px;
+}
+#login-footer #credit {
+  display: flex;
+}
+#login-footer #credit a {
+  text-decoration: none;
+  color: #76ce91;
+}
+#login-footer #credit a div {
+  display: flex;
+  align-items: center;
+}
+#login-footer #credit a div svg {
+  height: 20px;
+  margin-left: 10px;
+  margin-right: 5px;
+}
+
+main#login-main {
+  height: max-content;
+  min-height: 0;
+  position: absolute;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+}
+
+#login-inputs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#login-inputs * {
+  margin-bottom: 15px;
+}

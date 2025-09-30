@@ -73,3 +73,15 @@ input {
 	font-size: 1rem;
 	outline-color: ext.$green-0;
 }
+
+button {
+	border: none;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-right: 40px;
+	padding-left: 40px;
+	border-radius: 10px;
+	font-family: ext.$font-heading;
+	font-weight: 900;
+	cursor: pointer;
+}

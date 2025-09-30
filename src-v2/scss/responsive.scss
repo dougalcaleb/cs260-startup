@@ -23,7 +23,7 @@
 	#nav-desktop {
 		display: flex;
 	}
-	footer {
+	footer:not(#login-footer) {
 		display: none;
 	}
 }

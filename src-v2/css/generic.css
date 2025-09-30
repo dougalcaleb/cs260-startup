@@ -74,3 +74,15 @@ input {
   font-size: 1rem;
   outline-color: #2f914d;
 }
+
+button {
+  border: none;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-right: 40px;
+  padding-left: 40px;
+  border-radius: 10px;
+  font-family: "Inter", "Ubuntu", "Segoe UI", sans-serif, monospace;
+  font-weight: 900;
+  cursor: pointer;
+}
