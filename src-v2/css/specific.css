@@ -78,11 +78,12 @@ header #desktop-nav-wrap nav {
 
 main {
   width: 100%;
-  min-height: 93vh;
+  min-height: calc(100vh - max(7vh, 70px));
 }
 @media screen and (width < 900px) {
   main {
     padding-bottom: 5rem;
+    min-height: 75vh;
   }
 }
 main .rounded-corners {
