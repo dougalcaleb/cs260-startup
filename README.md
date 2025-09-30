@@ -70,12 +70,12 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Header, footer, and main content body** - I did not complete this part of the deliverable.
-- [ ] **Navigation elements** - I did not complete this part of the deliverable.
-- [ ] **Responsive to window resizing** - I did not complete this part of the deliverable.
-- [ ] **Application elements** - I did not complete this part of the deliverable.
-- [ ] **Application text content** - I did not complete this part of the deliverable.
-- [ ] **Application images** - I did not complete this part of the deliverable.
+- [x] **Header, footer, and main content body** - Header with Parallel logo, contains nav on desktop. Footer on mobile with nav. Main content on all pages.
+- [x] **Navigation elements** - Clickable, highlighted links for YOU/NEARBY/SEARCH (footer on mobile, header on desktop)
+- [x] **Responsive to window resizing** - Breakpoint at 900px, continuously responsive without a refresh
+- [x] **Application elements** - Library images, upload button, search box, nearby/search person card
+- [x] **Application text content** - Headings, nav, text on person cards
+- [x] **Application images** - Library images
 
 ## 🚀 React part 1: Routing deliverable
 
