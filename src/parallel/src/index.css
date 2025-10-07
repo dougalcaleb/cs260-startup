@@ -1,6 +1,5 @@
-@import "tailwindcss";
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import "tailwindcss";
 
 @theme {
 	--color-gray-0:		hsl(0, 0%, 3%);
@@ -14,7 +13,8 @@
 	--color-gray-8:		hsl(0, 0%, 70%);
 	--color-gray-9:		hsl(0, 0%, 80%);
 	--color-gray-10:	hsl(0, 0%, 90%);
-	--color-white: 		hsl(0, 0%, 98%);
+	--color-white-0: 	hsl(0, 0%, 86%);
+	--color-white-1: 	hsl(0, 0%, 98%);
 	--color-blue-0:		hsl(194, 100%, 27%);
 	--color-blue-1:		hsl(197, 100%, 36%);
 	--color-blue-2:		hsl(197, 100%, 50%);
@@ -38,4 +38,29 @@
 @theme {
 	--font-main: "Inter", "Ubuntu", system-ui, sans-serif;
 	--font-sub: "Ubuntu", system-ui, sans-serif;
+}
+
+input {
+	border: none;
+	padding-top: 0.5rem;
+	padding-bottom: 0.5rem;
+	padding-left: 15px;
+	padding-right: 15px;
+	font-family: var(--font-main);
+	background: var(--color-white);
+	border-radius: 5px;
+	font-size: 1rem;
+	outline-color: var(--color-green-0);
+}
+
+button {
+	border: none;
+	padding-top: 0.5rem;
+	padding-bottom: 0.5rem;
+	padding-right: 40px;
+	padding-left: 40px;
+	border-radius: 10px;
+	font-family: var(--font-main);
+	font-weight: 900;
+	cursor: pointer;
 }
