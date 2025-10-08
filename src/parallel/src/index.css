@@ -64,3 +64,11 @@ button {
 	font-weight: 900;
 	cursor: pointer;
 }
+
+a {
+	text-decoration: none;
+}
+
+body {
+	background: var(--color-gray-3);
+}
