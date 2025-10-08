@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import parallelLogo from "../../assets/parallel-icon.svg"
+import { useEffect, useRef, useState } from "react";
 
 export default function Header() {
 	const location = useLocation();
@@ -9,17 +10,45 @@ export default function Header() {
 
 	const selectedClass = "bg-green-2 text-gray-1";
 
+	const headerRef = useRef(null);
+	const bigLogoRef = useRef(null);
+	const smallLogoRef = useRef(null);
+
+	let logoHeight = null;
+
+	const [bigLogoStyle, setBigLogoStyle] = useState({top: 0});
+	const [smallLogoStyle, setSmallLogoStyle] = useState({opacity: 1});
+
+	useEffect(() => {
+		if (window.innerWidth < 700) {
+			const headerBound = headerRef.current?.getBoundingClientRect();
+			setBigLogoStyle({ top: `${headerBound.bottom / 2 - bigLogoRef.current.getBoundingClientRect().height / 2}px` });
+			setSmallLogoStyle({ opacity: 0 });
+		}
+	}, []);
+
+	window.addEventListener("scroll", () => {
+		if (window.innerWidth < 700) {
+			const headerBound = headerRef.current?.getBoundingClientRect();
+			logoHeight = bigLogoRef.current.getBoundingClientRect().height;
+			const percentScrolled = (window.scrollY / (window.innerHeight / 5));
+
+			setBigLogoStyle({ top: `${headerBound.bottom / 2 - logoHeight / 2}px`, opacity:  Math.min(1, 1 - percentScrolled * 3) });
+			setSmallLogoStyle({ opacity: Math.min(1, (percentScrolled - 0.3) * 3) });
+		}
+	});
+
 	return (
-		<div>
+		<>
 			<div id="pre-header" className="flex sm:hidden justify-center h-[20vh]">
-				<div className="fixed z-10 flex flex-col items-center w-full">
+				<div ref={bigLogoRef} id="pre-header-logo" className="fixed z-10 flex flex-col items-center w-full" style={bigLogoStyle}>
 					<img src={parallelLogo} className="h-8" />
 					<p className="font-header text-white-0 text-4xl mt-4 font-black">PARALLEL</p>
 				</div>
 			</div>
 
-			<header className="sticky bg-gray-3 flex justify-between h-[7vh] w-full m-0 sm:h-[max(7vh, 70px)] top-0 items-center">
-				<div className="flex items-center">
+			<header ref={headerRef} className="sticky bg-gray-3 flex justify-between h-[7vh] w-full m-0 sm:h-[max(7vh,70px)] top-0 items-center">
+				<div ref={smallLogoRef} id="header-logo-wrap" className="flex items-center" style={smallLogoStyle}>
 					<img src={parallelLogo} className="h-4 ml-5 sm:h-5 sm:ml-8" />
 					<p className="font-header text-white-0 ml-2.5 sm:text-2xl font-black">PARALLEL</p>
 				</div>
@@ -38,6 +67,6 @@ export default function Header() {
 					</nav>
 				</div>
 			</header>
-		</div>
+		</>
 	);
 }
