@@ -81,9 +81,9 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Bundled using Vite** - I did not complete this part of the deliverable.
-- [ ] **Components** - I did not complete this part of the deliverable.
-- [ ] **Router** - I did not complete this part of the deliverable.
+- [x] **Bundled using Vite** - React and Tailwind using Vite
+- [x] **Components** - Components for root, login page, reused header/footer, other pages, and common components (input, person card, button)
+- [x] **Router** - Router used to route between pages
 
 ## 🚀 React part 2: Reactivity deliverable
 
