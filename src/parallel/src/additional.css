@@ -7,8 +7,9 @@
 	#library-content {
 		grid-template-columns: repeat(3, calc((100vw - 30px - 20px) / 3));
 	}
-	.nearby-person {
-		
+	#person-search-wrap {
+		justify-content: center;
+		margin-bottom: 60px;
 	}
 }
 
