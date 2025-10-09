@@ -1,0 +1,10 @@
+#library-content {
+	width: calc(100% - 30px);
+	grid-template-columns: repeat(auto-fit, minmax(8rem, 10vh));
+}
+
+@media screen and (width <= 640px) {
+	#library-content {
+		grid-template-columns: repeat(3, calc((100vw - 30px - 20px) / 3));
+	}
+}
