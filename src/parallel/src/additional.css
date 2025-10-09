@@ -7,4 +7,11 @@
 	#library-content {
 		grid-template-columns: repeat(3, calc((100vw - 30px - 20px) / 3));
 	}
+	.nearby-person {
+		
+	}
+}
+
+.nearby-person {
+	width: min(90%, 500px);
 }

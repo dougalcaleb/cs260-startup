@@ -1,5 +1,3 @@
-import Header from "../shared/header"
-import Footer from "../shared/footer"
 import phimg from "../../assets/landscape-200.jpg"
 
 export default function Library() {
