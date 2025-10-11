@@ -16,3 +16,82 @@
 .nearby-person {
 	width: min(90%, 500px);
 }
+
+
+
+.uploadBtnImage-enter {
+	opacity: 0;
+	transform: translateY(8px) scale(0.98);
+	visibility: visible !important;
+}
+.uploadBtnImage-enter-active {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	transition: opacity 150ms ease-out, transform 150ms cubic-bezier(.2,.9,.2,1);
+	visibility: visible !important;
+}
+.uploadBtnImage-enter-done {
+	visibility: visible !important;
+}
+.uploadBtnImage-exit {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	visibility: visible !important;
+}
+.uploadBtnImage-exit-active {
+	opacity: 0;
+	transform: translateY(8px) scale(0.98);
+	transition: opacity 150ms ease-in, transform 150ms ease-in;
+}
+.uploadBtnImage-exit-done {
+	visibility: hidden;
+}
+
+
+.uploadBtnLocation-enter {
+	opacity: 0;
+	transform: translateY(8px) scale(0.98);
+	visibility: visible !important;
+}
+.uploadBtnLocation-enter-active {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	transition: opacity 150ms ease-out, transform 150ms cubic-bezier(.2,.9,.2,1);
+	visibility: visible !important;
+}
+.uploadBtnLocation-enter-done {
+	visibility: visible !important;
+}
+.uploadBtnLocation-exit {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	visibility: visible !important;
+}
+.uploadBtnLocation-exit-active {
+	opacity: 0;
+	transform: translateY(8px) scale(0.98);
+	transition: opacity 150ms ease-in, transform 150ms ease-in;
+	visibility: visible !important;
+}
+.uploadBtnLocation-exit-done {
+	visibility: hidden;
+}
+
+
+
+
+.menu-bg-enter {
+	opacity: 0;
+}
+.menu-bg-enter-active {
+	opacity: 0.8;
+	transition: opacity 100ms ease-out;
+}
+.menu-bg-exit {
+	opacity: 0.8;
+	transition: opacity 150ms ease-in;
+}
+.menu-bg-exit-active {
+	opacity: 0;
+	transition: opacity 150ms ease-in;
+}

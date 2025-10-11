@@ -1,7 +1,48 @@
+import { useState, useRef } from "react";
+import { CSSTransition } from 'react-transition-group'
 import phimg from "../../assets/landscape-200.jpg"
 import Button from "../shared/Button";
+import { isMobile } from "../shared/screen";
 
 export default function Library() {
+	const [menuOpen, setMenuOpen] = useState(false);
+	const [locBtnShow, setLocBtnShow] = useState(false);
+	const [imgBtnShow, setImgBtnShow] = useState(false);
+	const imageBtnRef = useRef(null);
+	const locationBtnRef = useRef(null);
+	const nodeRefBG = useRef(null);
+
+	const toggleOpen = () => {
+		if (menuOpen) {
+			setImgBtnShow(false);
+			setTimeout(() => {
+				setLocBtnShow(false);
+			}, 50);
+		} else {
+			setLocBtnShow(true);
+			setTimeout(() => {
+				setImgBtnShow(true);
+			}, 50);
+		}
+		setMenuOpen(!menuOpen)
+	};
+
+	const imgButton = (
+		<CSSTransition nodeRef={imageBtnRef} in={imgBtnShow} timeout={150} classNames="uploadBtnImage">
+			<div ref={imageBtnRef} className="invisible">
+				<Button className="rounded-2xl my-2 shadow-gray-0 shadow-lg sm:z-10 relative">IMAGES</Button>
+			</div>
+		</CSSTransition>
+	);
+
+	const locButton = (
+		<CSSTransition nodeRef={locationBtnRef} in={locBtnShow} timeout={150} classNames="uploadBtnLocation">
+			<div ref={locationBtnRef} className="invisible">
+				<Button className="rounded-2xl shadow-gray-0 shadow-lg z-10 sm:z-0 relative">LOCATIONS</Button>
+			</div>
+		</CSSTransition>
+	);
+
 	return (
 		<div className="bg-gray-1 w-full min-h-[175vh] sm:min-h-[calc(100vh-max(7vh,70px))]">
 			<div className="font-main font-black text-gray-6 text-center sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8">LIBRARY</div>
@@ -9,11 +50,23 @@ export default function Library() {
 				{ images() }
 			</div>
 
-			<Button className="fixed right-4 sm:top-[calc(max(7vh,70px+1rem))] bottom-20 sm:bottom-auto shadow-lg shadow-gray-0 hover:bg-green-0">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-6 w-6 text-white-0">
-					<path fill="currentColor" d="M342.6 73.4C330.1 60.9 309.8 60.9 297.3 73.4L169.3 201.4C156.8 213.9 156.8 234.2 169.3 246.7C181.8 259.2 202.1 259.2 214.6 246.7L288 173.3L288 384C288 401.7 302.3 416 320 416C337.7 416 352 401.7 352 384L352 173.3L425.4 246.7C437.9 259.2 458.2 259.2 470.7 246.7C483.2 234.2 483.2 213.9 470.7 201.4L342.7 73.4zM160 416C160 398.3 145.7 384 128 384C110.3 384 96 398.3 96 416L96 480C96 533 139 576 192 576L448 576C501 576 544 533 544 480L544 416C544 398.3 529.7 384 512 384C494.3 384 480 398.3 480 416L480 480C480 497.7 465.7 512 448 512L192 512C174.3 512 160 497.7 160 480L160 416z" />
-				</svg>
-			</Button>
+			<CSSTransition nodeRef={nodeRefBG} in={menuOpen} timeout={200} classNames="menu-bg" unmountOnExit>
+				<div ref={nodeRefBG} className="fixed bg-gray-1 top-0 opacity-80 bottom-0 right-0 left-0 z-20" onClick={toggleOpen}></div>
+			</CSSTransition>
+
+			<div className="fixed right-4 sm:top-[calc(max(7vh,70px+1rem))] bottom-24 sm:bottom-auto flex flex-col-reverse sm:flex-col items-end z-30">
+				<Button className="shadow-lg shadow-gray-0 rounded-4xl w-14 h-14 z-20" click={toggleOpen}>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-6 w-6 text-white-0">
+						<path fill="currentColor" d="M342.6 73.4C330.1 60.9 309.8 60.9 297.3 73.4L169.3 201.4C156.8 213.9 156.8 234.2 169.3 246.7C181.8 259.2 202.1 259.2 214.6 246.7L288 173.3L288 384C288 401.7 302.3 416 320 416C337.7 416 352 401.7 352 384L352 173.3L425.4 246.7C437.9 259.2 458.2 259.2 470.7 246.7C483.2 234.2 483.2 213.9 470.7 201.4L342.7 73.4zM160 416C160 398.3 145.7 384 128 384C110.3 384 96 398.3 96 416L96 480C96 533 139 576 192 576L448 576C501 576 544 533 544 480L544 416C544 398.3 529.7 384 512 384C494.3 384 480 398.3 480 416L480 480C480 497.7 465.7 512 448 512L192 512C174.3 512 160 497.7 160 480L160 416z" />
+					</svg>
+				</Button>
+				
+				<div className="flex flex-col my-2 z-10 sm:z-30 relative">
+					{ isMobile()
+						? [imgButton, locButton]
+						: [locButton, imgButton] }
+				</div>
+			</div>
 		</div>
 	);
 }
