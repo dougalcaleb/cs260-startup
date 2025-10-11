@@ -1,19 +1,26 @@
 import parallelLogo from "../../assets/parallel-icon.svg"
 import { Link } from "react-router-dom";
 import Input from "../shared/input";
+import { useState } from "react";
 
 export default function Login() {
+	const [doLogin, setDoLogin] = useState(true);
+	const selectedClass = "bg-green-2 text-gray-1";
+
+	const selectLogin = () => setDoLogin(true);
+	const selectRegister = () => setDoLogin(false);
+
 	return (
 		<div className="bg-gray-3 h-full w-full">
-			<div className="bg-gray-3 h-max absolute m-auto top-0 bottom-0 w-full">
+			<div className="bg-gray-3 h-max absolute top-1/4 w-full">
 				<div className="flex flex-col items-center">
-					<p className="font-main text-white-0 mb-4 font-black">LOGIN / REGISTER</p>
-					<div className="mb-4">
-						<Input type="text" placeholder="Username"></Input>
+					<div className="font-main text-white-0 text-sm mb-4 font-black flex bg-gray-1 rounded-full w-60">
+						<div className={`py-1 rounded-full cursor-pointer w-1/2 text-center ${doLogin ? selectedClass : ''}`} onClick={selectLogin}>LOGIN</div>
+						<div className={`py-1 rounded-full cursor-pointer w-1/2 text-center ${doLogin ? '' : selectedClass}`} onClick={selectRegister}>REGISTER</div>
 					</div>
-					<div className="mb-4">
-						<Input type="password" placeholder="Password"></Input>
-					</div>
+					<Input type="text" placeholder="Username" className="mb-4"></Input>
+					<Input type="password" placeholder="Password" className="mb-4"></Input>
+					{!doLogin && <Input type="Password" placeholder="Retype password" className="mb-4"></Input>}
 					<Link to="/library">
 						<button className="bg-green-2 text-gray-3 cursor-pointer">GO</button>
 					</Link>
