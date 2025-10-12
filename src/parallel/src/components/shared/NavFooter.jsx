@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 
 export default function Footer() {
 	const location = useLocation();
-	const atLibrary = location.pathname === '/library';
+	const atLibrary = location.pathname === '/library' || location.pathname === "/";
 	const atNearby = location.pathname === '/nearby';
 	const atSearch = location.pathname === '/search';
 

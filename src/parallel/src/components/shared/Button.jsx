@@ -1,17 +1,17 @@
 
 
-export default function Button({ className, children, click }) {
+export default function Button({ className, children, onClick }) {
 	
 
 	return (
-		<div
+		<button
 			className={
-				`p-4 bg-green-1 hover:bg-green-0 cursor-pointer font-main font-bold text-center flex flex-col items-center text-white-0 select-none
+				`p-4 bg-green-1 hover:bg-green-0 cursor-pointer font-main font-bold flex flex-col items-center text-white-0 select-none rounded-lg
 				${className}`
 			}
-			onClick={click}
+			onClick={onClick}
 		>
 			{ children }
-		</div>
+		</button>
 	)
 }

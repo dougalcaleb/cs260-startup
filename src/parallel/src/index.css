@@ -53,18 +53,6 @@ input {
 	outline-color: var(--color-green-0);
 }
 
-button {
-	border: none;
-	padding-top: 0.5rem;
-	padding-bottom: 0.5rem;
-	padding-right: 40px;
-	padding-left: 40px;
-	border-radius: 10px;
-	font-family: var(--font-main);
-	font-weight: 900;
-	cursor: pointer;
-}
-
 a {
 	text-decoration: none;
 }

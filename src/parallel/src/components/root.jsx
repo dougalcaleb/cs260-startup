@@ -1,17 +1,22 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate, Link, NavLink } from 'react-router-dom'
 import Header from './shared/header'
 import Login from './pages/login';
 import Library from './pages/library';
 import Nearby from './pages/nearby';
 import Search from './pages/search';
 import Connect from './pages/connect';
-import Footer from './shared/footer';
+import NavFooter from './shared/NavFooter';
+import { useAuth } from 'react-oidc-context';
+import LogoFooter from './shared/LogoFooter';
+import Button from './shared/Button';
+import Spinner from './shared/Spinner';
 
 export default function Root() {
 	const location = useLocation();
+	const auth = useAuth();
 
 	let rCorners = null;
-	if (!["/", "/login"].includes(location.pathname)) {
+	if (!["/login"].includes(location.pathname)) {
 		rCorners = (
 			<div className="flex justify-between sticky top-[7vh] sm:top-[max(7vh,70px)] -mb-8">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" className="text-gray-3 h-8 w-8">
@@ -25,26 +30,62 @@ export default function Root() {
 		);
 	}
 
+	if (auth.isLoading) {
+		return (
+			<>
+				<div className="flex justify-center mt-20">
+					<div className="flex items-center text-gray-8">
+						<Spinner className="h-8"></Spinner>
+						<div className="font-main font-black ml-4">LOADING, PLEASE WAIT...</div>
+					</div>
+				</div>
+
+				<LogoFooter />
+			</>
+		);
+	}
+
+	if (auth.error) {
+		return (
+			<div className="flex flex-col items-center">
+				<p className="text-red-1 font-black text-center text-3xl mt-20 px-4">AUTHENTICATION ERROR</p>
+				<div className="text-center text-sub text-gray-7 mt-8">
+					<p>Sorry, that didn't work.</p>
+					<p>Reload the page or try again later.</p>
+				</div>
+				<div className="text-center text-sub text-gray-7 mt-8">Auth error: ({auth.error.message})</div>
+
+				<NavLink to="/">
+					<Button className="mt-8">Reload</Button>
+				</NavLink>
+
+				<LogoFooter />
+			</div>
+		);
+	}
+
+	const navAllowed = auth.isAuthenticated || import.meta.env.DEV;
+
 	return (
 		<>
-			{!["/", "/login"].includes(location.pathname) && <Header /> }
+			{!["/login"].includes(location.pathname) && <Header /> }
 			
 			<main>
 
 				{rCorners}
 
 				<Routes>
-					<Route path="/" element={<Login />} />
+					<Route path="/" element={navAllowed ? <Library /> : <Navigate replace to="/login" />} />
 					<Route path="/login" element={<Login />} />
-					<Route path="/library" element={<Library />} />
-					<Route path="/nearby" element={<Nearby />} />
-					<Route path="/search" element={<Search />} />
-					<Route path="/connect" element={<Connect />} />
+					<Route path="/library" element={navAllowed ? <Library /> : <Navigate replace to="/login" />} />
+					<Route path="/nearby" element={navAllowed ? <Nearby /> : <Navigate replace to="/login" />} />
+					<Route path="/search" element={navAllowed ? <Search /> : <Navigate replace to="/login" />} />
+					<Route path="/connect" element={navAllowed ? <Connect /> : <Navigate replace to="/login" />} />
 				</Routes>
 				
 			</main>
 
-			{!["/", "/login"].includes(location.pathname) && <Footer /> }
+			{!["/login"].includes(location.pathname) && <NavFooter /> }
 		</>
 	)	
 }
