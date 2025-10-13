@@ -64,7 +64,7 @@ export default function Root() {
 		);
 	}
 
-	const navAllowed = auth.isAuthenticated || import.meta.env.DEV;
+	const navAllowed = auth.isAuthenticated || window.sessionStorage.getItem("parallel-skip-signin"); // || import.meta.env.DEV;
 
 	return (
 		<>
@@ -81,6 +81,7 @@ export default function Root() {
 					<Route path="/nearby" element={navAllowed ? <Nearby /> : <Navigate replace to="/login" />} />
 					<Route path="/search" element={navAllowed ? <Search /> : <Navigate replace to="/login" />} />
 					<Route path="/connect" element={navAllowed ? <Connect /> : <Navigate replace to="/login" />} />
+					<Route path="*" element={navAllowed ? <Navigate replace to="/library" /> : <Navigate replace to="/login" />} />
 				</Routes>
 				
 			</main>

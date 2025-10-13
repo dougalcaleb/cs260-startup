@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "../shared/input";
 import { useState } from "react";
 import { useAuth } from "react-oidc-context";
@@ -11,13 +11,20 @@ const loginModes = {
 	LOGIN_COGNITO: "LOGIN_COGNITO"
 };
 
+// TODO: sign-out
+
 export default function Login() {
 	const auth = useAuth();
+	const navigate = useNavigate();
 
 	const [loginMode, setLoginMode] = useState(loginModes.LOGIN_COGNITO);
 
 	const selectLogin = () => setLoginMode(loginModes.LOGIN_SIMPLE);
 	const selectCognito = () => setLoginMode(loginModes.LOGIN_COGNITO);
+	const skipSignIn = () => {
+		window.sessionStorage.setItem("parallel-skip-signin", true);
+		navigate("/library");
+	};
 	// const selectRegister = () => setLoginMode(loginModes.REGISTER);
 
 	return (
@@ -28,9 +35,12 @@ export default function Login() {
 					<p className="font-main text-gray-7 font-bold text-lg mt-12 mb-4">GET STARTED</p>
 					
 					{loginInput(loginMode, auth)}
-
-					{loginMode === loginModes.LOGIN_COGNITO && ( <p className="text-blue-0 font-main cursor-pointer mt-8" onClick={selectLogin}>Simple sign-in</p> )}
-					{loginMode !== loginModes.LOGIN_COGNITO && ( <p className="text-blue-0 font-main cursor-pointer mt-8" onClick={selectCognito}>Sign in with Cognito</p> )}
+					
+					<div className="mt-8 flex">
+						{loginMode === loginModes.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectLogin}>Simple sign-in</p>)}
+						{loginMode !== loginModes.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectCognito}>Sign in with Cognito</p>)}
+						<p className="text-blue-0 font-main cursor-pointer border-l-2 border-gray-6 pl-4" onClick={skipSignIn}>Skip sign-in</p>
+					</div>
 				</div>
 			</div>
 
@@ -40,8 +50,6 @@ export default function Login() {
 }
 
 function loginInput(mode, auth) {
-	
-
 	switch (mode) {
 		case loginModes.LOGIN_COGNITO:
 			return (
