@@ -10,6 +10,7 @@ import { useAuth } from 'react-oidc-context';
 import LogoFooter from './shared/LogoFooter';
 import Button from './shared/Button';
 import Spinner from './shared/Spinner';
+import constants from '../mixins/constants';
 
 export default function Root() {
 	const location = useLocation();
@@ -47,6 +48,11 @@ export default function Root() {
 	}
 
 	if (auth.error) {
+		const forceReload = () => {
+			navigate("/library", { replace: true });
+			window.location.href = `${window.location.href}`;
+		}
+
 		return (
 			<div className="flex flex-col items-center">
 				<p className="text-red-1 font-black text-center text-3xl mt-20 px-4">AUTHENTICATION ERROR</p>
@@ -56,14 +62,14 @@ export default function Root() {
 				</div>
 				<div className="text-center text-sub text-gray-7 mt-8">Auth error: ({auth.error.message})</div>
 
-				<Button className="mt-8" onClick={() => navigate("/")}>Reload</Button>
+				<Button className="mt-8" onClick={forceReload}>Reload</Button>
 
 				<LogoFooter />
 			</div>
 		);
 	}
 
-	const navAllowed = auth.isAuthenticated || window.sessionStorage.getItem("parallel-skip-signin"); // || import.meta.env.DEV;
+	const navAllowed = auth.isAuthenticated || window.sessionStorage.getItem(constants.SKIP_SIGNIN_KEY); // || import.meta.env.DEV;
 
 	return (
 		<>

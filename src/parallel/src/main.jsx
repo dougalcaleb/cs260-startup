@@ -11,7 +11,7 @@ const cognitoAuthConfig = {
 	client_id: "22rart6rc9f5arou9go82qi3rk",
 	redirect_uri: import.meta.env.PROD ? "https://startup.dougalcaleb.click/library" : "http://localhost:5173/library",
 	response_type: "code",
-	scope: "phone openid email",
+	scope: "phone openid email profile",
 };
 
 createRoot(document.getElementById('root')).render(
@@ -21,5 +21,5 @@ createRoot(document.getElementById('root')).render(
 				<Root></Root>
 			</BrowserRouter>
 		</AuthProvider>
-	</StrictMode>,
+	</StrictMode>
 )

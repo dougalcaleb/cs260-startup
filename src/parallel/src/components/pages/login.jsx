@@ -4,26 +4,21 @@ import { useState } from "react";
 import { useAuth } from "react-oidc-context";
 import LogoFooter from "../shared/LogoFooter";
 import Button from "../shared/Button";
-
-const loginModes = {
-	REGISTER: "REGISTER",
-	LOGIN_SIMPLE: "LOGIN_SIMPLE",
-	LOGIN_COGNITO: "LOGIN_COGNITO"
-};
+import constants from "../../mixins/constants";
 
 export default function Login() {
 	const auth = useAuth();
 	const navigate = useNavigate();
 
-	const [loginMode, setLoginMode] = useState(loginModes.LOGIN_COGNITO);
+	const [loginMode, setLoginMode] = useState(constants.LOGIN_MODES.LOGIN_COGNITO);
 
-	const selectLogin = () => setLoginMode(loginModes.LOGIN_SIMPLE);
-	const selectCognito = () => setLoginMode(loginModes.LOGIN_COGNITO);
+	const selectLogin = () => setLoginMode(constants.LOGIN_MODES.LOGIN_SIMPLE);
+	const selectCognito = () => setLoginMode(constants.LOGIN_MODES.LOGIN_COGNITO);
 	const skipSignIn = () => {
-		window.sessionStorage.setItem("parallel-skip-signin", true);
+		window.sessionStorage.setItem(constants.SKIP_SIGNIN_KEY, true);
 		navigate("/library");
 	};
-	// const selectRegister = () => setLoginMode(loginModes.REGISTER);
+	// const selectRegister = () => setLoginMode(constants.LOGIN_MODES.REGISTER);
 
 	return (
 		<div className="bg-gray-3 h-full w-full">
@@ -35,8 +30,8 @@ export default function Login() {
 					{loginInput(loginMode, auth)}
 					
 					<div className="mt-8 flex">
-						{loginMode === loginModes.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectLogin}>Simple sign-in</p>)}
-						{loginMode !== loginModes.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectCognito}>Sign in with Cognito</p>)}
+						{loginMode === constants.LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectLogin}>Simple sign-in</p>)}
+						{loginMode !== constants.LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectCognito}>Sign in with Cognito</p>)}
 						<p className="text-blue-0 font-main cursor-pointer border-l-2 border-gray-6 pl-4" onClick={skipSignIn}>Skip sign-in</p>
 					</div>
 				</div>
@@ -45,10 +40,10 @@ export default function Login() {
 			<LogoFooter showCredit />
 
 			<div className="absolute top-0 right-0 p-2">
-				{window.sessionStorage.getItem("parallel-skip-signin") && (<div>
+				{window.sessionStorage.getItem(constants.SKIP_SIGNIN_KEY) && (<div>
 					<p className="text-gray-6">Skip sign-in is enabled.</p>
 					<p className="text-blue-0 text-right">
-						<span className="cursor-pointer" onClick={() => { window.sessionStorage.removeItem("parallel-skip-signin"); navigate(0); }}>Disable</span>
+						<span className="cursor-pointer" onClick={() => { window.sessionStorage.removeItem(constants.SKIP_SIGNIN_KEY); navigate(0); }}>Disable</span>
 					</p>
 				</div>)}
 			</div>
@@ -58,7 +53,7 @@ export default function Login() {
 
 function loginInput(mode, auth) {
 	switch (mode) {
-		case loginModes.LOGIN_COGNITO:
+		case constants.LOGIN_MODES.LOGIN_COGNITO:
 			return (
 				<>
 					<Button className="bg-green-1 text-gray-3 cursor-pointer px-8" onClick={() => auth.signinRedirect()}>
@@ -80,7 +75,7 @@ function loginInput(mode, auth) {
 					</Button>
 				</>
 			);
-		case loginModes.LOGIN_SIMPLE:
+		case constants.LOGIN_MODES.LOGIN_SIMPLE:
 			return (
 				<>
 					<Input type="text" placeholder="Username" className="mb-4"></Input>
@@ -90,7 +85,7 @@ function loginInput(mode, auth) {
 					</Link>
 				</>
 			);
-		case loginModes.REGISTER:
+		case constants.LOGIN_MODES.REGISTER:
 			return (
 				<>
 					<Input type="text" placeholder="Username" className="mb-4"></Input>

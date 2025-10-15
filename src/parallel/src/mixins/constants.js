@@ -1,0 +1,8 @@
+export default {
+	SKIP_SIGNIN_KEY: "parallel-skip-signin",
+	LOGIN_MODES: {
+		REGISTER: "REGISTER",
+		LOGIN_SIMPLE: "LOGIN_SIMPLE",
+		LOGIN_COGNITO: "LOGIN_COGNITO"
+	},
+}

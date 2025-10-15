@@ -1,12 +1,13 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import parallelLogo from "../../assets/parallel-icon.svg"
 import { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import Popup from "./Popup";
+import useAuthUser from "../../hooks/useAuthUser";
 
 export default function Header() {
 	const location = useLocation();
-	const navigate = useNavigate();
+	const authUser = useAuthUser();
 
 	const atLibrary = location.pathname === '/library';
 	const atNearby = location.pathname === '/nearby';
@@ -49,21 +50,6 @@ export default function Header() {
 		</svg>
 	);
 
-	const signOutRedirect = () => {
-		if (window.sessionStorage.getItem("parallel-skip-signin")) {
-			window.sessionStorage.removeItem("parallel-skip-signin");
-			navigate(0);
-			return;
-		}
-
-		window.sessionStorage.clear();
-
-		const clientId = "22rart6rc9f5arou9go82qi3rk";
-		const logoutUri = import.meta.env.PROD ? "https://startup.dougalcaleb.click/login" : "http://localhost:5173/login";
-		const cognitoDomain = "https://us-east-1cenwrahji.auth.us-east-1.amazoncognito.com";
-		window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-	};
-
 	return (
 		<>
 			<div id="pre-header" className="flex sm:hidden justify-center h-[20vh]">
@@ -81,9 +67,17 @@ export default function Header() {
 					</div>
 					<div className="relative">
 						<div className="flex items-center cursor-pointer sm:hover:bg-gray-5 px-6 py-2 rounded-md" onClick={() => setProfilePopupOpen(true)}>
-							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4">John User</p>
-							<div className="text-green-2 bg-green-0 rounded-full w-7 h-7 sm:h-8 sm:w-8 flex justify-center items-center">
-								{placeholderUser}
+							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4">{authUser.username}</p>
+							<div className="text-green-2 bg-green-0 rounded-full w-7 h-7 sm:h-8 sm:w-8 flex justify-center items-center overflow-hidden">
+								{authUser.picture ? (
+									<img
+										src={authUser.picture}
+										alt="Profile"
+										referrerPolicy="no-referrer"
+										crossOrigin="anonymous"
+										className="w-full h-full object-cover"
+									/>
+								) : placeholderUser}
 							</div>
 						</div>
 						<Popup
@@ -96,7 +90,7 @@ export default function Header() {
 							xClicked={() => setProfilePopupOpen(false)}
 						>
 							<div className="flex justify-center pt-4">
-								<Button className="px-4 py-2" onClick={signOutRedirect}>Sign out</Button>
+								<Button className="px-4 py-2" onClick={authUser.signOut}>Sign out</Button>
 							</div>
 						</Popup>
 					</div>
