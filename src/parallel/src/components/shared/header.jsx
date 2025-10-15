@@ -9,7 +9,7 @@ export default function Header() {
 	const location = useLocation();
 	const authUser = useAuthUser();
 
-	const atLibrary = location.pathname === '/library';
+	const atLibrary = location.pathname === '/library' || location.pathname === "/";
 	const atNearby = location.pathname === '/nearby';
 	const atSearch = location.pathname === '/search';
 
