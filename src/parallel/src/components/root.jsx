@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, Navigate, Link, NavLink } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate, Link, NavLink, useNavigate } from 'react-router-dom'
 import Header from './shared/header'
 import Login from './pages/login';
 import Library from './pages/library';
@@ -14,6 +14,7 @@ import Spinner from './shared/Spinner';
 export default function Root() {
 	const location = useLocation();
 	const auth = useAuth();
+	const navigate = useNavigate();
 
 	let rCorners = null;
 	if (!["/login"].includes(location.pathname)) {
@@ -55,9 +56,7 @@ export default function Root() {
 				</div>
 				<div className="text-center text-sub text-gray-7 mt-8">Auth error: ({auth.error.message})</div>
 
-				<NavLink to="/">
-					<Button className="mt-8">Reload</Button>
-				</NavLink>
+				<Button className="mt-8" onClick={() => navigate("/")}>Reload</Button>
 
 				<LogoFooter />
 			</div>

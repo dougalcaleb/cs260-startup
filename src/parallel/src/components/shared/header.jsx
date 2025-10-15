@@ -1,9 +1,13 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import parallelLogo from "../../assets/parallel-icon.svg"
 import { useEffect, useRef, useState } from "react";
+import Button from "./Button";
+import Popup from "./Popup";
 
 export default function Header() {
 	const location = useLocation();
+	const navigate = useNavigate();
+
 	const atLibrary = location.pathname === '/library';
 	const atNearby = location.pathname === '/nearby';
 	const atSearch = location.pathname === '/search';
@@ -12,7 +16,8 @@ export default function Header() {
 
 	const headerRef = useRef(null);
 	const bigLogoRef = useRef(null);
-	const smallLogoRef = useRef(null);
+
+	const [profilePopupOpen, setProfilePopupOpen] = useState(false);
 
 	let logoHeight = null;
 
@@ -38,6 +43,27 @@ export default function Header() {
 		}
 	});
 
+	const placeholderUser = (
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-4 w-4 sm:h-5 :w-5">
+			<path fill="currentColor" d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z" />
+		</svg>
+	);
+
+	const signOutRedirect = () => {
+		if (window.sessionStorage.getItem("parallel-skip-signin")) {
+			window.sessionStorage.removeItem("parallel-skip-signin");
+			navigate(0);
+			return;
+		}
+
+		window.sessionStorage.clear();
+
+		const clientId = "22rart6rc9f5arou9go82qi3rk";
+		const logoutUri = import.meta.env.PROD ? "https://startup.dougalcaleb.click/login" : "http://localhost:5173/login";
+		const cognitoDomain = "https://us-east-1cenwrahji.auth.us-east-1.amazoncognito.com";
+		window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+	};
+
 	return (
 		<>
 			<div id="pre-header" className="flex sm:hidden justify-center h-[20vh]">
@@ -48,21 +74,44 @@ export default function Header() {
 			</div>
 
 			<header ref={headerRef} className="sticky bg-gray-3 flex justify-between h-[7vh] w-full m-0 sm:h-[max(7vh,70px)] top-0 items-center">
-				<div ref={smallLogoRef} id="header-logo-wrap" className="flex items-center" style={smallLogoStyle}>
-					<img src={parallelLogo} className="h-4 ml-5 sm:h-5 sm:ml-8" />
-					<p className="font-header text-white-0 ml-2.5 sm:text-2xl font-black">PARALLEL</p>
+				<div  className="flex items-center justify-between w-full sm:mr-8" >
+					<div className="flex items-center"  style={smallLogoStyle}>
+						<img src={parallelLogo} className="h-4 ml-5 sm:h-5 sm:ml-8" />
+						<p className="font-header text-white-0 ml-2.5 sm:text-2xl font-black">PARALLEL</p>
+					</div>
+					<div className="relative">
+						<div className="flex items-center cursor-pointer sm:hover:bg-gray-5 px-6 py-2 rounded-md" onClick={() => setProfilePopupOpen(true)}>
+							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4">John User</p>
+							<div className="text-green-2 bg-green-0 rounded-full w-7 h-7 sm:h-8 sm:w-8 flex justify-center items-center">
+								{placeholderUser}
+							</div>
+						</div>
+						<Popup
+							headerText="PROFILE"
+							buttons={[
+								{ text: "Cancel", onClick: () => setProfilePopupOpen(false) },
+								{ text: "Save", onClick: () => setProfilePopupOpen(false) },
+							]}
+							open={profilePopupOpen}
+							xClicked={() => setProfilePopupOpen(false)}
+						>
+							<div className="flex justify-center pt-4">
+								<Button className="px-4 py-2" onClick={signOutRedirect}>Sign out</Button>
+							</div>
+						</Popup>
+					</div>
 				</div>
 			
-				<div className="w-[30vw] mr-8 hidden sm:inline">
+				<div className="w-[30vw] min-w-max mr-8 hidden sm:inline">
 					<nav className="bg-gray-1 w-full h-6 rounded-4xl flex justify-between items-center">
-						<Link to={!atLibrary ? '/library' : null} className={`w-1/4 h-full flex flex-col justify-center rounded-4xl ${atLibrary ? selectedClass : 'text-white-0'}`}>
-							<div className="w-full font-main font-black text-center flex justify-center text-xs">YOU</div>
+						<Link to={!atLibrary ? '/library' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atLibrary ? selectedClass : 'text-white-0'}`}>
+							<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">YOU</div>
 						</Link>
-						<Link to={!atNearby ? '/nearby' : null} className={`w-1/4 h-full flex flex-col justify-center rounded-4xl ${atNearby ? selectedClass : 'text-white-0'}`}>
-							<div className="w-full font-main font-black text-center flex justify-center text-xs">NEARBY</div>
+						<Link to={!atNearby ? '/nearby' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atNearby ? selectedClass : 'text-white-0'}`}>
+							<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">NEARBY</div>
 						</Link>
-						<Link to={!atSearch ? '/search' : null} className={`w-1/4 h-full flex flex-col justify-center rounded-4xl ${atSearch ? selectedClass : 'text-white-0'}`}>
-							<div className="w-full font-main font-black text-center flex justify-center text-xs">SEARCH</div>
+						<Link to={!atSearch ? '/search' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atSearch ? selectedClass : 'text-white-0'}`}>
+							<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">SEARCH</div>
 						</Link>
 					</nav>
 				</div>

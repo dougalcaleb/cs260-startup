@@ -51,7 +51,7 @@ export default function Library() {
 			</div>
 
 			<CSSTransition nodeRef={nodeRefBG} in={menuOpen} timeout={200} classNames="menu-bg" unmountOnExit>
-				<div ref={nodeRefBG} className="fixed bg-gray-1 top-0 opacity-80 bottom-0 right-0 left-0 z-20" onClick={toggleOpen}></div>
+				<div ref={nodeRefBG} className="fixed bg-gray-1 top-0 opacity-80 bottom-0 right-0 left-0 z-20 h-dvh" onClick={toggleOpen}></div>
 			</CSSTransition>
 
 			<div className="fixed right-4 sm:top-[calc(max(7vh,70px+1rem))] bottom-24 sm:bottom-auto flex flex-col-reverse sm:flex-col items-end z-30">

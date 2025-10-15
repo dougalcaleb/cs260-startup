@@ -11,8 +11,6 @@ const loginModes = {
 	LOGIN_COGNITO: "LOGIN_COGNITO"
 };
 
-// TODO: sign-out
-
 export default function Login() {
 	const auth = useAuth();
 	const navigate = useNavigate();
@@ -45,6 +43,15 @@ export default function Login() {
 			</div>
 
 			<LogoFooter showCredit />
+
+			<div className="absolute top-0 right-0 p-2">
+				{window.sessionStorage.getItem("parallel-skip-signin") && (<div>
+					<p className="text-gray-6">Skip sign-in is enabled.</p>
+					<p className="text-blue-0 text-right">
+						<span className="cursor-pointer" onClick={() => { window.sessionStorage.removeItem("parallel-skip-signin"); navigate(0); }}>Disable</span>
+					</p>
+				</div>)}
+			</div>
 		</div>
 	);
 }
