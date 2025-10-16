@@ -20,9 +20,6 @@ export default function Header() {
 	const bigLogoRef = useRef(null);
 
 	const [profilePopupOpen, setProfilePopupOpen] = useState(false);
-
-	let logoHeight = null;
-
 	const [bigLogoStyle, setBigLogoStyle] = useState({top: 0});
 	const [smallLogoStyle, setSmallLogoStyle] = useState({opacity: 1});
 
@@ -37,7 +34,7 @@ export default function Header() {
 	window.addEventListener("scroll", () => {
 		if (window.innerWidth < 700) {
 			const headerBound = headerRef.current?.getBoundingClientRect();
-			logoHeight = bigLogoRef.current.getBoundingClientRect().height;
+			let logoHeight = bigLogoRef.current.getBoundingClientRect().height;
 			const percentScrolled = (window.scrollY / (window.innerHeight / 5));
 
 			setBigLogoStyle({ top: `${headerBound.bottom / 2 - logoHeight / 2}px`, opacity:  Math.min(1, 1 - percentScrolled * 3) });
