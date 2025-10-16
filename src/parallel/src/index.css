@@ -42,7 +42,7 @@
 	--font-sub: "Ubuntu", system-ui, sans-serif;
 }
 
-input {
+input[type="text"], input[type="number"], input[type="password"] {
 	border: none;
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
