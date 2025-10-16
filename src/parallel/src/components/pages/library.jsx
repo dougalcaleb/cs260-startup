@@ -6,6 +6,7 @@ import { isMobile } from "../../mixins/screen";
 import Popup from "../shared/Popup";
 import { BTN_VARIANTS } from "../../mixins/constants";
 import Input from "../shared/input";
+import FilePicker from "../shared/FilePicker";
 
 export default function Library() {
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -102,7 +103,7 @@ export default function Library() {
 			</div>
 
 			<Popup
-				bodyStyle="h-2/3 w-full sm:h-1/2 sm:w-1/3"
+				bodyStyle="h-2/3 w-full sm:w-1/3"
 				open={uploadLocPopupOpen}
 				headerText="ADD LOCATIONS"
 				xClicked={() => setLocPopupOpen(false)}
@@ -113,7 +114,7 @@ export default function Library() {
 				originalState={locations}
 				setState={setLocations}
 			>
-				<div className="flex flex-col items-center pt-4 px-8">
+				<div className="flex flex-col items-center pt-4 px-4">
 					{locations.map((value, i) => (
 						<div className="flex justify-center items-center mb-4" key={`loc-input-wrap-${i}`}>
 							<Input
@@ -137,6 +138,7 @@ export default function Library() {
 			</Popup>
 
 			<Popup
+				bodyStyle="h-2/3 w-full sm:w-1/3"
 				open={uploadImgPopupOpen}
 				headerText="UPLOAD IMAGES"
 				xClicked={() => setImgPopupOpen(false)}
@@ -144,7 +146,11 @@ export default function Library() {
 					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: () => setImgPopupOpen(false) },
 					{ text: "SAVE" },
 				]}
-			></Popup>
+			>
+				<div className="flex pt-4 px-4">
+					<FilePicker multiple showPicked accept="image/*" />
+				</div>
+			</Popup>
 		</div>
 	);
 }
