@@ -3,11 +3,18 @@ import { CSSTransition } from 'react-transition-group'
 import phimg from "../../assets/landscape-200.jpg"
 import Button from "../shared/Button";
 import { isMobile } from "../../mixins/screen";
+import Popup from "../shared/Popup";
+import { BTN_VARIANTS } from "../../mixins/constants";
+import Input from "../shared/input";
 
 export default function Library() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [locBtnShow, setLocBtnShow] = useState(false);
 	const [imgBtnShow, setImgBtnShow] = useState(false);
+	const [uploadLocPopupOpen, setLocPopupOpen] = useState(false);
+	const [uploadImgPopupOpen, setImgPopupOpen] = useState(false);
+	const [locations, setLocations] = useState([""]);
+
 	const imageBtnRef = useRef(null);
 	const locationBtnRef = useRef(null);
 	const nodeRefBG = useRef(null);
@@ -27,10 +34,36 @@ export default function Library() {
 		setMenuOpen(!menuOpen)
 	};
 
+	const openLocationPopup = () => {
+		toggleOpen();
+		setLocPopupOpen(true);
+	};
+
+	const openImagePopup = () => {
+		toggleOpen();
+		setImgPopupOpen(true);
+	};
+
+	const addLocation = () => {
+		setLocations([...locations, ""]);
+	};
+
+	const setLocation = (index, value) => {
+		const newLocations = [...locations];
+		newLocations[index] = value;
+		setLocations(newLocations);
+	};
+
+	const removeLocation = (index) => {
+		const newLocations = [...locations];
+		newLocations.splice(index, 1);
+		setLocations(newLocations);
+	}
+
 	const imgButton = (
 		<CSSTransition nodeRef={imageBtnRef} in={imgBtnShow} timeout={150} classNames="pop-in" key="img-btn">
 			<div ref={imageBtnRef} className="invisible">
-				<Button className="rounded-2xl my-2 shadow-gray-0 shadow-lg sm:z-10 relative">IMAGES</Button>
+				<Button className="rounded-2xl my-2 shadow-gray-0 shadow-lg sm:z-10 relative" onClick={openImagePopup}>IMAGES</Button>
 			</div>
 		</CSSTransition>
 	);
@@ -38,7 +71,7 @@ export default function Library() {
 	const locButton = (
 		<CSSTransition nodeRef={locationBtnRef} in={locBtnShow} timeout={150} classNames="pop-in" key="loc-btn">
 			<div ref={locationBtnRef} className="invisible">
-				<Button className="rounded-2xl shadow-gray-0 shadow-lg z-10 sm:z-0 relative">LOCATIONS</Button>
+				<Button className="rounded-2xl shadow-gray-0 shadow-lg z-10 sm:z-0 relative" onClick={openLocationPopup}>LOCATIONS</Button>
 			</div>
 		</CSSTransition>
 	);
@@ -67,6 +100,51 @@ export default function Library() {
 						: [locButton, imgButton] }
 				</div>
 			</div>
+
+			<Popup
+				bodyStyle="h-2/3 w-full sm:h-1/2 sm:w-1/3"
+				open={uploadLocPopupOpen}
+				headerText="ADD LOCATIONS"
+				xClicked={() => setLocPopupOpen(false)}
+				buttons={[
+					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: () => setLocPopupOpen(false) },
+					{ text: "SAVE", onClick: () => setLocPopupOpen(false) },
+				]}
+				originalState={locations}
+				setState={setLocations}
+			>
+				<div className="flex flex-col items-center pt-4 px-8">
+					{locations.map((value, i) => (
+						<div className="flex justify-center items-center mb-4" key={`loc-input-wrap-${i}`}>
+							<Input
+								className="w-4/5"
+								key={`loc-input-${i}`}
+								value={value}
+								placeholder="Enter a location"
+								onChange={(v) => setLocation(i, v)}
+							></Input>
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-6 w-6 ml-2 cursor-pointer text-gray-7 hover:text-red-2" onClick={() => removeLocation(i)}>
+								<path fill="currentColor" d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z" />
+							</svg>
+						</div>
+					))}
+					<Button className="py-2 px-2 mb-4" onClick={addLocation}>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-6 w-6">
+							<path fill="currentColor" d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z" />
+						</svg>
+					</Button>
+				</div>
+			</Popup>
+
+			<Popup
+				open={uploadImgPopupOpen}
+				headerText="UPLOAD IMAGES"
+				xClicked={() => setImgPopupOpen(false)}
+				buttons={[
+					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: () => setImgPopupOpen(false) },
+					{ text: "SAVE" },
+				]}
+			></Popup>
 		</div>
 	);
 }
