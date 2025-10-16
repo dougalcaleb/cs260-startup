@@ -28,7 +28,7 @@ export default function Library() {
 	};
 
 	const imgButton = (
-		<CSSTransition nodeRef={imageBtnRef} in={imgBtnShow} timeout={150} classNames="uploadBtnImage" key="img-btn">
+		<CSSTransition nodeRef={imageBtnRef} in={imgBtnShow} timeout={150} classNames="pop-in" key="img-btn">
 			<div ref={imageBtnRef} className="invisible">
 				<Button className="rounded-2xl my-2 shadow-gray-0 shadow-lg sm:z-10 relative">IMAGES</Button>
 			</div>
@@ -36,7 +36,7 @@ export default function Library() {
 	);
 
 	const locButton = (
-		<CSSTransition nodeRef={locationBtnRef} in={locBtnShow} timeout={150} classNames="uploadBtnLocation" key="loc-btn">
+		<CSSTransition nodeRef={locationBtnRef} in={locBtnShow} timeout={150} classNames="pop-in" key="loc-btn">
 			<div ref={locationBtnRef} className="invisible">
 				<Button className="rounded-2xl shadow-gray-0 shadow-lg z-10 sm:z-0 relative">LOCATIONS</Button>
 			</div>
@@ -50,7 +50,7 @@ export default function Library() {
 				{ images() }
 			</div>
 
-			<CSSTransition nodeRef={nodeRefBG} in={menuOpen} timeout={200} classNames="menu-bg" unmountOnExit>
+			<CSSTransition nodeRef={nodeRefBG} in={menuOpen} timeout={200} classNames="overlay-bg" unmountOnExit>
 				<div ref={nodeRefBG} className="fixed bg-gray-1 top-0 opacity-80 bottom-0 right-0 left-0 z-20 h-dvh" onClick={toggleOpen}></div>
 			</CSSTransition>
 
