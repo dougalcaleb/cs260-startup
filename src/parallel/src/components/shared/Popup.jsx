@@ -68,14 +68,14 @@ export default function Popup({
 
 	const buttonClicked = (button) => {
 		if ((button.variant === BTN_VARIANTS.CANCEL && !button.preventReset) || button.doReset) {
-			setState(stateOnOpenRef.current);
+			setState?.(stateOnOpenRef.current);
 		}
 		button.onClick();
 	};
 
 	const closeClicked = () => {
 		if (!preventXReset) {
-			setState(stateOnOpenRef.current);
+			setState?.(stateOnOpenRef.current);
 		}
 		xClicked();
 	};
