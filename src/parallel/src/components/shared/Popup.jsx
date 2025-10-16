@@ -35,8 +35,6 @@ export default function Popup({
 		return null;
 	}
 
-	
-
 	return createPortal(
 		<>
 			<CSSTransition nodeRef={bgRef} in={popupOpen} timeout={200} classNames="overlay-bg" unmountOnExit>
@@ -62,7 +60,7 @@ export default function Popup({
 
 					{(buttons && buttons.length || "") && <div className="bg-gray-3 absolute bottom-0 h-12 w-full flex items-center justify-end px-4">
 						{buttons.map(btn => (
-							<Button className="py-1 text-sm rounded-sm ml-2" onClick={btn.onClick}>{btn.text}</Button>
+							<Button className="py-1 text-sm rounded-sm ml-2" onClick={btn.onClick} variant={btn.variant}>{btn.text}</Button>
 						))}
 					</div>}
 				</div>

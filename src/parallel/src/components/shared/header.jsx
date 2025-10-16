@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import Popup from "./Popup";
 import useAuthUser from "../../hooks/useAuthUser";
+import { BTN_VARIANTS } from "../../mixins/constants";
 
 export default function Header() {
 	const location = useLocation();
@@ -83,7 +84,7 @@ export default function Header() {
 						<Popup
 							headerText="PROFILE"
 							buttons={[
-								{ text: "Cancel", onClick: () => setProfilePopupOpen(false) },
+								{ text: "Cancel", onClick: () => setProfilePopupOpen(false), variant: BTN_VARIANTS.CANCEL },
 								{ text: "Save", onClick: () => setProfilePopupOpen(false) },
 							]}
 							open={profilePopupOpen}
