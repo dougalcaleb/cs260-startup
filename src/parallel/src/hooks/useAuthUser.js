@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import constants from "../mixins/constants";
+import {SKIP_SIGNIN_KEY} from "../mixins/constants";
 import { useAuth } from "react-oidc-context";
 
 export default function useAuthUser() {
@@ -7,8 +7,8 @@ export default function useAuthUser() {
 	const auth = useAuth();
 
 	const signOutRedirect = () => {
-		if (window.sessionStorage.getItem(constants.SKIP_SIGNIN_KEY)) {
-			window.sessionStorage.removeItem(constants.SKIP_SIGNIN_KEY);
+		if (window.sessionStorage.getItem(SKIP_SIGNIN_KEY)) {
+			window.sessionStorage.removeItem(SKIP_SIGNIN_KEY);
 			navigate(0);
 			return;
 		}
@@ -21,7 +21,7 @@ export default function useAuthUser() {
 		window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
 	};
 
-	if (window.sessionStorage.getItem(constants.SKIP_SIGNIN_KEY)) {
+	if (window.sessionStorage.getItem(SKIP_SIGNIN_KEY)) {
 		return {
 			username: "Not signed in",
 			name: "Not signed in",

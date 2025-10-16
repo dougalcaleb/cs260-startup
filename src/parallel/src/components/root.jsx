@@ -10,7 +10,7 @@ import { useAuth } from 'react-oidc-context';
 import LogoFooter from './shared/LogoFooter';
 import Button from './shared/Button';
 import Spinner from './shared/Spinner';
-import constants from '../mixins/constants';
+import {SKIP_SIGNIN_KEY} from '../mixins/constants';
 
 export default function Root() {
 	const location = useLocation();
@@ -69,7 +69,7 @@ export default function Root() {
 		);
 	}
 
-	const navAllowed = auth.isAuthenticated || window.sessionStorage.getItem(constants.SKIP_SIGNIN_KEY); // || import.meta.env.DEV;
+	const navAllowed = auth.isAuthenticated || window.sessionStorage.getItem(SKIP_SIGNIN_KEY); // || import.meta.env.DEV;
 
 	return (
 		<>
