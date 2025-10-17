@@ -44,6 +44,7 @@ export default function useAuthUser() {
 		signOut: signOutRedirect,
 		idToken: auth.user?.id_token,
 		accessToken: auth.user?.access_token,
+		authToken: auth.user?.id_token ?? auth.user?.access_token,
 		raw: auth.user,
 	};
 }

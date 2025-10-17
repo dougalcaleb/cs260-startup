@@ -1,7 +1,52 @@
 import express from "express";
+import cookieParser from "cookie-parser";
+import { requireAuth, optionalAuth } from "./cognitoAuth.js";
 
 const app = express();
 
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 
-application.use(express.static('public'));
+// Generic middleware
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.static('public'));
+
+// Enable CORS
+app.use((req, res, next) => {
+	const origin = req.headers.origin;
+	if (origin === 'http://localhost:5173' || origin === 'https://startup.dougalcaleb.click') {
+		res.setHeader('Access-Control-Allow-Origin', origin);
+	}
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+	res.setHeader('Access-Control-Allow-Credentials', 'true');
+	
+	if (req.method === 'OPTIONS') {
+		return res.sendStatus(200);
+	}
+	next();
+});
+
+// public route
+// app.get("/path", (req, res) => {
+
+// });
+
+// protected route
+// app.get("/path", requireAuth, (req, res) => {
+// 	console.log(req.user);
+// });
+
+// optionally protected route
+// app.get("/path", optionalAuth, (req, res) => {
+// 	if (req.user) {
+// 		console.log("authd");
+// 	} else {
+// 		console.log("not authd");
+// 	}
+// });
+
+// Start server
+app.listen(port, () => {
+	console.log(`Server listening on port ${port}`);
+});
