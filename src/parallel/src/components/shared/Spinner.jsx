@@ -1,4 +1,4 @@
-export default function Spinner({className, speed = "1"}) {
+export default function Spinner({className = "", speed = "1"}) {
 	return (
 		<svg className={className} stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 			<g>

@@ -12,7 +12,7 @@ const API_BASE_URL = import.meta.env.PROD
  */
 export async function authFetch(endpoint, token, options = {}) {
 	if (!token) {
-		throw new Error('No authentication token provided');
+		throw new Error('User is not authenticated');
 	}
 
 	const isFormData = options && options.body && typeof FormData !== 'undefined' && options.body instanceof FormData;

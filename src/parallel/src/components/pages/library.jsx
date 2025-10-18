@@ -4,19 +4,24 @@ import phimg from "../../assets/landscape-200.jpg"
 import Button from "../shared/Button";
 import { isMobile } from "../../mixins/screen";
 import Popup from "../shared/Popup";
-import { BTN_VARIANTS } from "../../mixins/constants";
+import { ALERTS, BTN_VARIANTS } from "../../mixins/constants";
 import Input from "../shared/Input";
 import FilePicker from "../shared/FilePicker";
 import { authPost } from "../../mixins/api";
 import useAuthUser from "../../hooks/useAuthUser";
+import { useAlert } from "../../contexts/AlertContext";
+import Spinner from "../shared/Spinner";
 
 export default function Library() {
 	const authUser = useAuthUser();
+	const Alert = useAlert();
+
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [locBtnShow, setLocBtnShow] = useState(false);
 	const [imgBtnShow, setImgBtnShow] = useState(false);
 	const [uploadLocPopupOpen, setLocPopupOpen] = useState(false);
 	const [uploadImgPopupOpen, setImgPopupOpen] = useState(false);
+	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
 	const [locations, setLocations] = useState([""]);
 	const [images, setImages] = useState([]);
 
@@ -82,23 +87,30 @@ export default function Library() {
 	);
 
 	const uploadImages = async () => {
-		if (!images || images.length === 0) {
-			setImgPopupOpen(false);
+		const imageArray = Array.from(images);
+
+		if (!imageArray || imageArray.length === 0) {
+			Alert.launch(ALERTS.WARNING, "No images selected for upload");
 			return;
 		}
 
 		try {
-			let endpoint = images.length > 1 ? "/upload-multiple" : "/upload-single";
-			const formKey = images.length > 1 ? "images" : "image";
+			let endpoint = imageArray.length > 1 ? "/upload-multiple" : "/upload-single";
+			const formKey = imageArray.length > 1 ? "images" : "image";
 			const data = new FormData();
 
-			Array.from(images).forEach(img => data.append(formKey, img));
+			imageArray.forEach(img => data.append(formKey, img));
 
-			const response = await authPost(`/api/image${endpoint}`, authUser.authToken, data);
-			console.log(response);
 			setImgPopupOpen(false);
+			setLoadingPopupOpen(true);
+
+			await authPost(`/api/image${endpoint}`, authUser.authToken, data);
+			
+			Alert.launch(ALERTS.SUCCESS, `Image${imageArray.length > 1 ? 's' : ''} uploaded successfully!`);
+			setLoadingPopupOpen(false);
 		} catch (e) {
-			console.error(e);
+			Alert.launch(ALERTS.ERROR, "Upload failed: " + (e.message || e.toString()));
+			setLoadingPopupOpen(false);
 		}
 	};
 
@@ -176,6 +188,19 @@ export default function Library() {
 			>
 				<div className="flex pt-4 px-4">
 					<FilePicker multiple showPicked accept="image/*" onChange={setImages} />
+				</div>
+			</Popup>
+
+			<Popup
+				bodyStyle="h-1/4 w-2/3 sm:w-90"
+				headerText="UPLOADING"
+				open={loadingPopupOpen}
+				xDisabled
+			>
+				<div className="flex w-full h-full flex-col justify-center px-4">
+					<div className="flex text-white justify-center font-main items-center">
+						<Spinner className="h-8 mr-4" /> Upload in progress, please wait...
+					</div>
 				</div>
 			</Popup>
 		</div>
