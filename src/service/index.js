@@ -30,25 +30,6 @@ app.use(express.static('public'));
 // Image endpoints
 app.use("/api/image", imageAPI);
 
-// public route
-// app.get("/path", (req, res) => {
-
-// });
-
-// protected route
-// app.get("/path", requireAuth, (req, res) => {
-// 	console.log(req.user);
-// });
-
-// optionally protected route
-// app.get("/path", optionalAuth, (req, res) => {
-// 	if (req.user) {
-// 		console.log("authd");
-// 	} else {
-// 		console.log("not authd");
-// 	}
-// });
-
 // Start server
 app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
