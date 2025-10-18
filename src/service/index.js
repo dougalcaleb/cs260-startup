@@ -1,15 +1,10 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import { requireAuth, optionalAuth } from "./cognitoAuth.js";
+import imageAPI from "./modules/imageAPI.js";
 
 const app = express();
 
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
-
-// Generic middleware
-app.use(express.json());
-app.use(cookieParser());
-app.use(express.static('public'));
 
 // Enable CORS
 app.use((req, res, next) => {
@@ -26,6 +21,14 @@ app.use((req, res, next) => {
 	}
 	next();
 });
+
+// Generic middleware
+app.use(express.json({ limit: '2mb' }));
+app.use(cookieParser());
+app.use(express.static('public'));
+
+// Image endpoints
+app.use("/api/image", imageAPI);
 
 // public route
 // app.get("/path", (req, res) => {

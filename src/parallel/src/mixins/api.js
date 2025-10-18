@@ -15,9 +15,11 @@ export async function authFetch(endpoint, token, options = {}) {
 		throw new Error('No authentication token provided');
 	}
 
+	const isFormData = options && options.body && typeof FormData !== 'undefined' && options.body instanceof FormData;
+
 	const defaultOptions = {
 		headers: {
-			'Content-Type': 'application/json',
+			...(isFormData ? {} : { 'Content-Type': 'application/json' }),
 			'Authorization': `Bearer ${token}`,
 			...options.headers,
 		},

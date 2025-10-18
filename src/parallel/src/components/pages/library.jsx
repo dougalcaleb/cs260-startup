@@ -7,14 +7,18 @@ import Popup from "../shared/Popup";
 import { BTN_VARIANTS } from "../../mixins/constants";
 import Input from "../shared/input";
 import FilePicker from "../shared/FilePicker";
+import { authPost } from "../../mixins/api";
+import useAuthUser from "../../hooks/useAuthUser";
 
 export default function Library() {
+	const authUser = useAuthUser();
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [locBtnShow, setLocBtnShow] = useState(false);
 	const [imgBtnShow, setImgBtnShow] = useState(false);
 	const [uploadLocPopupOpen, setLocPopupOpen] = useState(false);
 	const [uploadImgPopupOpen, setImgPopupOpen] = useState(false);
 	const [locations, setLocations] = useState([""]);
+	const [images, setImages] = useState([]);
 
 	const imageBtnRef = useRef(null);
 	const locationBtnRef = useRef(null);
@@ -77,11 +81,32 @@ export default function Library() {
 		</CSSTransition>
 	);
 
+	const uploadImages = async () => {
+		if (!images || images.length === 0) {
+			setImgPopupOpen(false);
+			return;
+		}
+
+		try {
+			let endpoint = images.length > 1 ? "/upload-multiple" : "/upload-single";
+			const formKey = images.length > 1 ? "images" : "image";
+			const data = new FormData();
+
+			Array.from(images).forEach(img => data.append(formKey, img));
+
+			const response = await authPost(`/api/image${endpoint}`, authUser.authToken, data);
+			console.log(response);
+			setImgPopupOpen(false);
+		} catch (e) {
+			console.error(e);
+		}
+	};
+
 	return (
 		<div className="bg-gray-1 w-full min-h-[175vh] sm:min-h-[calc(100vh-max(7vh,70px))]">
 			<div className="font-main font-black text-gray-6 text-center sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8">LIBRARY</div>
 			<div className="grid p-4 gap-2.5" id="library-content">
-				{ images() }
+				{ placeholderImages() }
 			</div>
 
 			<CSSTransition nodeRef={nodeRefBG} in={menuOpen} timeout={200} classNames="overlay-bg" unmountOnExit>
@@ -144,18 +169,20 @@ export default function Library() {
 				xClicked={() => setImgPopupOpen(false)}
 				buttons={[
 					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: () => setImgPopupOpen(false) },
-					{ text: "SAVE" },
+					{ text: "SAVE", onClick: uploadImages },
 				]}
+				originalState={images}
+				setState={setImages}
 			>
 				<div className="flex pt-4 px-4">
-					<FilePicker multiple showPicked accept="image/*" />
+					<FilePicker multiple showPicked accept="image/*" onChange={setImages} />
 				</div>
 			</Popup>
 		</div>
 	);
 }
 
-function images() {
+function placeholderImages() {
 	const arr = [];
 
 	for (let i = 0; i < 20; i++) {
