@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { requireAuth, optionalAuth } from "../common/cognitoAuth.js";
-import { BATCH_IMAGES, BUCKET_NAME, MAX_FILESIZE } from "../config.js";
+import { BATCH_IMAGES, BUCKET_NAME, MAX_FILESIZE, SIGNED_URL_EXPIRE } from "../config.js";
 import multer from "multer";
-import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { formatFileSize } from "../../parallel/src/mixins/format.js";
+import { formatFileSize } from "../common/util.js";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const router = Router();
 const s3 = new S3Client({
@@ -24,6 +25,21 @@ const upload = multer({
 	},
 });
 
+async function signURLs(keys) {
+	if (!keys || !keys.length) {
+		return [];
+	}
+
+	return await Promise.all(keys.map(async (Key) => {
+		const command = new GetObjectCommand({
+			Bucket: BUCKET_NAME,
+			Key
+		});
+
+		return { url: await getSignedUrl(s3, command, { expiresIn: SIGNED_URL_EXPIRE }), key: Key } ;
+	}));
+}
+
 router.get("/get-user-images", requireAuth, async (req, res) => {
 	try {
 		const data = await s3.send(new ListObjectsV2Command({
@@ -32,7 +48,13 @@ router.get("/get-user-images", requireAuth, async (req, res) => {
 			MaxKeys: 1000,
 		}));
 
-		res.json(data.Contents || []);
+		let returnData = null;
+
+		if (data.Contents) {
+			returnData = await signURLs(data.Contents.map(c => c.Key));
+		}
+
+		res.json(returnData);
 	} catch (e) {
 		res.status(500).json({ error: e.message });
 	}

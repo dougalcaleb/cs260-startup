@@ -23,7 +23,7 @@ export function AlertProvider({ children }) {
 		});
 	};
 
-	const launch = (type, message, autoDismiss = 5000) => {
+	const launchAlert = (type, message, autoDismiss = 5000) => {
 		const newAlert = { 
 			type, 
 			message, 
@@ -48,7 +48,7 @@ export function AlertProvider({ children }) {
 	};
 
 	return (
-		<AlertContext.Provider value={{ launch }}>
+		<AlertContext.Provider value={{ launchAlert }}>
 			{children}
 			<div className="fixed top-0 left-0 right-0 m-auto z-100 flex flex-col items-center w-full mt-2 px-2">
 				<TransitionGroup component={null}>

@@ -1,20 +1,19 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { CSSTransition } from 'react-transition-group'
-import phimg from "../../assets/landscape-200.jpg"
 import Button from "../shared/Button";
 import { isMobile } from "../../mixins/screen";
 import Popup from "../shared/Popup";
 import { ALERTS, BTN_VARIANTS } from "../../mixins/constants";
 import Input from "../shared/Input";
 import FilePicker from "../shared/FilePicker";
-import { authPost } from "../../mixins/api";
+import { authGet, authPost } from "../../mixins/api";
 import useAuthUser from "../../hooks/useAuthUser";
 import { useAlert } from "../../contexts/AlertContext";
 import Spinner from "../shared/Spinner";
 
 export default function Library() {
 	const authUser = useAuthUser();
-	const Alert = useAlert();
+	const { launchAlert } = useAlert();
 
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [locBtnShow, setLocBtnShow] = useState(false);
@@ -23,7 +22,9 @@ export default function Library() {
 	const [uploadImgPopupOpen, setImgPopupOpen] = useState(false);
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
 	const [locations, setLocations] = useState([""]);
-	const [images, setImages] = useState([]);
+	const [imagesToUpload, setImagesToUpload] = useState([]);
+	const [imageUrls, setImageUrls] = useState([]);
+	const [viewImage, setViewImage] = useState(null);
 
 	const imageBtnRef = useRef(null);
 	const locationBtnRef = useRef(null);
@@ -78,6 +79,8 @@ export default function Library() {
 		</CSSTransition>
 	);
 
+	const placeholderImages = () => Array.from({ length: 20 }).map((_, i) => <div key={`placeholder-img-${i}`} className="ghost-loader rounded-md w-full h-30"></div>);
+
 	const locButton = (
 		<CSSTransition nodeRef={locationBtnRef} in={locBtnShow} timeout={150} classNames="pop-in" key="loc-btn">
 			<div ref={locationBtnRef} className="invisible">
@@ -86,11 +89,20 @@ export default function Library() {
 		</CSSTransition>
 	);
 
+	const refreshLibrary = useCallback(async () => {
+		try {
+			const list = await authGet("/api/image/get-user-images", authUser.authToken);
+			setImageUrls(list);
+		} catch (e) {
+			launchAlert(ALERTS.ERROR, "Failed to retrieve user image library: " + (e.message || e.toString()));
+		}
+	}, [authUser.authToken]);
+
 	const uploadImages = async () => {
-		const imageArray = Array.from(images);
+		const imageArray = Array.from(imagesToUpload);
 
 		if (!imageArray || imageArray.length === 0) {
-			Alert.launch(ALERTS.WARNING, "No images selected for upload");
+			launchAlert(ALERTS.WARNING, "No images selected for upload");
 			return;
 		}
 
@@ -106,19 +118,45 @@ export default function Library() {
 
 			await authPost(`/api/image${endpoint}`, authUser.authToken, data);
 			
-			Alert.launch(ALERTS.SUCCESS, `Image${imageArray.length > 1 ? 's' : ''} uploaded successfully!`);
+			launchAlert(ALERTS.SUCCESS, `Image${imageArray.length > 1 ? 's' : ''} uploaded successfully!`);
 			setLoadingPopupOpen(false);
+			// Refresh gallery after upload
+			refreshLibrary();
 		} catch (e) {
-			Alert.launch(ALERTS.ERROR, "Upload failed: " + (e.message || e.toString()));
+			launchAlert(ALERTS.ERROR, "Upload failed: " + (e.message || e.toString()));
 			setLoadingPopupOpen(false);
 		}
 	};
 
+	const libraryImages = () => {
+		if (imageUrls === null) {
+			return (
+				<div className="text-gray-7 italic font-bold w-80 ml-4">No library images found. Upload some!</div>
+			);
+		}
+		if (imageUrls.length === 0) {
+			return placeholderImages();
+		}
+		return imageUrls.map((imgData, i) => (
+			<div className="overflow-hidden cursor-pointer h-40 rounded-md flex-shrink-0" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
+				<img
+					src={imgData.url}
+					alt={(imgData.key || '').split('/').pop().split('__')[0]}
+					className="h-full w-auto rounded-md"
+				/>
+			</div>
+		));
+	}
+
+	useEffect(() => {
+		refreshLibrary();
+	}, [refreshLibrary]);
+
 	return (
 		<div className="bg-gray-1 w-full min-h-[175vh] sm:min-h-[calc(100vh-max(7vh,70px))]">
 			<div className="font-main font-black text-gray-6 text-center sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8">LIBRARY</div>
-			<div className="grid p-4 gap-2.5" id="library-content">
-				{ placeholderImages() }
+			<div className="grid p-4 gap-2.5 sm:flex flex-wrap" id="library-content">
+				{ libraryImages() }
 			</div>
 
 			<CSSTransition nodeRef={nodeRefBG} in={menuOpen} timeout={200} classNames="overlay-bg" unmountOnExit>
@@ -183,11 +221,11 @@ export default function Library() {
 					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: () => setImgPopupOpen(false) },
 					{ text: "SAVE", onClick: uploadImages },
 				]}
-				originalState={images}
-				setState={setImages}
+				originalState={imagesToUpload}
+				setState={setImagesToUpload}
 			>
 				<div className="flex pt-4 px-4">
-					<FilePicker multiple showPicked accept="image/*" onChange={setImages} />
+					<FilePicker multiple showPicked accept="image/*" onChange={setImagesToUpload} />
 				</div>
 			</Popup>
 
@@ -203,16 +241,21 @@ export default function Library() {
 					</div>
 				</div>
 			</Popup>
+
+			<Popup
+				bodyStyle="h-full w-full"
+				open={viewImage !== null}
+				headerText="VIEW IMAGE"
+				xClicked={() => setViewImage(null)}
+			>
+				<div className="flex justify-center p-4 h-11/12">
+					<img
+						src={imageUrls?.[viewImage]?.url}
+						alt={(imageUrls?.[viewImage]?.key || '').split('/').pop().split('__')[0]}
+						className="w-auto max-w-full max-h-full object-cover rounded-md"
+					/>
+				</div>
+			</Popup>
 		</div>
 	);
-}
-
-function placeholderImages() {
-	const arr = [];
-
-	for (let i = 0; i < 20; i++) {
-		arr.push(<img key={`img-${i}`} src={phimg} alt={`placeholder ${i}`} className="w-full h-auto object-cover rounded-md" />);
-	}
-
-	return arr;
 }
