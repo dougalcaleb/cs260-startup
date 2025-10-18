@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { requireAuth, optionalAuth } from "../common/cognitoAuth.js";
-import { BATCH_IMAGES, BUCKET_NAME } from "../config.js";
+import { BATCH_IMAGES, BUCKET_NAME, MAX_FILESIZE } from "../config.js";
 import multer from "multer";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
+import { formatFileSize } from "../../parallel/src/mixins/format.js";
 
 const router = Router();
 const s3 = new S3Client({
@@ -14,7 +15,7 @@ const s3 = new S3Client({
 const upload = multer({
 	storage: multer.memoryStorage(),
 	limits: {
-		fileSize: 10 * 1024 * 1024, // 10MB per file
+		fileSize: MAX_FILESIZE,
 		files: BATCH_IMAGES,
 	},
 	fileFilter: (req, file, cb) => {
@@ -90,7 +91,7 @@ router.post("/upload-multiple", requireAuth, upload.array("images", BATCH_IMAGES
 router.use((err, req, res, next) => {
 	if (!err) return next();
 	if (err.code === 'LIMIT_FILE_SIZE') {
-		return res.status(413).json({ error: 'File too large. Max 10MB per image.' });
+		return res.status(413).json({ error: `File too large. Max ${formatFileSize(MAX_FILESIZE)} per image.` });
 	}
 	return res.status(400).json({ error: err.message || 'Upload error' });
 });
