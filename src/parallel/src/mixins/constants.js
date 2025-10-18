@@ -9,3 +9,9 @@ export const BTN_VARIANTS = {
 	SECONDARY: "btn_secondary",
 	CANCEL: "btn_cancel"
 };
+export const ALERTS = {
+	INFO: "info",
+	WARNING: "warning",
+	ERROR: "error",
+	SUCCESS: "success"
+};

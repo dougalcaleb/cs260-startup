@@ -11,6 +11,7 @@ import LogoFooter from './shared/LogoFooter';
 import Button from './shared/Button';
 import Spinner from './shared/Spinner';
 import {SKIP_SIGNIN_KEY} from '../mixins/constants';
+import { AlertProvider } from '../contexts/AlertContext';
 
 export default function Root() {
 	const location = useLocation();
@@ -72,8 +73,8 @@ export default function Root() {
 	const navAllowed = auth.isAuthenticated || window.sessionStorage.getItem(SKIP_SIGNIN_KEY); // || import.meta.env.DEV;
 
 	return (
-		<>
-			{!["/login"].includes(location.pathname) && <Header /> }
+		<AlertProvider>
+			{!["/login"].includes(location.pathname) && <Header />}
 			
 			<main>
 
@@ -92,6 +93,6 @@ export default function Root() {
 			</main>
 
 			{!["/login"].includes(location.pathname) && <NavFooter /> }
-		</>
+		</AlertProvider>
 	)	
 }
