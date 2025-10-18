@@ -5,7 +5,7 @@ import Button from "../shared/Button";
 import { isMobile } from "../../mixins/screen";
 import Popup from "../shared/Popup";
 import { BTN_VARIANTS } from "../../mixins/constants";
-import Input from "../shared/input";
+import Input from "../shared/Input";
 import FilePicker from "../shared/FilePicker";
 import { authPost } from "../../mixins/api";
 import useAuthUser from "../../hooks/useAuthUser";

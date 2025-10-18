@@ -1,5 +1,4 @@
-import Input from "../shared/input";
-import PersonCard from "../shared/personcard";
+import PersonCard from "../shared/PersonCard";
 
 export default function Nearby() {
 	return (

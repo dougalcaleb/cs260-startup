@@ -1,5 +1,5 @@
-import Input from "../shared/input";
-import PersonCard from "../shared/personcard";
+import Input from "../shared/Input";
+import PersonCard from "../shared/PersonCard";
 
 export default function Search() {
 	return (

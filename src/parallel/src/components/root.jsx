@@ -1,10 +1,10 @@
-import { Routes, Route, useLocation, Navigate, Link, NavLink, useNavigate } from 'react-router-dom'
-import Header from './shared/header'
-import Login from './pages/login';
-import Library from './pages/library';
-import Nearby from './pages/nearby';
-import Search from './pages/search';
-import Connect from './pages/connect';
+import { Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom'
+import Header from './shared/Header'
+import Login from './pages/Login';
+import Library from './pages/Library';
+import Nearby from './pages/Nearby';
+import Search from './pages/Search';
+import Connect from './pages/Connect';
 import NavFooter from './shared/NavFooter';
 import { useAuth } from 'react-oidc-context';
 import LogoFooter from './shared/LogoFooter';
