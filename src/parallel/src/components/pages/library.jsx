@@ -106,6 +106,11 @@ export default function Library() {
 			return;
 		}
 
+		if (imageArray.length > 25) {
+			launchAlert(ALERTS.WARNING, "A max of 25 images can be uploaded at one time. Please upload your images in batches.");
+			return;
+		}
+
 		try {
 			let endpoint = imageArray.length > 1 ? "/upload-multiple" : "/upload-single";
 			const formKey = imageArray.length > 1 ? "images" : "image";
