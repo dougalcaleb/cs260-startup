@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
 import { formatFileSize } from "../../mixins/format";
 
-export default function FilePicker({ id, multiple = false, onChange = () => {}, accept = "", showPicked=false}) {
+export default function FilePicker({ id, multiple = false, onChange = () => {}, accept = "", showPicked=false, maxCount = 25 }) {
 	const reactId = useId();
 	const [files, setFiles] = useState([]);
 	
@@ -36,7 +36,7 @@ export default function FilePicker({ id, multiple = false, onChange = () => {}, 
 
 				{showPicked && (
 					<>
-						<div className="font-main text-white-1 mb-2">Selected files: ({files.length})</div>
+						<div className="font-main text-white-1 mb-2">Selected files: ({files.length}, max {maxCount})</div>
 						<div className="flex flex-col mb-4">
 							{files.map((f, i) => (
 								<div key={`file-display-${inputId}-${i}`} className="font-mono text-gray-8 hover:bg-gray-3 p-1 flex items-center">
