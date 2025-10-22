@@ -5,6 +5,7 @@ import './additional.css'
 import Root from './components/root'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from 'react-oidc-context'
+import { AlertProvider } from './contexts/AlertContext';
 
 const cognitoAuthConfig = {
 	authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_CeNWRAhjI",
@@ -18,7 +19,9 @@ createRoot(document.getElementById('root')).render(
 	<StrictMode>
 		<AuthProvider {...cognitoAuthConfig}>
 			<BrowserRouter>
-				<Root></Root>
+				<AlertProvider>
+					<Root></Root>
+				</AlertProvider>
 			</BrowserRouter>
 		</AuthProvider>
 	</StrictMode>
