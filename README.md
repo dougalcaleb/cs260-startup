@@ -89,27 +89,27 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **All functionality implemented or mocked out** - I did not complete this part of the deliverable.
-- [ ] **Hooks** - I did not complete this part of the deliverable.
+- [x] **All functionality implemented or mocked out** - Functionality implemented and reactive
+- [x] **Hooks** - Hooks used (including custom useAuthUser hook) (library.jsx, root.jsx, etc)
 
 ## 🚀 Service deliverable
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Node.js/Express HTTP service** - I did not complete this part of the deliverable.
-- [ ] **Static middleware for frontend** - I did not complete this part of the deliverable.
-- [ ] **Calls to third party endpoints** - I did not complete this part of the deliverable.
-- [ ] **Backend service endpoints** - I did not complete this part of the deliverable.
-- [ ] **Frontend calls service endpoints** - I did not complete this part of the deliverable.
-- [ ] **Supports registration, login, logout, and restricted endpoint** - I did not complete this part of the deliverable.
+- [x] **Node.js/Express HTTP service** - Express server, using Router to separate image and user endpoints
+- [x] **Static middleware for frontend** - CORS, file serving
+- [x] **Calls to third party endpoints** - AWS S3, DynamoDB
+- [x] **Backend service endpoints** - Several endpoints for login, image URL fetching, etc
+- [x] **Frontend calls service endpoints** - Wrappers on fetch() to facilitate easy post/get/etc requests
+- [x] **Supports registration, login, logout, and restricted endpoint** - Login/logout with either Google or email
 
 
 ## 🚀 DB deliverable
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Stores data in MongoDB** - I did not complete this part of the deliverable.
-- [ ] **Stores credentials in MongoDB** - I did not complete this part of the deliverable.
+- [x] **Stores data in MongoDB** - User data stored in DynamoDB
+- [x] **Stores credentials in MongoDB** - User credentials managed by AWS Cognito and supplemented by DynamoDB
 
 ## 🚀 WebSocket deliverable
 
