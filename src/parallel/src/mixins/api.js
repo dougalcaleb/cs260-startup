@@ -54,6 +54,10 @@ export async function authFetch(endpoint, token, options = {}) {
  * @returns Promise
  */
 export async function authPost(endpoint, token, body, options = {}) {
+	if (Object.getPrototypeOf(body) === Object.prototype) {
+		body = JSON.stringify(body);
+	}
+
 	return authFetch(endpoint, token, {
 		...options,
 		body,

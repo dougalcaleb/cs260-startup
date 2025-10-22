@@ -45,6 +45,7 @@ export default function useAuthUser() {
 		idToken: auth.user?.id_token,
 		accessToken: auth.user?.access_token,
 		authToken: auth.user?.id_token ?? auth.user?.access_token,
+		uuid: profile?.sub,
 		raw: auth.user,
 	};
 }

@@ -10,13 +10,53 @@ import { useAuth } from 'react-oidc-context';
 import LogoFooter from './shared/LogoFooter';
 import Button from './shared/Button';
 import Spinner from './shared/Spinner';
-import {SKIP_SIGNIN_KEY} from '../mixins/constants';
+import {ALERTS, DID_LOGIN_KEY, SKIP_SIGNIN_KEY, USER_PROFILE_KEY} from '../mixins/constants';
 import { useAlert } from '../contexts/AlertContext';
+import useAuthUser from '../hooks/useAuthUser';
+import { authPost } from '../mixins/api';
+import { useEffect } from 'react';
 
 export default function Root() {
 	const location = useLocation();
 	const auth = useAuth();
 	const navigate = useNavigate();
+	const authUser = useAuthUser();
+	const { launchAlert } = useAlert();
+
+	useEffect(() => {
+		const doReq = async () => {
+			if (authUser?.uuid && !window.sessionStorage.getItem(DID_LOGIN_KEY)) {
+				window.sessionStorage.setItem(DID_LOGIN_KEY, true);
+				try {
+					await authPost("/api/user/login", authUser.authToken, {
+						uuid: authUser.uuid,
+						username: authUser.username
+					})
+				} catch (e) {
+					window.sessionStorage.removeItem(DID_LOGIN_KEY);
+					launchAlert(ALERTS.WARNING, "Could not finish logging in. Some features may not function. Please refresh the page.");
+					console.error(e);
+				}
+
+				if (!window.sessionStorage.getItem(USER_PROFILE_KEY)) {
+					window.sessionStorage.setItem(USER_PROFILE_KEY, "{}");
+					try {
+						const data = await authPost("/api/user/get-user", authUser.authToken, {
+							uuid: authUser.uuid
+						});
+						window.sessionStorage.setItem(USER_PROFILE_KEY, JSON.stringify(data));
+					} catch (e) {
+						window.sessionStorage.removeItem(USER_PROFILE_KEY);
+						launchAlert(ALERTS.WARNING, "Could not get user data. Some features may not function. Please refresh the page.");
+						console.error(e);
+					}
+				}
+			}
+			
+		};
+
+		doReq();
+	}, [authUser]);
 
 	let rCorners = null;
 	if (!["/login"].includes(location.pathname)) {

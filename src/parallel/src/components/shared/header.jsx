@@ -4,11 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import Popup from "./Popup";
 import useAuthUser from "../../hooks/useAuthUser";
-import { BTN_VARIANTS } from "../../mixins/constants";
+import { ALERTS, BTN_VARIANTS, USER_PROFILE_KEY } from "../../mixins/constants";
+import { authPost } from "../../mixins/api";
+import { useAlert } from "../../contexts/AlertContext";
+import Input from "./Input";
+import Spinner from "./Spinner";
 
 export default function Header() {
 	const location = useLocation();
 	const authUser = useAuthUser();
+	const { launchAlert } = useAlert();
 
 	const atLibrary = location.pathname === '/library' || location.pathname === "/";
 	const atNearby = location.pathname === '/nearby';
@@ -21,7 +26,9 @@ export default function Header() {
 
 	const [profilePopupOpen, setProfilePopupOpen] = useState(false);
 	const [bigLogoStyle, setBigLogoStyle] = useState({top: 0});
-	const [smallLogoStyle, setSmallLogoStyle] = useState({opacity: 1});
+	const [smallLogoStyle, setSmallLogoStyle] = useState({ opacity: 1 });
+	const [username, setUsername] = useState("");
+	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
 
 	useEffect(() => {
 		if (window.innerWidth < 700) {
@@ -31,22 +38,66 @@ export default function Header() {
 		}
 	}, []);
 
-	window.addEventListener("scroll", () => {
-		if (window.innerWidth < 700) {
-			const headerBound = headerRef.current?.getBoundingClientRect();
-			let logoHeight = bigLogoRef.current.getBoundingClientRect().height;
-			const percentScrolled = (window.scrollY / (window.innerHeight / 5));
-
-			setBigLogoStyle({ top: `${headerBound.bottom / 2 - logoHeight / 2}px`, opacity:  Math.min(1, 1 - percentScrolled * 3) });
-			setSmallLogoStyle({ opacity: Math.min(1, (percentScrolled - 0.3) * 3) });
+	useEffect(() => {
+		const stored = window.sessionStorage.getItem(USER_PROFILE_KEY);
+		if (stored) {
+			try {
+				const data = JSON.parse(stored);
+				if (data?.username !== undefined && data?.username !== null) {
+					setUsername(data.username);
+					return;
+				}
+			} catch { /* ignore malformed session storage */ }
 		}
-	});
+		// Fallback to auth username if nothing stored yet
+		setUsername(authUser.username || "");
+	}, [profilePopupOpen, authUser.username]);
+
+	// Attach scroll handler once with cleanup to avoid stacking listeners
+	useEffect(() => {
+		const onScroll = () => {
+			if (window.innerWidth < 700) {
+				const headerBound = headerRef.current?.getBoundingClientRect();
+				let logoHeight = bigLogoRef.current.getBoundingClientRect().height;
+				const percentScrolled = (window.scrollY / (window.innerHeight / 5));
+
+				setBigLogoStyle({ top: `${headerBound.bottom / 2 - logoHeight / 2}px`, opacity: Math.min(1, 1 - percentScrolled * 3) });
+				setSmallLogoStyle({ opacity: Math.min(1, (percentScrolled - 0.3) * 3) });
+			}
+		};
+		window.addEventListener("scroll", onScroll);
+		return () => window.removeEventListener("scroll", onScroll);
+	}, []);
 
 	const placeholderUser = (
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-4 w-4 sm:h-5 :w-5">
 			<path fill="currentColor" d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z" />
 		</svg>
 	);
+
+	const saveUsername = async () => {
+		setLoadingPopupOpen(true);
+		setProfilePopupOpen(false);
+
+		try {
+			await authPost("/api/user/set-username", authUser.authToken, {
+				uuid: authUser.uuid,
+				username: username
+			});
+			setUsername(username);
+			// Persist to session storage so future opens reflect the saved name
+			try {
+				const stored = window.sessionStorage.getItem(USER_PROFILE_KEY);
+				const data = stored ? JSON.parse(stored) : {};
+				data.username = username;
+				window.sessionStorage.setItem(USER_PROFILE_KEY, JSON.stringify(data));
+			} catch { /* ignore malformed session storage */ }
+		} catch (e) {
+			launchAlert(ALERTS.ERROR, "Save failed: " + (e.message || e.toString()));
+		} finally {
+			setLoadingPopupOpen(false);
+		}
+	}
 
 	return (
 		<>
@@ -65,7 +116,7 @@ export default function Header() {
 					</div>
 					<div className="relative">
 						<div className="flex items-center cursor-pointer sm:hover:bg-gray-5 px-6 py-2 rounded-md" onClick={() => setProfilePopupOpen(true)}>
-							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4 select-none">{authUser.username}</p>
+							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4 select-none">{username || authUser.username}</p>
 							<div className="text-green-2 bg-green-0 rounded-full w-7 h-7 sm:h-8 sm:w-8 flex justify-center items-center overflow-hidden">
 								{authUser.picture ? (
 									<img
@@ -79,16 +130,36 @@ export default function Header() {
 							</div>
 						</div>
 						<Popup
+							bodyStyle="h-2/3 w-full sm:w-1/3"
 							headerText="PROFILE"
 							buttons={[
 								{ text: "Cancel", onClick: () => setProfilePopupOpen(false), variant: BTN_VARIANTS.CANCEL },
-								{ text: "Save", onClick: () => setProfilePopupOpen(false) },
+								{ text: "Save", onClick: saveUsername },
 							]}
 							open={profilePopupOpen}
 							xClicked={() => setProfilePopupOpen(false)}
+							originalState={username}
+							setState={setUsername}
 						>
-							<div className="flex justify-center pt-4">
-								<Button className="px-4 py-2" onClick={authUser.signOut}>Sign out</Button>
+							<div className="flex flex-col justify-between items-center h-full py-4 px-4">
+								<div className="flex flex-col-reverse sm:flex-row">
+									<Input value={username} onChange={ (d) => setUsername(d) } placeholder="Username" className="mr-4 h-max" />
+									<p className="text-gray-7 font-main font-bold italic mb-2">Your username. This is how you will be displayed to others, and how they can search for you.</p>
+								</div>
+								<Button className="px-4 py-2 w-1/2" onClick={authUser.signOut}>Sign out</Button>
+							</div>
+						</Popup>
+
+						<Popup
+							bodyStyle="h-1/4 w-2/3 sm:w-90"
+							headerText="SAVING"
+							open={loadingPopupOpen}
+							xDisabled
+						>
+							<div className="flex w-full h-full flex-col justify-center px-4">
+								<div className="flex text-white justify-center font-main items-center">
+									<Spinner className="h-8 mr-4" /> Saving, please wait...
+								</div>
 							</div>
 						</Popup>
 					</div>

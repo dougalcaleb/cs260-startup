@@ -1,6 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import imageAPI from "./modules/imageAPI.js";
+import userAPI from "./modules/userAPI.js";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use(express.static('public'));
 
 // Image endpoints
 app.use("/api/image", imageAPI);
+app.use("/api/user", userAPI);
 
 // Start server
 app.listen(port, () => {

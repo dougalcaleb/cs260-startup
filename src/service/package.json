@@ -11,7 +11,9 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.914.0",
     "@aws-sdk/client-s3": "^3.676.0",
+    "@aws-sdk/lib-dynamodb": "^3.914.0",
     "@aws-sdk/lib-storage": "^3.676.0",
     "@aws-sdk/s3-request-presigner": "^3.676.0",
     "cookie-parser": "^1.4.7",

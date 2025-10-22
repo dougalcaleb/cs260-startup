@@ -1,4 +1,4 @@
-export default function Input({ type = "text", placeholder, className = "", value, onChange }) {
+export default function Input({ type = "text", placeholder = "", className = "", value, onChange }) {
 	return (
 		<input
 			type={type}

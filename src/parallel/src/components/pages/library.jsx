@@ -124,11 +124,11 @@ export default function Library() {
 			await authPost(`/api/image${endpoint}`, authUser.authToken, data);
 			
 			launchAlert(ALERTS.SUCCESS, `Image${imageArray.length > 1 ? 's' : ''} uploaded successfully!`);
-			setLoadingPopupOpen(false);
 			// Refresh gallery after upload
 			refreshLibrary();
 		} catch (e) {
 			launchAlert(ALERTS.ERROR, "Upload failed: " + (e.message || e.toString()));
+		} finally {
 			setLoadingPopupOpen(false);
 		}
 	};
