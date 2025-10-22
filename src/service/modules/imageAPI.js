@@ -70,6 +70,7 @@ router.post("/upload-single", requireAuth, upload.single("image"), async (req, r
 				Key: key,
 				Body: req.file.buffer,
 				ContentType: req.file.mimetype,
+				CacheControl: "public, max-age=31536000, immutable", // doesn't do anything right now since URLS are unique every time, but maybe in the future?
 			},
 			queueSize: 4,
 			partSize: 5 * 1024 * 1024, // 5MB
@@ -94,6 +95,7 @@ router.post("/upload-multiple", requireAuth, upload.array("images", BATCH_IMAGES
 					Key: key,
 					Body: file.buffer,
 					ContentType: file.mimetype,
+					CacheControl: "public, max-age=31536000, immutable", // doesn't do anything right now since URLS are unique every time, but maybe in the future?
 				},
 				queueSize: 4,
 				partSize: 5 * 1024 * 1024,

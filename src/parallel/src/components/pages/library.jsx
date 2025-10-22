@@ -10,10 +10,12 @@ import { authGet, authPost } from "../../mixins/api";
 import useAuthUser from "../../hooks/useAuthUser";
 import { useAlert } from "../../contexts/AlertContext";
 import Spinner from "../shared/Spinner";
+import { useImages } from "../../contexts/ImageProvider";
 
 export default function Library() {
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
+	const { images, setImages, imagesLoaded, setImagesLoaded } = useImages();
 
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [locBtnShow, setLocBtnShow] = useState(false);
@@ -23,7 +25,6 @@ export default function Library() {
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
 	const [locations, setLocations] = useState([""]);
 	const [imagesToUpload, setImagesToUpload] = useState([]);
-	const [imageUrls, setImageUrls] = useState([]);
 	const [viewImage, setViewImage] = useState(null);
 
 	const imageBtnRef = useRef(null);
@@ -92,11 +93,18 @@ export default function Library() {
 	const refreshLibrary = useCallback(async () => {
 		try {
 			const list = await authGet("/api/image/get-user-images", authUser.authToken);
-			setImageUrls(list);
+			if (list?.length) {
+				setImages(list.map(i => ({
+					url: i.url,
+					key: i.key
+				})));
+			} else {
+				setImages(null);
+			}
 		} catch (e) {
 			launchAlert(ALERTS.ERROR, "Failed to retrieve user image library: " + (e.message || e.toString()));
 		}
-	}, [authUser.authToken]);
+	}, [authUser.authToken, setImages]);
 
 	const uploadImages = async () => {
 		const imageArray = Array.from(imagesToUpload);
@@ -134,28 +142,38 @@ export default function Library() {
 	};
 
 	const libraryImages = () => {
-		if (imageUrls === null) {
+		if (images === null) {
 			return (
 				<div className="text-gray-7 italic font-bold w-80 ml-4">No library images found. Upload some!</div>
 			);
 		}
-		if (imageUrls.length === 0) {
+		if (images.length === 0) {
 			return placeholderImages();
 		}
-		return imageUrls.map((imgData, i) => (
+		return images.map((imgData, i) => (
 			<div className="overflow-hidden cursor-pointer h-40 rounded-md flex-shrink-0" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
+				{!imagesLoaded.has(imgData.key) && <div className="ghost-loader h-40 w-40"></div>}
 				<img
 					src={imgData.url}
 					alt={(imgData.key || '').split('/').pop().split('__')[0]}
-					className="h-full w-auto rounded-md"
+					className={`h-full w-auto rounded-md ${imagesLoaded.has(imgData.key) ? '' : 'hidden'}`}
+					onLoad={() => {
+						setImagesLoaded(prev => {
+							const updated = new Set(prev);
+							updated.add(imgData.key);
+							return updated;
+						});
+					}}
 				/>
 			</div>
 		));
 	}
 
 	useEffect(() => {
-		refreshLibrary();
-	}, [refreshLibrary]);
+		if (!images?.length) {
+			refreshLibrary();
+		}
+	}, [refreshLibrary, images]);
 
 	return (
 		<div className="bg-gray-1 w-full min-h-[175vh] sm:min-h-[calc(100vh-max(7vh,70px))]">
@@ -255,8 +273,8 @@ export default function Library() {
 			>
 				<div className="flex justify-center p-4 h-11/12">
 					<img
-						src={imageUrls?.[viewImage]?.url}
-						alt={(imageUrls?.[viewImage]?.key || '').split('/').pop().split('__')[0]}
+						src={images?.[viewImage]?.url}
+						alt={(images?.[viewImage]?.key || '').split('/').pop().split('__')[0]}
 						className="w-auto max-w-full max-h-full object-cover rounded-md"
 					/>
 				</div>
