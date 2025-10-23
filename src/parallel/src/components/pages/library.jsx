@@ -101,6 +101,7 @@ export default function Library() {
 			} else {
 				setImages(null);
 			}
+			setImagesLoaded(new Set());
 		} catch (e) {
 			launchAlert(ALERTS.ERROR, "Failed to retrieve user image library: " + (e.message || e.toString()));
 		}
@@ -174,6 +175,10 @@ export default function Library() {
 			refreshLibrary();
 		}
 	}, [refreshLibrary, images]);
+
+	useEffect(() => {
+		setImagesLoaded(new Set());
+	}, []);
 
 	return (
 		<div className="bg-gray-1 w-full min-h-[175vh] sm:min-h-[calc(100vh-max(7vh,70px))]">
