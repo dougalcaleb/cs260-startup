@@ -9,11 +9,14 @@ import { authPost } from "../../mixins/api";
 import { useAlert } from "../../contexts/AlertContext";
 import Input from "./Input";
 import Spinner from "./Spinner";
+import { useGlobalState } from "../../contexts/StateProvider";
 
 export default function Header() {
 	const location = useLocation();
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
+
+	const { username, setUsername } = useGlobalState();
 
 	const atLibrary = location.pathname === '/library' || location.pathname === "/";
 	const atNearby = location.pathname === '/nearby';
@@ -27,7 +30,7 @@ export default function Header() {
 	const [profilePopupOpen, setProfilePopupOpen] = useState(false);
 	const [bigLogoStyle, setBigLogoStyle] = useState({top: 0});
 	const [smallLogoStyle, setSmallLogoStyle] = useState({ opacity: 1 });
-	const [username, setUsername] = useState("");
+	// const [username, setUsername] = useState("");
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
 
 	useEffect(() => {
@@ -37,21 +40,6 @@ export default function Header() {
 			setSmallLogoStyle({ opacity: 0 });
 		}
 	}, []);
-
-	useEffect(() => {
-		const stored = window.sessionStorage.getItem(USER_PROFILE_KEY);
-		if (stored) {
-			try {
-				const data = JSON.parse(stored);
-				if (data?.username !== undefined && data?.username !== null) {
-					setUsername(data.username);
-					return;
-				}
-			} catch { /* ignore malformed session storage */ }
-		}
-		// Fallback to auth username if nothing stored yet
-		setUsername(authUser.username || "");
-	}, [profilePopupOpen, authUser.username]);
 
 	// Attach scroll handler once with cleanup to avoid stacking listeners
 	useEffect(() => {

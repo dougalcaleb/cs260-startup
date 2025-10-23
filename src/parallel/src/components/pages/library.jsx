@@ -10,12 +10,12 @@ import { authGet, authPost } from "../../mixins/api";
 import useAuthUser from "../../hooks/useAuthUser";
 import { useAlert } from "../../contexts/AlertContext";
 import Spinner from "../shared/Spinner";
-import { useImages } from "../../contexts/ImageProvider";
+import { useGlobalState } from "../../contexts/StateProvider";
 
 export default function Library() {
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
-	const { images, setImages, imagesLoaded, setImagesLoaded } = useImages();
+	const { images, setImages, imagesLoaded, setImagesLoaded } = useGlobalState();
 
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [locBtnShow, setLocBtnShow] = useState(false);

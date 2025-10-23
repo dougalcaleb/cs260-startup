@@ -15,6 +15,7 @@ import { useAlert } from '../contexts/AlertContext';
 import useAuthUser from '../hooks/useAuthUser';
 import { authPost } from '../mixins/api';
 import { useEffect } from 'react';
+import { useGlobalState } from '../contexts/StateProvider';
 
 export default function Root() {
 	const location = useLocation();
@@ -22,6 +23,8 @@ export default function Root() {
 	const navigate = useNavigate();
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
+
+	const { setUsername } = useGlobalState();
 
 	useEffect(() => {
 		const doReq = async () => {
@@ -45,6 +48,7 @@ export default function Root() {
 							uuid: authUser.uuid
 						});
 						window.sessionStorage.setItem(USER_PROFILE_KEY, JSON.stringify(data));
+						setUsername(data?.username || null);
 					} catch (e) {
 						window.sessionStorage.removeItem(USER_PROFILE_KEY);
 						launchAlert(ALERTS.WARNING, "Could not get user data. Some features may not function. Please refresh the page.");
@@ -56,7 +60,7 @@ export default function Root() {
 		};
 
 		doReq();
-	}, [authUser]);
+	}, [authUser, setUsername]);
 
 	let rCorners = null;
 	if (!["/login"].includes(location.pathname)) {

@@ -7,8 +7,10 @@ export default function useAuthUser() {
 	const auth = useAuth();
 
 	const signOutRedirect = () => {
-		if (window.sessionStorage.getItem(SKIP_SIGNIN_KEY)) {
-			window.sessionStorage.removeItem(SKIP_SIGNIN_KEY);
+		const didSkipSignin = window.sessionStorage.getItem(SKIP_SIGNIN_KEY);
+		window.sessionStorage.clear();
+		
+		if (didSkipSignin) {
 			navigate(0);
 			return;
 		}
