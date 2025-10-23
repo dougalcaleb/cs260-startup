@@ -5,7 +5,7 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dyn
 import { USER_ACTIVE_TTL, USER_TABLE } from "../config.js";
 
 const router = Router();
-const dynamoClient = new DynamoDBClient({});
+const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1" });
 const ddClient = DynamoDBDocumentClient.from(dynamoClient);
 
 function isActive(activeAt) {

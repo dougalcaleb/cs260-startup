@@ -36,7 +36,7 @@ export default function Root() {
 						username: authUser.username
 					})
 				} catch (e) {
-					window.sessionStorage.removeItem(DID_LOGIN_KEY);
+					// window.sessionStorage.removeItem(DID_LOGIN_KEY);
 					launchAlert(ALERTS.WARNING, "Could not finish logging in. Some features may not function. Please refresh the page.");
 					console.error(e);
 				}
