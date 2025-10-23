@@ -7,6 +7,9 @@
 	#library-content {
 		grid-template-columns: repeat(3, calc((100vw - 30px - 20px) / 3));
 	}
+	#library-content > div {
+		height: calc((100vw - 30px - 20px) / 3);
+	}
 	#person-search-wrap {
 		justify-content: center;
 		margin-bottom: 60px;

@@ -152,12 +152,12 @@ export default function Library() {
 			return placeholderImages();
 		}
 		return images.map((imgData, i) => (
-			<div className="overflow-hidden cursor-pointer h-40 rounded-md flex-shrink-0" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
+			<div className="overflow-hidden cursor-pointer sm:h-40 rounded-md flex-shrink-0" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
 				{!imagesLoaded.has(imgData.key) && <div className="ghost-loader h-40 w-40"></div>}
 				<img
 					src={imgData.url}
 					alt={(imgData.key || '').split('/').pop().split('__')[0]}
-					className={`h-full w-auto rounded-md ${imagesLoaded.has(imgData.key) ? '' : 'hidden'}`}
+					className={`w-full h-full object-cover object-center sm:h-full sm:w-auto sm:object-contain rounded-md ${imagesLoaded.has(imgData.key) ? '' : 'hidden'}`}
 					onLoad={() => {
 						setImagesLoaded(prev => {
 							const updated = new Set(prev);
@@ -276,11 +276,11 @@ export default function Library() {
 				headerText="VIEW IMAGE"
 				xClicked={() => setViewImage(null)}
 			>
-				<div className="flex justify-center p-4 h-11/12">
+				<div className="flex justify-center p-4 sm:h-11/12">
 					<img
 						src={images?.[viewImage]?.url}
 						alt={(images?.[viewImage]?.key || '').split('/').pop().split('__')[0]}
-						className="w-auto max-w-full max-h-full object-cover rounded-md"
+						className="w-auto sm:max-w-full sm:max-h-full object-cover rounded-md"
 					/>
 				</div>
 			</Popup>
