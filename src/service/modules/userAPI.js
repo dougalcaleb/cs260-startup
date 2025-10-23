@@ -9,7 +9,7 @@ const dynamoClient = new DynamoDBClient({});
 const ddClient = DynamoDBDocumentClient.from(dynamoClient);
 
 function isActive(activeAt) {
-	return (Date.now() / 1000 - activeAt) < USER_ACTIVE_TTL;
+	return (Math.floor(Date.now() / 1000) - activeAt) < USER_ACTIVE_TTL;
 }
 
 // Ensures the user has an entry in the db, creates one if not
@@ -39,7 +39,7 @@ router.post("/login", requireAuth, async (req, res) => {
 		Item: {
 			uid: req.body.uuid,
 			username,
-			activeAt: Date.now() / 1000
+			activeAt: Math.floor(Date.now() / 1000)
 		}
 	});
 
@@ -59,7 +59,7 @@ router.post("/set-username", requireAuth, async (req, res) => {
 		Item: {
 			uid: req.body.uuid,
 			username: req.body.username,
-			activeAt: Date.now() / 1000
+			activeAt: Math.floor(Date.now() / 1000)
 		}
 	});
 
