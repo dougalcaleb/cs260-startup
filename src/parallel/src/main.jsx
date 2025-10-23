@@ -11,7 +11,7 @@ import StateProvider from './contexts/StateProvider'
 const cognitoAuthConfig = {
 	authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_CeNWRAhjI",
 	client_id: "22rart6rc9f5arou9go82qi3rk",
-	redirect_uri: import.meta.env.PROD ? "https://startup.dougalcaleb.click/library" : "http://localhost:5173/library",
+	redirect_uri: import.meta.env.PROD ? "https://startup.dougalcaleb.click/" : "http://localhost:5173/",
 	response_type: "code",
 	scope: "phone openid email profile",
 };
