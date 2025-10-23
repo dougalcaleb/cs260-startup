@@ -18,7 +18,7 @@ export default function useAuthUser() {
 		auth.removeUser();
 
 		const clientId = "22rart6rc9f5arou9go82qi3rk";
-		const logoutUri = import.meta.env.PROD ? "https://startup.dougalcaleb.click/login" : "http://localhost:5173/login";
+		const logoutUri = import.meta.env.PROD ? "https://startup.dougalcaleb.click/" : "http://localhost:5173/";
 		const cognitoDomain = "https://us-east-1cenwrahji.auth.us-east-1.amazoncognito.com";
 		window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
 	};
