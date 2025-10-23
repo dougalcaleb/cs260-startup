@@ -18,7 +18,6 @@ export default function Login() {
 		window.sessionStorage.setItem(SKIP_SIGNIN_KEY, true);
 		navigate("/library");
 	};
-	// const selectRegister = () => setLoginMode(LOGIN_MODES.REGISTER);
 
 	return (
 		<div className="bg-gray-3 h-full w-full">
@@ -30,9 +29,9 @@ export default function Login() {
 					{loginInput(loginMode, auth)}
 					
 					<div className="mt-8 flex">
-						{loginMode === LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectLogin}>Simple sign-in</p>)}
-						{loginMode !== LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectCognito}>Sign in with Cognito</p>)}
-						<p className="text-blue-0 font-main cursor-pointer border-l-2 border-gray-6 pl-4" onClick={skipSignIn}>Skip sign-in</p>
+						{/* {loginMode === LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectLogin}>Simple sign-in</p>)} */}
+						{loginMode !== LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectCognito}>Sign in</p>)}
+						<p className="text-blue-0 font-main cursor-pointer border-gray-6 pl-4" onClick={skipSignIn}>Skip sign-in</p>
 					</div>
 				</div>
 			</div>
@@ -58,8 +57,8 @@ function loginInput(mode, auth) {
 				<>
 					<Button className="bg-green-1 text-gray-3 cursor-pointer px-8" onClick={() => auth.signinRedirect()}>
 						<div>
-							<p>SIGN IN WITH COGNITO</p>
-							<div className="flex justify-around h-8 mt-4 text-white-0">
+							<p className="px-14 text-xl">SIGN IN</p>
+							<div className="flex justify-around h-7 mt-4 text-white-0">
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
 									<path fill="currentColor" d="M564 325.8C564 467.3 467.1 568 324 568C186.8 568 76 457.2 76 320C76 182.8 186.8 72 324 72C390.8 72 447 96.5 490.3 136.9L422.8 201.8C334.5 116.6 170.3 180.6 170.3 320C170.3 406.5 239.4 476.6 324 476.6C422.2 476.6 459 406.2 464.8 369.7L324 369.7L324 284.4L560.1 284.4C562.4 297.1 564 309.3 564 325.8z" />
 								</svg>
