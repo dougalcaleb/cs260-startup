@@ -2,7 +2,7 @@ import { Router } from "express";
 import { requireAuth, optionalAuth } from "../common/cognitoAuth.js";
 import { BATCH_IMAGES, BUCKET_NAME, MAX_FILESIZE, SIGNED_URL_EXPIRE } from "../config.js";
 import multer from "multer";
-import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { formatFileSize } from "../common/util.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -106,6 +106,29 @@ router.post("/upload-multiple", requireAuth, upload.array("images", BATCH_IMAGES
 		}));
 
 		res.json({ message: "Batch upload successful", keys: uploadResults });
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+router.post("/delete-single", requireAuth, async (req, res) => {
+	try {
+		const { key } = req.body || {};
+
+		if (!key || typeof key !== "string") {
+			return res.status(400).json({ error: "Missing or invalid 'key' in request body" });
+		}
+
+		// Ensure users can only delete within their own folder
+		const userPrefix = `images/${req.user.username}/`;
+		if (!key.startsWith(userPrefix)) {
+			return res.status(403).json({ error: "Forbidden: cannot delete objects outside your namespace" });
+		}
+
+		await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: key }));
+
+		// S3 delete is idempotent; consider it success even if the key didn't exist
+		return res.json({ message: "Delete successful", key });
 	} catch (e) {
 		res.status(500).json({ error: e.message });
 	}

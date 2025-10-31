@@ -13,10 +13,16 @@ import Spinner from "../shared/Spinner";
 import { useGlobalState } from "../../contexts/StateProvider";
 
 export default function Library() {
+	/**===========================================================
+	 * STATE
+	 =============================================================*/
+	
+	// Hooks
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
 	const { images, setImages, imagesLoaded, setImagesLoaded } = useGlobalState();
 
+	// State
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [locBtnShow, setLocBtnShow] = useState(false);
 	const [imgBtnShow, setImgBtnShow] = useState(false);
@@ -28,10 +34,12 @@ export default function Library() {
 	const [viewImage, setViewImage] = useState(null);
 	const [popupImageLoaded, setPopupImageLoaded] = useState(false);
 
+	// Refs
 	const imageBtnRef = useRef(null);
 	const locationBtnRef = useRef(null);
 	const nodeRefBG = useRef(null);
 
+	// State-setting helpers
 	const toggleOpen = () => {
 		if (menuOpen) {
 			setImgBtnShow(false);
@@ -73,6 +81,10 @@ export default function Library() {
 		setLocations(newLocations);
 	}
 
+	/**===========================================================
+	 * MINI-COMPONENTS
+	 =============================================================*/
+	
 	const imgButton = (
 		<CSSTransition nodeRef={imageBtnRef} in={imgBtnShow} timeout={150} classNames="pop-in" key="img-btn" unmountOnExit>
 			<div ref={imageBtnRef} className="invisible">
@@ -90,6 +102,38 @@ export default function Library() {
 	);
 
 	const placeholderImages = () => Array.from({ length: 20 }).map((_, i) => <div key={`placeholder-img-${i}`} className="ghost-loader rounded-md w-full h-30"></div>);
+
+	const libraryImages = () => {
+		if (images === null) {
+			return (
+				<div className="text-gray-7 italic font-bold w-80 ml-4">No library images found. Upload some!</div>
+			);
+		}
+		if (images.length === 0) {
+			return placeholderImages();
+		}
+		return images.map((imgData, i) => (
+			<div className="overflow-hidden cursor-pointer sm:h-40 rounded-md flex-shrink-0" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
+				{!imagesLoaded.has(imgData.key) && <div className="ghost-loader h-40 w-40"></div>}
+				<img
+					src={imgData.url}
+					alt={(imgData.key || '').split('/').pop().split('__')[0]}
+					className={`w-full h-full object-cover object-center sm:h-full sm:w-auto sm:object-contain rounded-md ${imagesLoaded.has(imgData.key) ? '' : 'hidden'}`}
+					onLoad={() => {
+						setImagesLoaded(prev => {
+							const updated = new Set(prev);
+							updated.add(imgData.key);
+							return updated;
+						});
+					}}
+				/>
+			</div>
+		));
+	}
+
+	/**===========================================================
+	 * BACKEND LINK
+	 =============================================================*/
 
 	const refreshLibrary = useCallback(async () => {
 		try {
@@ -142,35 +186,36 @@ export default function Library() {
 			setLoadingPopupOpen(false);
 		}
 	};
-	
-	const libraryImages = () => {
-		if (images === null) {
-			return (
-				<div className="text-gray-7 italic font-bold w-80 ml-4">No library images found. Upload some!</div>
-			);
+
+	const deleteImage = async () => {
+		const deleteKey = images?.[viewImage]?.key;
+		if (!deleteKey) {
+			launchAlert(ALERTS.ERROR, "Cannot delete: No image key");
+			return;
 		}
-		if (images.length === 0) {
-			return placeholderImages();
+
+		setViewImage(null);
+		setLoadingPopupOpen(true);
+
+		try {
+			await authPost("/api/image/delete-single", authUser.authToken, {
+				key: deleteKey
+			});
+
+			setImages(images.filter(i => i.key !== deleteKey));
+
+			launchAlert(ALERTS.SUCCESS, "Image deleted successfully!");
+		} catch (e) {
+			launchAlert(ALERTS.ERROR, "Delete failed: " + (e.message || e.toString()));
+		} finally {
+			setLoadingPopupOpen(false);
 		}
-		return images.map((imgData, i) => (
-			<div className="overflow-hidden cursor-pointer sm:h-40 rounded-md flex-shrink-0" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
-				{!imagesLoaded.has(imgData.key) && <div className="ghost-loader h-40 w-40"></div>}
-				<img
-					src={imgData.url}
-					alt={(imgData.key || '').split('/').pop().split('__')[0]}
-					className={`w-full h-full object-cover object-center sm:h-full sm:w-auto sm:object-contain rounded-md ${imagesLoaded.has(imgData.key) ? '' : 'hidden'}`}
-					onLoad={() => {
-						setImagesLoaded(prev => {
-							const updated = new Set(prev);
-							updated.add(imgData.key);
-							return updated;
-						});
-					}}
-				/>
-			</div>
-		));
 	}
 
+	/**===========================================================
+	 * WATCHERS
+	 =============================================================*/
+	
 	useEffect(() => {
 		if (!images?.length) {
 			refreshLibrary();
@@ -180,6 +225,10 @@ export default function Library() {
 	useEffect(() => {
 		setImagesLoaded(new Set());
 	}, [setImagesLoaded]);
+
+	/**===========================================================
+	 * RENDER
+	 =============================================================*/
 
 	return (
 		<div className="bg-gray-1 w-full pb-40 sm:pb-0 min-h-[calc(100vh-max(7vh,70px))]">
@@ -260,13 +309,13 @@ export default function Library() {
 
 			<Popup
 				bodyStyle="h-1/4 w-2/3 sm:w-90"
-				headerText="UPLOADING"
+				headerText="PROCESSING"
 				open={loadingPopupOpen}
 				xDisabled
 			>
 				<div className="flex w-full h-full flex-col justify-center px-4">
 					<div className="flex text-white justify-center font-main items-center">
-						<Spinner className="h-8 mr-4" /> Upload in progress, please wait...
+						<Spinner className="h-8 mr-4" /> Processing, please wait...
 					</div>
 				</div>
 			</Popup>
@@ -279,7 +328,7 @@ export default function Library() {
 				originalState={popupImageLoaded}
 				setState={setPopupImageLoaded}
 				buttons={[
-					{ text: "Delete", variant: BTN_VARIANTS.CANCEL, preventReset: true }
+					{ text: "Delete", variant: BTN_VARIANTS.CANCEL, preventReset: true, onClick: deleteImage }
 				]}
 			>
 				<div className="flex justify-center items-center px-4 pb-2 h-full">
