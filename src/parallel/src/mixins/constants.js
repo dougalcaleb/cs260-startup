@@ -17,3 +17,7 @@ export const ALERTS = {
 	ERROR: "error",
 	SUCCESS: "success"
 };
+export const POPUP_VARIANTS = {
+	DEFAULT: "default",
+	BLUR: "blur"
+};

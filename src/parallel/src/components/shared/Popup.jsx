@@ -2,7 +2,7 @@ import {createPortal} from "react-dom";
 import Button from "./Button";
 import { CSSTransition } from "react-transition-group";
 import { useEffect, useRef, useState } from "react";
-import { BTN_VARIANTS } from "../../mixins/constants";
+import { BTN_VARIANTS, POPUP_VARIANTS } from "../../mixins/constants";
 
 export default function Popup({
 	children,
@@ -14,7 +14,8 @@ export default function Popup({
 	preventXReset = false,
 	originalState,
 	setState,
-	xDisabled = false
+	xDisabled = false,
+	variant = POPUP_VARIANTS.DEFAULT
 }) {
 	const bgRef = useRef(null);
 	const popupRef = useRef(null);
@@ -81,6 +82,22 @@ export default function Popup({
 		xClicked();
 	};
 
+	const bodyVariantStyle = variant === POPUP_VARIANTS.DEFAULT
+		? "bg-gray-4 rounded-lg shadow-lg"
+		: "backdrop-blur-sm";
+	
+	const headerVariantStyle = variant === POPUP_VARIANTS.DEFAULT
+		? "bg-gray-5"
+		: "";
+	
+	const footerVariantStyle = variant === POPUP_VARIANTS.DEFAULT
+		? "bg-gray-3 justify-end"
+		: "justify-center py-4";
+	
+	const buttonVariantStyle = variant === POPUP_VARIANTS.DEFAULT
+		? "ml-2"
+		: "";
+	
 	return createPortal(
 		<>
 			<CSSTransition nodeRef={bgRef} in={popupOpen} timeout={200} classNames="overlay-bg" unmountOnExit>
@@ -88,8 +105,8 @@ export default function Popup({
 			</CSSTransition>
 
 			<CSSTransition nodeRef={popupRef} in={popupOpen} timeout={150} classNames="pop-in">
-				<div ref={popupRef} className={`invisible fixed bg-gray-4 rounded-lg top-0 bottom-0 right-0 left-0 m-auto shadow-lg shadow-gray-0 z-60 overflow-hidden ${bodyStyle}`}>
-					<div ref={popupHeaderRef} className="bg-gray-5 w-full h-12 flex justify-between items-center px-4">
+				<div ref={popupRef} className={`invisible fixed top-0 bottom-0 right-0 left-0 m-auto shadow-gray-0 z-60 overflow-hidden ${bodyVariantStyle} ${bodyStyle}`}>
+					<div ref={popupHeaderRef} className={`w-full h-12 flex justify-between items-center px-4 ${headerVariantStyle}`}>
 						<p className="font-main text-white-0 font-bold">
 							{headerText}
 						</p>
@@ -104,14 +121,13 @@ export default function Popup({
 						{children}
 					</div>
 
-					{(buttons && buttons.length || "") && <div ref={popupFooterRef} className="bg-gray-3 absolute bottom-0 h-12 w-full flex items-center justify-end px-4">
+					{(buttons && buttons.length || "") && <div ref={popupFooterRef} className={`absolute bottom-0 h-12 w-full flex items-center px-4 ${footerVariantStyle}`}>
 						{buttons.map((btn, i) => (
-							<Button key={`popup-${headerText}-btn-${i}`} className="py-1 text-sm rounded-sm ml-2" onClick={() => buttonClicked(btn)} variant={btn.variant}>{btn.text}</Button>
+							<Button key={`popup-${headerText}-btn-${i}`} className={`py-1 text-sm rounded-sm ${buttonVariantStyle}`} onClick={() => buttonClicked(btn)} variant={btn.variant}>{btn.text}</Button>
 						))}
 					</div>}
 				</div>
 			</CSSTransition>
-			
 		</>,
 		document.body
 	);

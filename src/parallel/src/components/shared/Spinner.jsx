@@ -1,8 +1,8 @@
-export default function Spinner({className = "", speed = "1"}) {
+export default function Spinner({className = "", speed = "1", thickness="3"}) {
 	return (
 		<svg className={className} stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 			<g>
-				<circle cx="12" cy="12" r="9.5" fill="none" strokeWidth="3" strokeLinecap="round">
+				<circle cx="12" cy="12" r="9.5" fill="none" strokeWidth={thickness} strokeLinecap="round">
 					<animate
 						attributeName="stroke-dasharray"
 						dur={`${speed}s`}

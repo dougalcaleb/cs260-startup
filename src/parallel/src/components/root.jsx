@@ -41,6 +41,8 @@ export default function Root() {
 					console.error(e);
 				}
 
+				// todo: username disappears on refresh, grab from session storage
+
 				if (!window.sessionStorage.getItem(USER_PROFILE_KEY)) {
 					window.sessionStorage.setItem(USER_PROFILE_KEY, "{}");
 					try {
@@ -122,6 +124,8 @@ export default function Root() {
 			
 			<main>
 
+				{/* // todo: fix cannot GET on PROD */}
+			
 				{rCorners}
 
 				<Routes>

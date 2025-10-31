@@ -3,7 +3,7 @@ import { CSSTransition } from 'react-transition-group'
 import Button from "../shared/Button";
 import { isMobile } from "../../mixins/screen";
 import Popup from "../shared/Popup";
-import { ALERTS, BTN_VARIANTS } from "../../mixins/constants";
+import { ALERTS, BTN_VARIANTS, POPUP_VARIANTS } from "../../mixins/constants";
 import Input from "../shared/Input";
 import FilePicker from "../shared/FilePicker";
 import { authGet, authPost } from "../../mixins/api";
@@ -26,6 +26,7 @@ export default function Library() {
 	const [locations, setLocations] = useState([""]);
 	const [imagesToUpload, setImagesToUpload] = useState([]);
 	const [viewImage, setViewImage] = useState(null);
+	const [popupImageLoaded, setPopupImageLoaded] = useState(false);
 
 	const imageBtnRef = useRef(null);
 	const locationBtnRef = useRef(null);
@@ -43,7 +44,7 @@ export default function Library() {
 				setImgBtnShow(true);
 			}, 50);
 		}
-		setMenuOpen(!menuOpen)
+		setMenuOpen(!menuOpen);
 	};
 
 	const openLocationPopup = () => {
@@ -73,22 +74,22 @@ export default function Library() {
 	}
 
 	const imgButton = (
-		<CSSTransition nodeRef={imageBtnRef} in={imgBtnShow} timeout={150} classNames="pop-in" key="img-btn">
+		<CSSTransition nodeRef={imageBtnRef} in={imgBtnShow} timeout={150} classNames="pop-in" key="img-btn" unmountOnExit>
 			<div ref={imageBtnRef} className="invisible">
 				<Button className="rounded-2xl my-2 shadow-gray-0 shadow-lg sm:z-10 relative" onClick={openImagePopup}>IMAGES</Button>
 			</div>
 		</CSSTransition>
 	);
 
-	const placeholderImages = () => Array.from({ length: 20 }).map((_, i) => <div key={`placeholder-img-${i}`} className="ghost-loader rounded-md w-full h-30"></div>);
-
 	const locButton = (
-		<CSSTransition nodeRef={locationBtnRef} in={locBtnShow} timeout={150} classNames="pop-in" key="loc-btn">
+		<CSSTransition nodeRef={locationBtnRef} in={locBtnShow} timeout={150} classNames="pop-in" key="loc-btn" unmountOnExit>
 			<div ref={locationBtnRef} className="invisible">
 				<Button className="rounded-2xl shadow-gray-0 shadow-lg z-10 sm:z-0 relative" onClick={openLocationPopup}>LOCATIONS</Button>
 			</div>
 		</CSSTransition>
 	);
+
+	const placeholderImages = () => Array.from({ length: 20 }).map((_, i) => <div key={`placeholder-img-${i}`} className="ghost-loader rounded-md w-full h-30"></div>);
 
 	const refreshLibrary = useCallback(async () => {
 		try {
@@ -105,7 +106,7 @@ export default function Library() {
 		} catch (e) {
 			launchAlert(ALERTS.ERROR, "Failed to retrieve user image library: " + (e.message || e.toString()));
 		}
-	}, [authUser.authToken, setImages]);
+	}, [authUser.authToken, setImages, setImagesLoaded]);
 
 	const uploadImages = async () => {
 		const imageArray = Array.from(imagesToUpload);
@@ -141,7 +142,7 @@ export default function Library() {
 			setLoadingPopupOpen(false);
 		}
 	};
-
+	
 	const libraryImages = () => {
 		if (images === null) {
 			return (
@@ -178,10 +179,10 @@ export default function Library() {
 
 	useEffect(() => {
 		setImagesLoaded(new Set());
-	}, []);
+	}, [setImagesLoaded]);
 
 	return (
-		<div className="bg-gray-1 w-full min-h-[175vh] sm:min-h-[calc(100vh-max(7vh,70px))]">
+		<div className="bg-gray-1 w-full pb-40 sm:pb-0 min-h-[calc(100vh-max(7vh,70px))]">
 			<div className="font-main font-black text-gray-6 text-center sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8">LIBRARY</div>
 			<div className="grid p-4 gap-2.5 sm:flex flex-wrap" id="library-content">
 				{ libraryImages() }
@@ -198,7 +199,7 @@ export default function Library() {
 					</svg>
 				</Button>
 				
-				<div className="flex flex-col my-2 z-10 sm:z-30 relative items-end">
+				<div className={`flex flex-col my-2 z-10 sm:z-30 relative items-end`}>
 					{ isMobile()
 						? [imgButton, locButton]
 						: [locButton, imgButton] }
@@ -273,14 +274,21 @@ export default function Library() {
 			<Popup
 				bodyStyle="h-full w-full"
 				open={viewImage !== null}
-				headerText="VIEW IMAGE"
 				xClicked={() => setViewImage(null)}
+				variant={POPUP_VARIANTS.BLUR}
+				originalState={popupImageLoaded}
+				setState={setPopupImageLoaded}
+				buttons={[
+					{ text: "Delete", variant: BTN_VARIANTS.CANCEL, preventReset: true }
+				]}
 			>
-				<div className="flex justify-center p-4 sm:h-11/12">
+				<div className="flex justify-center items-center px-4 pb-2 h-full">
+					{!popupImageLoaded && <Spinner className="h-14 w-14 text-white-0" thickness="2.5" />}
 					<img
 						src={images?.[viewImage]?.url}
 						alt={(images?.[viewImage]?.key || '').split('/').pop().split('__')[0]}
-						className="w-auto sm:max-w-full sm:max-h-full object-cover rounded-md"
+						className="max-w-full max-h-full object-contain rounded-md"
+						onLoad={() => setPopupImageLoaded(true)}
 					/>
 				</div>
 			</Popup>
