@@ -7,6 +7,7 @@ import Popup from "./Popup";
 import Spinner from "./Spinner";
 import { authPost } from "../../mixins/api";
 import Dropdown from "./Dropdown";
+import { formatMetadata } from "../../mixins/format";
 
 
 export default function ImageDisplay({ onPage }) {
@@ -25,7 +26,7 @@ export default function ImageDisplay({ onPage }) {
 
 	if (libImages === null) {
 		return (
-			<div className="text-gray-7 italic font-bold w-80 ml-4">No library images found. Upload some!</div>
+			<div className="text-gray-7 italic font-bold w-full p-8">No library images found. Upload some!</div>
 		);
 	}
 	if (libImages.length === 0) {
@@ -97,6 +98,7 @@ export default function ImageDisplay({ onPage }) {
 			
 			<Popup
 				bodyStyle="h-full w-full"
+				headerText={formatMetadata(libImages?.[viewImage]) }
 				open={viewImage !== null}
 				xClicked={() => setViewImage(null)}
 				variant={POPUP_VARIANTS.BLUR}

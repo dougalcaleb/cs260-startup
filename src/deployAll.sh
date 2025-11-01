@@ -29,6 +29,7 @@ mkdir ./build/modules
 mkdir ./build/common
 cp -rf ./service/modules/* ./build/modules
 cp -rf ./service/common/* ./build/common
+cp ./service/.env ./build
 cp ./service/*.json ./build
 
 # Step 2

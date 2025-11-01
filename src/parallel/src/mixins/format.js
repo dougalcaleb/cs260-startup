@@ -22,3 +22,26 @@ export function formatFileSize(bytes, fractionDigits = 1) {
     const decimals = value >= 100 ? 0 : value >= 10 ? Math.min(fractionDigits, 1) : fractionDigits;
     return `${value.toFixed(decimals)} ${units[unitIndex]}`;
 }
+
+export function formatDate(timestamp) {
+	const date = new Date(timestamp);
+	return date.toLocaleString("en-US", {
+		weekday: "short",
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+		hour: "numeric",
+		minute: "numeric",
+	});
+}
+
+export function formatMetadata(data) {
+	if (!data) {
+		return "";
+	}
+
+	const loc = data?.metadata?.readableLocation ?? '';
+	const time = data?.metadata?.timestamp ? formatDate(data?.metadata?.timestamp) : "";
+
+	return `${time} ${loc ? '| ' : ''}${loc}`;
+}

@@ -5,3 +5,4 @@ export const SIGNED_URL_EXPIRE = 60 * 60 * 24;
 export const USER_TABLE = "userdata";
 export const MDATA_TABLE = "image-metadata";
 export const USER_ACTIVE_TTL = 60 * 60 * 2; // 2 hours
+export const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;

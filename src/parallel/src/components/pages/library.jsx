@@ -110,7 +110,8 @@ export default function Library() {
 			if (list?.length) {
 				setLibImages(list.map(i => ({
 					url: i.url,
-					key: i.key
+					key: i.key,
+					metadata: i.metadata
 				})));
 			} else {
 				setLibImages(null);

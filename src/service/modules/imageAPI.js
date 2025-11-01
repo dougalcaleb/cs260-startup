@@ -7,19 +7,20 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { formatFileSize } from "../common/util.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ddClient } from "../common/dynamodb.js";
-import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand, BatchGetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import exifr from "exifr";
+import { getGeocode } from "../common/geocode.js";
 
 const router = Router();
 const s3 = new S3Client({
 	region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || "us-east-1",
 });
 
-// Extract and store image metadata (EXIF)
+// Extract and store image metadata (with exif library)
 async function extractAndStoreMetadata(buffer, uid, key) {
 	const metadata = await exifr.parse(buffer, { gps: true, exif: true, xmp: false, icc: false, iptc: false });
 
-	// Extract timestamp (tries multiple EXIF fields)
+	// Extract timestamp
 	let timestamp = null;
 	if (metadata?.DateTimeOriginal) {
 		timestamp = Math.floor(new Date(metadata.DateTimeOriginal).getTime() / 1000);
@@ -31,11 +32,19 @@ async function extractAndStoreMetadata(buffer, uid, key) {
 	
 	// Extract GPS coordinates
 	let location = null;
+	let readableLoc = null;
 	if (metadata?.latitude && metadata?.longitude) {
 		location = {
 			lat: metadata.latitude,
 			lng: metadata.longitude
 		};
+		try {
+			const geocode = await getGeocode([{ key, lat: location.lat, lng: location.lng }]);
+			readableLoc = geocode?.[0]?.label ?? null;
+		} catch (e) {
+			console.error("Failed to geocode location for image " + key + ":", e.message);
+			// May fail due to rate-limiting; will be retried on fetch
+		}
 	}
 	
 	const updateCommand = new PutCommand({
@@ -43,6 +52,7 @@ async function extractAndStoreMetadata(buffer, uid, key) {
 		Item: {
 			uid: key,
 			location,
+			readableLocation: readableLoc,
 			timestamp
 		}
 	});
@@ -52,7 +62,7 @@ async function extractAndStoreMetadata(buffer, uid, key) {
 	return { location, timestamp };
 }
 
-// Multer setup with sane limits and image-only filter
+// Multer setup (for uploading images)
 const upload = multer({
 	storage: multer.memoryStorage(),
 	limits: {
@@ -65,6 +75,7 @@ const upload = multer({
 	},
 });
 
+// Gets public signed URLs for images in the s3 bucket
 async function signURLs(keys) {
 	if (!keys || !keys.length) {
 		return [];
@@ -80,6 +91,81 @@ async function signURLs(keys) {
 	}));
 }
 
+// Retrieves the metadata for a set of images from DynamoDB
+// If the geolocation data doesn't exist (failed on upload, likely rate limited), also tries to re-get that data
+async function getMetadataForImages(keys) {
+	if (!keys || !keys.length) {
+		return {};
+	}
+
+	// DynamoDB BatchGet has a limit of 100 items per request
+	const batchSize = 100;
+	const batches = [];
+	
+	for (let i = 0; i < keys.length; i += batchSize) {
+		batches.push(keys.slice(i, i + batchSize));
+	}
+
+	const allMetadata = {};
+
+	for (const batch of batches) {
+		const batchGetCommand = new BatchGetCommand({
+			RequestItems: {
+				[MDATA_TABLE]: {
+					Keys: batch.map(key => ({ uid: key }))
+				}
+			}
+		});
+
+		try {
+			const response = await ddClient.send(batchGetCommand);
+			if (response.Responses && response.Responses[MDATA_TABLE]) {
+				response.Responses[MDATA_TABLE].forEach(item => {
+					allMetadata[item.uid] = {
+						location: item.location || null,
+						readableLocation: item.readableLocation || null,
+						timestamp: item.timestamp || null
+					};
+				});
+
+				// Since I'm anticipating a lot of uploads at once when we demo this, we might hit the google geoloc api rate limit
+				// In theory, this should catch images that failed to get a readable geolocation and will populate than when they're fetched
+				// instead of when they're uploaded
+				const toGeocode = response.Responses[MDATA_TABLE]
+					.filter(i => i.location && (!i.readableLocation || i.readableLocation === null))
+					.map(i => ({ key: i.uid, lat: i.location.lat, lng: i.location.lng }));
+
+				if (toGeocode.length) {
+					try {
+						const geocoded = await getGeocode(toGeocode);
+						await Promise.all(geocoded.map(async ({ key, label }) => {
+							if (!label) return;
+							try {
+								await ddClient.send(new UpdateCommand({
+									TableName: MDATA_TABLE,
+									Key: { uid: key },
+									UpdateExpression: 'SET readableLocation = :loc',
+									ExpressionAttributeValues: { ':loc': label },
+								}));
+								if (allMetadata[key]) allMetadata[key].readableLocation = label;
+							} catch (updateErr) {
+								console.error(`Failed to update readableLocation for ${key}:`, updateErr.message);
+							}
+						}));
+					} catch (geoErr) {
+						console.error('Batch geocode failed:', geoErr.message);
+					}
+				}
+			}
+		} catch (error) {
+			console.error(`Failed to fetch metadata batch:`, error.message);
+			// Continue with other batches even if one fails
+		}
+	}
+
+	return allMetadata;
+}
+
 router.get("/get-user-images", requireAuth, async (req, res) => {
 	try {
 		const data = await s3.send(new ListObjectsV2Command({
@@ -91,7 +177,18 @@ router.get("/get-user-images", requireAuth, async (req, res) => {
 		let returnData = null;
 
 		if (data.Contents) {
-			returnData = await signURLs(data.Contents.map(c => c.Key));
+			const keys = data.Contents.map(c => c.Key);
+			
+			// Get signed URLs and metadata in parallel
+			const [signedUrls, metadata] = await Promise.all([
+				signURLs(keys),
+				getMetadataForImages(keys)
+			]);
+
+			returnData = signedUrls.map(item => ({
+				...item,
+				metadata: metadata[item.key] || { location: null, readableLocation: null, timestamp: null }
+			}));
 		}
 
 		res.json(returnData);
@@ -151,7 +248,6 @@ router.post("/upload-multiple", requireAuth, upload.array("images", BATCH_IMAGES
 			});
 			await uploader.done();
 
-			// Extract and store metadata
 			let metadata = null;
 			try {
 				metadata = await extractAndStoreMetadata(file.buffer, req.body.uuid, key);
@@ -185,7 +281,6 @@ router.post("/delete-single", requireAuth, async (req, res) => {
 
 		await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: key }));
 
-		// S3 delete is idempotent; consider it success even if the key didn't exist
 		return res.json({ message: "Delete successful", key });
 	} catch (e) {
 		res.status(500).json({ error: e.message });
