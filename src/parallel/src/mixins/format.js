@@ -41,7 +41,9 @@ export function formatMetadata(data) {
 	}
 
 	const loc = data?.metadata?.readableLocation ?? '';
-	const time = data?.metadata?.timestamp ? formatDate(data?.metadata?.timestamp) : "";
+	const time = parseInt(data?.metadata?.timestamp)
+		? formatDate(parseInt(data?.metadata?.timestamp) * 1000)
+		: "";
 
 	return `${time} ${loc ? '| ' : ''}${loc}`;
 }
