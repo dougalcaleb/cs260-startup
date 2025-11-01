@@ -3,7 +3,7 @@ import { CSSTransition } from 'react-transition-group'
 import Button from "../shared/Button";
 import { isMobile } from "../../mixins/screen";
 import Popup from "../shared/Popup";
-import { ALERTS, BTN_VARIANTS, POPUP_VARIANTS } from "../../mixins/constants";
+import { ALERTS, BTN_VARIANTS, PAGES, POPUP_VARIANTS } from "../../mixins/constants";
 import Input from "../shared/Input";
 import FilePicker from "../shared/FilePicker";
 import { authGet, authPost } from "../../mixins/api";
@@ -11,6 +11,7 @@ import useAuthUser from "../../hooks/useAuthUser";
 import { useAlert } from "../../contexts/AlertContext";
 import Spinner from "../shared/Spinner";
 import { useGlobalState } from "../../contexts/StateProvider";
+import ImageDisplay from "../shared/ImageDisplay";
 
 export default function Library() {
 	/**===========================================================
@@ -20,7 +21,7 @@ export default function Library() {
 	// Hooks
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
-	const { images, setImages, imagesLoaded, setImagesLoaded } = useGlobalState();
+	const { libImages, setLibImages, setImagesLoaded } = useGlobalState();
 
 	// State
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -31,8 +32,6 @@ export default function Library() {
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
 	const [locations, setLocations] = useState([""]);
 	const [imagesToUpload, setImagesToUpload] = useState([]);
-	const [viewImage, setViewImage] = useState(null);
-	const [popupImageLoaded, setPopupImageLoaded] = useState(false);
 
 	// Refs
 	const imageBtnRef = useRef(null);
@@ -101,36 +100,6 @@ export default function Library() {
 		</CSSTransition>
 	);
 
-	const placeholderImages = () => Array.from({ length: 20 }).map((_, i) => <div key={`placeholder-img-${i}`} className="ghost-loader rounded-md w-full h-30"></div>);
-
-	const libraryImages = () => {
-		if (images === null) {
-			return (
-				<div className="text-gray-7 italic font-bold w-80 ml-4">No library images found. Upload some!</div>
-			);
-		}
-		if (images.length === 0) {
-			return placeholderImages();
-		}
-		return images.map((imgData, i) => (
-			<div className="overflow-hidden cursor-pointer sm:h-40 rounded-md flex-shrink-0" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
-				{!imagesLoaded.has(imgData.key) && <div className="ghost-loader h-40 w-40"></div>}
-				<img
-					src={imgData.url}
-					alt={(imgData.key || '').split('/').pop().split('__')[0]}
-					className={`w-full h-full object-cover object-center sm:h-full sm:w-auto sm:object-contain rounded-md ${imagesLoaded.has(imgData.key) ? '' : 'hidden'}`}
-					onLoad={() => {
-						setImagesLoaded(prev => {
-							const updated = new Set(prev);
-							updated.add(imgData.key);
-							return updated;
-						});
-					}}
-				/>
-			</div>
-		));
-	}
-
 	/**===========================================================
 	 * BACKEND LINK
 	 =============================================================*/
@@ -139,18 +108,18 @@ export default function Library() {
 		try {
 			const list = await authGet("/api/image/get-user-images", authUser.authToken);
 			if (list?.length) {
-				setImages(list.map(i => ({
+				setLibImages(list.map(i => ({
 					url: i.url,
 					key: i.key
 				})));
 			} else {
-				setImages(null);
+				setLibImages(null);
 			}
 			setImagesLoaded(new Set());
 		} catch (e) {
 			launchAlert(ALERTS.ERROR, "Failed to retrieve user image library: " + (e.message || e.toString()));
 		}
-	}, [authUser.authToken, setImages, setImagesLoaded]);
+	}, [authUser.authToken, setLibImages, setImagesLoaded]);
 
 	const uploadImages = async () => {
 		const imageArray = Array.from(imagesToUpload);
@@ -187,40 +156,15 @@ export default function Library() {
 		}
 	};
 
-	const deleteImage = async () => {
-		const deleteKey = images?.[viewImage]?.key;
-		if (!deleteKey) {
-			launchAlert(ALERTS.ERROR, "Cannot delete: No image key");
-			return;
-		}
-
-		setViewImage(null);
-		setLoadingPopupOpen(true);
-
-		try {
-			await authPost("/api/image/delete-single", authUser.authToken, {
-				key: deleteKey
-			});
-
-			setImages(images.filter(i => i.key !== deleteKey));
-
-			launchAlert(ALERTS.SUCCESS, "Image deleted successfully!");
-		} catch (e) {
-			launchAlert(ALERTS.ERROR, "Delete failed: " + (e.message || e.toString()));
-		} finally {
-			setLoadingPopupOpen(false);
-		}
-	}
-
 	/**===========================================================
 	 * WATCHERS
 	 =============================================================*/
 	
 	useEffect(() => {
-		if (!images?.length) {
+		if (!libImages?.length) {
 			refreshLibrary();
 		}
-	}, [refreshLibrary, images]);
+	}, [refreshLibrary, libImages]);
 
 	useEffect(() => {
 		setImagesLoaded(new Set());
@@ -232,10 +176,7 @@ export default function Library() {
 
 	return (
 		<div className="bg-gray-1 w-full pb-40 sm:pb-0 min-h-[calc(100vh-max(7vh,70px))]">
-			<div className="font-main font-black text-gray-6 text-center sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8">LIBRARY</div>
-			<div className="grid p-4 gap-2.5 sm:flex flex-wrap" id="library-content">
-				{ libraryImages() }
-			</div>
+			<ImageDisplay onPage={PAGES.LIBRARY} />
 
 			<CSSTransition nodeRef={nodeRefBG} in={menuOpen} timeout={200} classNames="overlay-bg" unmountOnExit>
 				<div ref={nodeRefBG} className="fixed bg-gray-1 top-0 opacity-80 bottom-0 right-0 left-0 z-20 h-dvh" onClick={toggleOpen}></div>
@@ -309,36 +250,14 @@ export default function Library() {
 
 			<Popup
 				bodyStyle="h-1/4 w-2/3 sm:w-90"
-				headerText="PROCESSING"
+				headerText="UPLOADING"
 				open={loadingPopupOpen}
 				xDisabled
 			>
 				<div className="flex w-full h-full flex-col justify-center px-4">
 					<div className="flex text-white justify-center font-main items-center">
-						<Spinner className="h-8 mr-4" /> Processing, please wait...
+						<Spinner className="h-8 mr-4" /> Upload in progress, please wait...
 					</div>
-				</div>
-			</Popup>
-
-			<Popup
-				bodyStyle="h-full w-full"
-				open={viewImage !== null}
-				xClicked={() => setViewImage(null)}
-				variant={POPUP_VARIANTS.BLUR}
-				originalState={popupImageLoaded}
-				setState={setPopupImageLoaded}
-				buttons={[
-					{ text: "Delete", variant: BTN_VARIANTS.CANCEL, preventReset: true, onClick: deleteImage }
-				]}
-			>
-				<div className="flex justify-center items-center px-4 pb-2 h-full">
-					{!popupImageLoaded && <Spinner className="h-14 w-14 text-white-0" thickness="2.5" />}
-					<img
-						src={images?.[viewImage]?.url}
-						alt={(images?.[viewImage]?.key || '').split('/').pop().split('__')[0]}
-						className="max-w-full max-h-full object-contain rounded-md"
-						onLoad={() => setPopupImageLoaded(true)}
-					/>
 				</div>
 			</Popup>
 		</div>

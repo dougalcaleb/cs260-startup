@@ -21,3 +21,14 @@ export const POPUP_VARIANTS = {
 	DEFAULT: "default",
 	BLUR: "blur"
 };
+export const PAGES = {
+	LIBRARY: "library",
+	NEARBY: "nearby",
+	SEARCH: "search",
+	CONNECT: "connect"
+};
+export const IMG_ORGANIZE = {
+	DEFAULT: "default",
+	BY_LOC: "location",
+	BY_DATE: "date"
+};

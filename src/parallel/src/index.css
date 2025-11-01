@@ -62,3 +62,8 @@ a {
 body {
 	background: var(--color-gray-3);
 }
+
+/* Hide the native select arrow in old Edge/IE just in case */
+select::-ms-expand {
+	display: none;
+}
