@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from "express";
 import cookieParser from "cookie-parser";
+import path from 'path';
+import { fileURLToPath } from 'url';
 import imageAPI from "./modules/imageAPI.js";
 import userAPI from "./modules/userAPI.js";
 
@@ -32,6 +34,13 @@ app.use(express.static('public'));
 // Image endpoints
 app.use("/api/image", imageAPI);
 app.use("/api/user", userAPI);
+
+// SPA fallback: send index.html for non-API routes so client-side routing works
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.get(/^\/(?!api).*/, (_req, res) => {
+	res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Start server
 app.listen(port, () => {
