@@ -1,12 +1,10 @@
 import { Router } from "express";
 import { requireAuth } from "../common/cognitoAuth.js";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { USER_ACTIVE_TTL, USER_TABLE } from "../config.js";
+import { ddClient } from "../common/dynamodb.js";
 
 const router = Router();
-const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1" });
-const ddClient = DynamoDBDocumentClient.from(dynamoClient);
 
 function isActive(activeAt) {
 	return (Math.floor(Date.now() / 1000) - activeAt) < USER_ACTIVE_TTL;

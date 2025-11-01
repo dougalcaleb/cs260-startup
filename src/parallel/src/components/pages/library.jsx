@@ -143,6 +143,7 @@ export default function Library() {
 
 			setImgPopupOpen(false);
 			setLoadingPopupOpen(true);
+			setImagesToUpload([]);
 
 			await authPost(`/api/image${endpoint}`, authUser.authToken, data);
 			

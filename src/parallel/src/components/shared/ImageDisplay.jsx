@@ -77,7 +77,7 @@ export default function ImageDisplay({ onPage }) {
 
 			<div className="grid p-4 gap-2.5 sm:flex flex-wrap" id="library-content">
 				{libImages.map((imgData, i) => (
-					<div className="overflow-hidden cursor-pointer sm:h-40 rounded-md flex-shrink-0" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
+					<div className="overflow-hidden cursor-pointer sm:h-40 rounded-md flex-shrink-0 hover:shadow-lg shadow-gray-0 transition-all hover:-translate-y-1 duration-100" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
 						{!imagesLoaded.has(imgData.key) && <div className="ghost-loader h-40 w-40"></div>}
 						<img
 							src={imgData.url}
@@ -106,8 +106,8 @@ export default function ImageDisplay({ onPage }) {
 					{ text: "Delete", variant: BTN_VARIANTS.CANCEL, preventReset: true, onClick: deleteImage }
 				] : null}
 			>
-				<div className="flex justify-center items-center px-4 pb-2 h-full">
-					{!popupImageLoaded && <Spinner className="h-14 w-14 text-white-0" thickness="2.5" />}
+				<div className="flex justify-center items-center px-4 pb-2 h-full relative">
+					{!popupImageLoaded && <Spinner className="h-14 w-14 text-white-0 absolute m-auto left-0 right-0 top-0 bottom-0" thickness="2.5" />}
 					<img
 						src={libImages?.[viewImage]?.url}
 						alt={(libImages?.[viewImage]?.key || '').split('/').pop().split('__')[0]}
