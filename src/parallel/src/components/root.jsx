@@ -36,12 +36,9 @@ export default function Root() {
 						username: authUser.username
 					})
 				} catch (e) {
-					// window.sessionStorage.removeItem(DID_LOGIN_KEY);
 					launchAlert(ALERTS.WARNING, "Could not finish logging in. Some features may not function. Please refresh the page.");
 					console.error(e);
 				}
-
-				// todo: username disappears on refresh, grab from session storage
 
 				if (!window.sessionStorage.getItem(USER_PROFILE_KEY)) {
 					window.sessionStorage.setItem(USER_PROFILE_KEY, "{}");
@@ -57,8 +54,10 @@ export default function Root() {
 						console.error(e);
 					}
 				}
+			} else if (window.sessionStorage.getItem(DID_LOGIN_KEY) && window.sessionStorage.getItem(USER_PROFILE_KEY)) {
+				const userProfile = JSON.parse(window.sessionStorage.getItem(USER_PROFILE_KEY));
+				setUsername(userProfile?.username || null);
 			}
-			
 		};
 
 		doReq();
@@ -124,8 +123,6 @@ export default function Root() {
 			
 			<main>
 
-				{/* // todo: fix cannot GET on PROD */}
-			
 				{rCorners}
 
 				<Routes>
