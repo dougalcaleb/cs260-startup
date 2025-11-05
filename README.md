@@ -101,7 +101,7 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 - [x] **Calls to third party endpoints** - AWS S3, DynamoDB
 - [x] **Backend service endpoints** - Several endpoints for login, image URL fetching, etc
 - [x] **Frontend calls service endpoints** - Wrappers on fetch() to facilitate easy post/get/etc requests
-- [x] **Supports registration, login, logout, and restricted endpoint** - Login/logout with either Google or email
+- [x] **Supports registration, login, logout, and restricted endpoint** - Login/logout with either Google or email, all endpoints require auth
 
 
 ## 🚀 DB deliverable
