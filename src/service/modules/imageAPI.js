@@ -7,9 +7,9 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { formatFileSize } from "../common/util.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ddClient } from "../common/dynamodb.js";
-import { PutCommand, BatchGetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand, BatchGetCommand } from "@aws-sdk/lib-dynamodb";
 import exifr from "exifr";
-import { getGeocode } from "../common/geocode.js";
+import { geocodeQueue } from "../common/geocodeQueue.js";
 
 const router = Router();
 const s3 = new S3Client({
@@ -32,27 +32,23 @@ async function extractAndStoreMetadata(buffer, uid, key) {
 	
 	// Extract GPS coordinates
 	let location = null;
-	let readableLoc = null;
 	if (metadata?.latitude && metadata?.longitude) {
 		location = {
 			lat: metadata.latitude,
 			lng: metadata.longitude
 		};
-		try {
-			const geocode = await getGeocode([{ key, lat: location.lat, lng: location.lng }]);
-			readableLoc = geocode?.[0]?.label ?? null;
-		} catch (e) {
-			console.error("Failed to geocode location for image " + key + ":", e.message);
-			// May fail due to rate-limiting; will be retried on fetch
-		}
+		
+		// Add to geocode queue for async processing
+		geocodeQueue.enqueue(key, location.lat, location.lng);
 	}
 	
+	// Store metadata without readableLocation (will be filled by queue)
 	const updateCommand = new PutCommand({
 		TableName: MDATA_TABLE,
 		Item: {
 			uid: key,
 			location,
-			readableLocation: readableLoc,
+			readableLocation: null, // Will be populated by geocode queue
 			timestamp
 		}
 	});
@@ -92,7 +88,6 @@ async function signURLs(keys) {
 }
 
 // Retrieves the metadata for a set of images from DynamoDB
-// If the geolocation data doesn't exist (failed on upload, likely rate limited), also tries to re-get that data
 async function getMetadataForImages(keys) {
 	if (!keys || !keys.length) {
 		return {};
@@ -127,35 +122,6 @@ async function getMetadataForImages(keys) {
 						timestamp: item.timestamp || null
 					};
 				});
-
-				// Since I'm anticipating a lot of uploads at once when we demo this, we might hit the google geoloc api rate limit
-				// In theory, this should catch images that failed to get a readable geolocation and will populate than when they're fetched
-				// instead of when they're uploaded
-				const toGeocode = response.Responses[MDATA_TABLE]
-					.filter(i => i.location && (!i.readableLocation || i.readableLocation === null))
-					.map(i => ({ key: i.uid, lat: i.location.lat, lng: i.location.lng }));
-
-				if (toGeocode.length) {
-					try {
-						const geocoded = await getGeocode(toGeocode);
-						await Promise.all(geocoded.map(async ({ key, label }) => {
-							if (!label) return;
-							try {
-								await ddClient.send(new UpdateCommand({
-									TableName: MDATA_TABLE,
-									Key: { uid: key },
-									UpdateExpression: 'SET readableLocation = :loc',
-									ExpressionAttributeValues: { ':loc': label },
-								}));
-								if (allMetadata[key]) allMetadata[key].readableLocation = label;
-							} catch (updateErr) {
-								console.error(`Failed to update readableLocation for ${key}:`, updateErr.message);
-							}
-						}));
-					} catch (geoErr) {
-						console.error('Batch geocode failed:', geoErr.message);
-					}
-				}
 			}
 		} catch (error) {
 			console.error(`Failed to fetch metadata batch:`, error.message);

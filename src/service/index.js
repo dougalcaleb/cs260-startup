@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import imageAPI from "./modules/imageAPI.js";
 import userAPI from "./modules/userAPI.js";
+import { geocodeQueue } from "./common/geocodeQueue.js";
 
 const app = express();
 
@@ -45,4 +46,5 @@ app.get(/^\/(?!api).*/, (_req, res) => {
 // Start server
 app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
+	console.log('Geocode queue initialized:', geocodeQueue.getStatus());
 });

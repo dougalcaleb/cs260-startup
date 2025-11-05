@@ -42,7 +42,7 @@ export default function ImageDisplay({ onPage }) {
 		if (!imageSet || !imageSet.length) return [[], []];
 		return [sortByLocation(imageSet), sortByTime(imageSet)];
 	}, [imageSet]);
-	const imagesByKey = useMemo(() => Object.fromEntries(imageSet.map(img => [img.key, img])), [imageSet]);
+	const imagesByKey = useMemo(() => Object.fromEntries((imageSet || []).map(img => [img.key, img])), [imageSet]);
 	const imageMetadata = useMemo(() => (formatMetadata(imagesByKey?.[viewImage])), [viewImage]);
 	
 	/**===========================================================
@@ -126,7 +126,7 @@ export default function ImageDisplay({ onPage }) {
 		</div>
 	);
 
-	const compactView = imageSet.map(createImage);
+	const compactView = (imageSet || []).map(createImage);
 
 	const dateView = (
 		dateSortedImageSet.map(dateSet => (
