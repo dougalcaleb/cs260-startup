@@ -96,20 +96,20 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [x] **Node.js/Express HTTP service** - Express server, using Router to separate image and user endpoints
+- [x] **Node.js/Express HTTP service** - Express server, using Router to organize endpoint groups
 - [x] **Static middleware for frontend** - CORS, file serving
-- [x] **Calls to third party endpoints** - AWS S3, DynamoDB
-- [x] **Backend service endpoints** - Several endpoints for login, image URL fetching, etc
+- [x] **Calls to third party endpoints** - Google Geolocation API, AWS S3
+- [x] **Backend service endpoints** - Endpoints for login, image URL fetching, username changes, etc
 - [x] **Frontend calls service endpoints** - Wrappers on fetch() to facilitate easy post/get/etc requests
-- [x] **Supports registration, login, logout, and restricted endpoint** - Login/logout with either Google or email, all endpoints require auth
+- [x] **Supports registration, login, logout, and restricted endpoint** - Login/logout with either Google account or email, all endpoints require auth
 
 
 ## 🚀 DB deliverable
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [x] **Stores data in MongoDB** - User data stored in DynamoDB
-- [x] **Stores credentials in MongoDB** - User credentials managed by AWS Cognito and supplemented by DynamoDB
+- [x] **Stores data in MongoDB** - Persistent user data and image data stored (using DynamoDB instead of Mongo for security reasons since Google login is available and those are real accounts)
+- [x] **Stores credentials in MongoDB** - User credentials, tokens, usernames, etc stored/managed by DynamoDB and Cognito
 
 ## 🚀 WebSocket deliverable
 
