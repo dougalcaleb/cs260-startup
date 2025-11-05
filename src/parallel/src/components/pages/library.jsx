@@ -163,14 +163,14 @@ export default function Library() {
 	 =============================================================*/
 	
 	useEffect(() => {
+		setImagesLoaded(new Set());
+	}, [setImagesLoaded]);
+	
+	useEffect(() => {
 		if (!libImages?.length) {
 			refreshLibrary();
 		}
 	}, [refreshLibrary, libImages]);
-
-	useEffect(() => {
-		setImagesLoaded(new Set());
-	}, [setImagesLoaded]);
 
 	/**===========================================================
 	 * RENDER
