@@ -37,13 +37,24 @@ export function formatDate(timestamp) {
 
 export function formatMetadata(data) {
 	if (!data) {
-		return "";
+		return { none: "No data" };
 	}
 
-	const loc = data?.metadata?.readableLocation ?? '';
-	const time = parseInt(data?.metadata?.timestamp)
+	let loc = data?.metadata?.readableLocation ?? '';
+	let time = parseInt(data?.metadata?.timestamp)
 		? formatDate(parseInt(data?.metadata?.timestamp) * 1000)
 		: "";
+	
+	if (!loc && !time) {
+		return { none: "No data" };
+	} else {
+		if (!loc) {
+			loc = "No location data";
+		}
+		if (!time) {
+			time = "No time data";
+		}
+	}
 
-	return `${time} ${loc ? '| ' : ''}${loc}`;
+	return { loc, time };
 }

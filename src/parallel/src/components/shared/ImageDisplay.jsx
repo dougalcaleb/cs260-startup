@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useGlobalState } from "../../contexts/StateProvider";
 import { ALERTS, BTN_VARIANTS, IMG_ORGANIZE, PAGES, POPUP_VARIANTS } from "../../mixins/constants";
 import { useAlert } from "../../contexts/AlertContext";
@@ -19,10 +19,13 @@ export default function ImageDisplay({ onPage }) {
 	const [viewImage, setViewImage] = useState(null);
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
 	const [settingsPopupOpen, setSettingsPopupOpen] = useState(false);
+	const [infoPopupOpen, setInfoPopupOpen] = useState(false);
 	const [organization, setOrganization] = useState(IMG_ORGANIZE.DEFAULT);
 	const [tmpOrg, setTmpOrg] = useState(IMG_ORGANIZE.DEFAULT);
 
 	const placeholderImages = () => Array.from({ length: 20 }).map((_, i) => <div key={`placeholder-img-${i}`} className="ghost-loader rounded-md w-full h-30"></div>);
+
+	const imageMetadata = useMemo(() => ( formatMetadata(libImages?.[viewImage]) ), [viewImage]);
 
 	if (libImages === null) {
 		return (
@@ -63,7 +66,22 @@ export default function ImageDisplay({ onPage }) {
 		setSettingsPopupOpen(false);
 		setOrganization(tmpOrg);
 	}
-	
+
+	const closeViewPopup = () => {
+		setViewImage(null);
+		setInfoPopupOpen(false);
+	}
+
+	const viewPopupHeader = (
+		<div className="text-white-0 hover:text-green-2 cursor-pointer" onClick={() => setInfoPopupOpen(true)}>
+			<div className="flex">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-6 w-6">
+					<path fill="currentColor" d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512zM224 160a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm-8 64l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z" />
+				</svg>
+			</div>
+		</div>
+	);
+
 	return (
 		<>
 			<div className="font-main font-black text-gray-6 flex justify-between sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8 px-4 sm:px-0 sm:justify-start">
@@ -98,9 +116,9 @@ export default function ImageDisplay({ onPage }) {
 			
 			<Popup
 				bodyStyle="h-full w-full"
-				headerText={formatMetadata(libImages?.[viewImage]) }
+				header={viewPopupHeader}
 				open={viewImage !== null}
-				xClicked={() => setViewImage(null)}
+				xClicked={closeViewPopup}
 				variant={POPUP_VARIANTS.BLUR}
 				originalState={popupImageLoaded}
 				setState={setPopupImageLoaded}
@@ -133,7 +151,7 @@ export default function ImageDisplay({ onPage }) {
 			</Popup>
 
 			<Popup
-				bodyStyle="h-1/3 w-2/3 sm:w-90 sm:h-1/2"
+				bodyStyle="h-1/3 w-5/6 sm:w-90 sm:h-1/2"
 				headerText="VIEW SETTINGS"
 				open={settingsPopupOpen}
 				xClicked={() => setSettingsPopupOpen(false)}
@@ -158,6 +176,25 @@ export default function ImageDisplay({ onPage }) {
 						onChange={setTmpOrg}
 						value={tmpOrg}
 					/>
+				</div>
+			</Popup>
+
+			<Popup
+				headerText="IMAGE INFO"
+				bodyStyle="h-1/3 w-5/6 sm:w-90 sm:h-1/2"
+				open={infoPopupOpen}
+				xClicked={() => setInfoPopupOpen(false)}
+				layer={1}
+			>
+				<div className="p-4 w-full h-full font-main text-white-0 font-bold">
+					{imageMetadata.none || (
+						<div>
+							<p className="text-gray-8 italic">Location:</p>
+							<p>{imageMetadata.loc}</p>
+							<p className="text-gray-8 italic mt-4">Date:</p>
+							<p>{imageMetadata.time}</p>
+						</div>
+					)}
 				</div>
 			</Popup>
 		</>
