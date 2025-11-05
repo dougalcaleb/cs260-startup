@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useGlobalState } from "../../contexts/StateProvider";
 import { ALERTS, BTN_VARIANTS, IMG_ORGANIZE, PAGES, POPUP_VARIANTS } from "../../mixins/constants";
 import { useAlert } from "../../contexts/AlertContext";
@@ -8,13 +8,20 @@ import Spinner from "./Spinner";
 import { authPost } from "../../mixins/api";
 import Dropdown from "./Dropdown";
 import { formatMetadata } from "../../mixins/format";
+import { sortByLocation, sortByTime } from "../../mixins/sort";
 
 
 export default function ImageDisplay({ onPage }) {
+	/**===========================================================
+	 * STATE
+	 =============================================================*/
+	
+	// Hooks
 	const { libImages, setLibImages, imagesLoaded, setImagesLoaded } = useGlobalState();
 	const { launchAlert } = useAlert();
 	const authUser = useAuthUser();
 
+	// State
 	const [popupImageLoaded, setPopupImageLoaded] = useState(false);
 	const [viewImage, setViewImage] = useState(null);
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
@@ -23,22 +30,43 @@ export default function ImageDisplay({ onPage }) {
 	const [organization, setOrganization] = useState(IMG_ORGANIZE.DEFAULT);
 	const [tmpOrg, setTmpOrg] = useState(IMG_ORGANIZE.DEFAULT);
 
-	const placeholderImages = () => Array.from({ length: 20 }).map((_, i) => <div key={`placeholder-img-${i}`} className="ghost-loader rounded-md w-full h-30"></div>);
+	// Computeds
+	const [imageSet, setImageSet] = useMemo(() => {
+		if (onPage === PAGES.LIBRARY) {
+			return [libImages, setLibImages];
+		}
 
-	const imageMetadata = useMemo(() => ( formatMetadata(libImages?.[viewImage]) ), [viewImage]);
+		return [[], () => { }];
+	}, [onPage, libImages]);
+	const [locationSortedImageSet, dateSortedImageSet] = useMemo(() => {
+		if (!imageSet || !imageSet.length) return [[], []];
+		return [sortByLocation(imageSet), sortByTime(imageSet)];
+	}, [imageSet]);
+	const imagesByKey = useMemo(() => Object.fromEntries(imageSet.map(img => [img.key, img])), [imageSet]);
+	const imageMetadata = useMemo(() => (formatMetadata(imagesByKey?.[viewImage])), [viewImage]);
+	
+	/**===========================================================
+	 * WATCHERS
+	 =============================================================*/
+	
+	
 
-	if (libImages === null) {
-		return (
-			<div className="text-gray-7 italic font-bold w-full p-8">No library images found. Upload some!</div>
-		);
+	/**===========================================================
+	 * SETTER HELPERS
+	 =============================================================*/
+
+	const setOrgType = () => {
+		setSettingsPopupOpen(false);
+		setOrganization(tmpOrg);
 	}
-	if (libImages.length === 0) {
-		return placeholderImages();
-	}
 
+	const closeViewPopup = () => {
+		setViewImage(null);
+		setInfoPopupOpen(false);
+	}
 
 	const deleteImage = async () => {
-		const deleteKey = libImages?.[viewImage]?.key;
+		const deleteKey = imagesByKey?.[viewImage]?.key;
 		if (!deleteKey) {
 			launchAlert(ALERTS.ERROR, "Cannot delete: No image key");
 			return;
@@ -52,7 +80,7 @@ export default function ImageDisplay({ onPage }) {
 				key: deleteKey
 			});
 
-			setLibImages(libImages.filter(i => i.key !== deleteKey));
+			setImageSet(imageSet.filter(i => i.key !== deleteKey));
 
 			launchAlert(ALERTS.SUCCESS, "Image deleted successfully!");
 		} catch (e) {
@@ -62,15 +90,31 @@ export default function ImageDisplay({ onPage }) {
 		}
 	}
 
-	const setOrgType = () => {
-		setSettingsPopupOpen(false);
-		setOrganization(tmpOrg);
-	}
-
-	const closeViewPopup = () => {
-		setViewImage(null);
-		setInfoPopupOpen(false);
-	}
+	/**===========================================================
+	 * COMPONENT FRAGMENTS
+	 =============================================================*/
+	
+	const createImage = (imgData, idx) => (
+		<div
+			className="overflow-hidden cursor-pointer sm:h-40 rounded-md flex-shrink-0 hover:shadow-lg shadow-gray-0 transition-all hover:-translate-y-1 duration-100"
+			onClick={() => setViewImage(imgData.key)}
+			key={imgData.key || `img-${idx}`}
+		>
+			{!imagesLoaded.has(imgData.key) && <div className="ghost-loader h-40 w-40"></div>}
+			<img
+				src={imgData.url}
+				alt={(imgData.key || '').split('/').pop().split('__')[0]}
+				className={`w-full h-full object-cover object-center sm:h-full sm:w-auto sm:object-contain rounded-md ${imagesLoaded.has(imgData.key) ? '' : 'hidden'}`}
+				onLoad={() => {
+					setImagesLoaded(prev => {
+						const updated = new Set(prev);
+						updated.add(imgData.key);
+						return updated;
+					});
+				}}
+			/>
+		</div>
+	);
 
 	const viewPopupHeader = (
 		<div className="text-white-0 hover:text-green-2 cursor-pointer" onClick={() => setInfoPopupOpen(true)}>
@@ -82,6 +126,73 @@ export default function ImageDisplay({ onPage }) {
 		</div>
 	);
 
+	const compactView = imageSet.map(createImage);
+
+	const dateView = (
+		dateSortedImageSet.map(dateSet => (
+			<>
+				<div className="img-organizer-title mt-2 col-span-full w-full font-bold text-gray-8 italic font-main">
+					{dateSet.time}
+				</div>
+				{dateSet.images.map(createImage)}
+			</>
+		))
+	);
+
+	const locationView = (
+		locationSortedImageSet.map(locationSet => (
+			<>
+				<div className="img-organizer-title mt-2 col-span-full w-full font-bold text-gray-8 italic font-main">
+					{locationSet.location}
+				</div>
+				{locationSet.images.map(createImage)}
+			</>
+		))
+	);
+
+	let imageView = null;
+	switch (organization) {
+		case IMG_ORGANIZE.DEFAULT:
+			imageView = compactView;
+			break;
+		case IMG_ORGANIZE.BY_LOC:
+			imageView = locationView;
+			break;
+		case IMG_ORGANIZE.BY_DATE:
+			imageView = dateView;
+			break;
+		default:
+			console.error("Unknown image organization type", organization);
+			break;
+	}
+
+	/**===========================================================
+	 * EMPTY RENDER
+	 =============================================================*/
+
+	if (imageSet === null) {
+		if (onPage === PAGES.LIBRARY) {
+			return (
+				<div className="text-gray-7 italic font-bold w-full p-8">No library images found. Upload some!</div>
+			);
+		} else {
+			return (
+				<div className="text-gray-7 italic font-bold w-full p-8">No images to show.</div>
+			);
+		}
+	}
+	if (imageSet.length === 0) {
+		return (
+			<div className="grid gap-2.5 sm:flex flex-wrap w-full h-full pt-18 px-4">
+				{Array.from({ length: 20 }).map((_, i) => <div key={`placeholder-img-${i}`} className="ghost-loader rounded-md h-40 w-40"></div>)}
+			</div>
+		);
+	}
+
+	/**===========================================================
+	 * CONTENFUL RENDER
+	 =============================================================*/
+	
 	return (
 		<>
 			<div className="font-main font-black text-gray-6 flex justify-between sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8 px-4 sm:px-0 sm:justify-start">
@@ -95,23 +206,7 @@ export default function ImageDisplay({ onPage }) {
 			</div>
 
 			<div className="grid p-4 gap-2.5 sm:flex flex-wrap" id="library-content">
-				{libImages.map((imgData, i) => (
-					<div className="overflow-hidden cursor-pointer sm:h-40 rounded-md flex-shrink-0 hover:shadow-lg shadow-gray-0 transition-all hover:-translate-y-1 duration-100" onClick={() => setViewImage(i)} key={imgData.key || `img-${i}`}>
-						{!imagesLoaded.has(imgData.key) && <div className="ghost-loader h-40 w-40"></div>}
-						<img
-							src={imgData.url}
-							alt={(imgData.key || '').split('/').pop().split('__')[0]}
-							className={`w-full h-full object-cover object-center sm:h-full sm:w-auto sm:object-contain rounded-md ${imagesLoaded.has(imgData.key) ? '' : 'hidden'}`}
-							onLoad={() => {
-								setImagesLoaded(prev => {
-									const updated = new Set(prev);
-									updated.add(imgData.key);
-									return updated;
-								});
-							}}
-						/>
-					</div>
-				))}
+				{imageView}
 			</div>
 			
 			<Popup
@@ -129,8 +224,8 @@ export default function ImageDisplay({ onPage }) {
 				<div className="flex justify-center items-center px-4 pb-2 h-full relative">
 					{!popupImageLoaded && <Spinner className="h-14 w-14 text-white-0 absolute m-auto left-0 right-0 top-0 bottom-0" thickness="2.5" />}
 					<img
-						src={libImages?.[viewImage]?.url}
-						alt={(libImages?.[viewImage]?.key || '').split('/').pop().split('__')[0]}
+						src={imagesByKey?.[viewImage]?.url}
+						alt={(imagesByKey?.[viewImage]?.key || '').split('/').pop().split('__')[0]}
 						className="max-w-full max-h-full object-contain rounded-md"
 						onLoad={() => setPopupImageLoaded(true)}
 					/>

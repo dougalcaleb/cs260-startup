@@ -7,7 +7,7 @@
 	#library-content {
 		grid-template-columns: repeat(3, calc((100vw - 30px - 20px) / 3));
 	}
-	#library-content > div {
+	#library-content > div:not(.img-organizer-title) {
 		height: calc((100vw - 30px - 20px) / 3);
 	}
 	#person-search-wrap {
