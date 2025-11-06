@@ -168,7 +168,9 @@ export default function Library() {
 	
 	useEffect(() => {
 		if (!libImages?.length) {
-			refreshLibrary();
+			setTimeout(() => { // Timeout to ensure that this happens AFTER setImagesLoaded has reset all loaded states (hopefully prevents stuck loaders)
+				refreshLibrary();
+			}, 0);
 		}
 	}, [refreshLibrary, libImages]);
 
