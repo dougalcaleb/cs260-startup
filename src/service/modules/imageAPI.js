@@ -136,7 +136,7 @@ router.get("/get-user-images", requireAuth, async (req, res) => {
 	try {
 		const data = await s3.send(new ListObjectsV2Command({
 			Bucket: BUCKET_NAME,
-			Prefix: `images/${req.user.username}/`,
+			Prefix: `images/${req.user.sub}/`,
 			MaxKeys: 1000,
 		}));
 
@@ -164,7 +164,7 @@ router.get("/get-user-images", requireAuth, async (req, res) => {
 });
 
 router.post("/upload-single", requireAuth, upload.single("image"), async (req, res) => {
-	const key = `images/${req.user.username}/${req.file.originalname}__${Date.now()}`;
+	const key = `images/${req.user.sub}/${req.file.originalname}__${Date.now()}`;
 
 	try {
 		const uploader = new Upload({
@@ -196,7 +196,7 @@ router.post("/upload-single", requireAuth, upload.single("image"), async (req, r
 router.post("/upload-multiple", requireAuth, upload.array("images", BATCH_IMAGES), async (req, res) => {
 	try {
 		const uploadResults = await Promise.all(req.files.map(async file => {
-			const key = `images/${req.user.username}/${file.originalname}__${Date.now()}`;
+			const key = `images/${req.user.sub}/${file.originalname}__${Date.now()}`;
 			
 			// Upload to S3
 			const uploader = new Upload({
@@ -240,7 +240,7 @@ router.post("/delete-single", requireAuth, async (req, res) => {
 		}
 
 		// Ensure users can only delete within their own folder
-		const userPrefix = `images/${req.user.username}/`;
+		const userPrefix = `images/${req.user.sub}/`;
 		if (!key.startsWith(userPrefix)) {
 			return res.status(403).json({ error: "Forbidden: cannot delete objects outside your namespace" });
 		}
