@@ -115,8 +115,8 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Backend listens for WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **Frontend makes WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **Data sent over WebSocket connection** - I did not complete this part of the deliverable.
-- [ ] **WebSocket data displayed** - I did not complete this part of the deliverable.
+- [x] **Backend listens for WebSocket connection** - Backend uses WebsocketManager to handle websocket connections
+- [x] **Frontend makes WebSocket connection** - Websocket connection made on image upload
+- [x] **Data sent over WebSocket connection** - Geolocation data is sent back to client as queue processes it
+- [x] **WebSocket data displayed** - Location displayed per-image
 - [ ] **Application is fully functional** - I did not complete this part of the deliverable.
