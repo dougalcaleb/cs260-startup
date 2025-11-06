@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import express from "express";
+import http from "http";
+import { initWebSocket } from "./common/websocket.js";
 import cookieParser from "cookie-parser";
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,7 +10,7 @@ import userAPI from "./modules/userAPI.js";
 import { geocodeQueue } from "./common/geocodeQueue.js";
 
 const app = express();
-
+const server = http.createServer(app);
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 
 // Enable CORS
@@ -43,8 +45,12 @@ app.get(/^\/(?!api).*/, (_req, res) => {
 	res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+
+// WebSocket setup
+const websocketManager = initWebSocket(server);
+
 // Start server
-app.listen(port, () => {
+server.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
 	console.log('Geocode queue initialized:', geocodeQueue.getStatus());
 });

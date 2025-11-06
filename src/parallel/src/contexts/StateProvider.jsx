@@ -8,6 +8,7 @@ export const useGlobalState = () => {
 
 export default function StateProvider({ children }) {
 	const [libImages, setLibImages] = useState([]);
+	const [libImgMetadata, setLibImgMetadata] = useState(new Map());
 	const [connectImages, setConnectImages] = useState([]);
 	const [imagesLoaded, setImagesLoaded] = useState(new Set());
 	const [username, setUsername] = useState("");
@@ -15,6 +16,7 @@ export default function StateProvider({ children }) {
 	return (
 		<StateContext.Provider value={{
 			libImages, setLibImages,
+			libImgMetadata, setLibImgMetadata,
 			connectImages, setConnectImages,
 			imagesLoaded, setImagesLoaded,
 			username, setUsername

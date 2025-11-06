@@ -1,15 +1,18 @@
 import { ddClient } from "./dynamodb.js";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { MDATA_TABLE } from "../config.js";
+import { GEOCODE_BATCH, GEOCODE_RATE, MDATA_TABLE } from "../config.js";
 import { getGeocode } from "./geocode.js";
+import { getWebSocketManager } from "./websocket.js";
+import { WS_GEOCODE_UPDATE, WS_UPLOAD } from "../constants.js";
 
 class GeocodeQueue {
 	constructor(options = {}) {
 		this.queue = [];
 		this.processing = false;
-		this.maxRatePerSecond = options.maxRatePerSecond || 45; // Stay under 50/sec limit with buffer
-		this.batchSize = options.batchSize || 10; // Process 10 at a time
+		this.maxRatePerSecond = options.maxRatePerSecond || GEOCODE_RATE;
+		this.batchSize = options.batchSize || GEOCODE_BATCH;
 		this.processIntervalMs = Math.ceil((this.batchSize / this.maxRatePerSecond) * 1000);
+		this.imgOwners = new Map();
 	}
 
 	/**
@@ -18,7 +21,7 @@ class GeocodeQueue {
 	 * @param {number} lat - Latitude
 	 * @param {number} lng - Longitude
 	 */
-	enqueue(key, lat, lng) {
+	enqueue(key, lat, lng, userID) {
 		if (!key || typeof lat !== "number" || typeof lng !== "number") {
 			console.warn("Invalid geocode job parameters:", { key, lat, lng });
 			return;
@@ -32,6 +35,7 @@ class GeocodeQueue {
 		}
 
 		this.queue.push({ key, lat, lng });
+		this.imgOwners.set(key, userID);
 		console.log(`Added geocode job for ${key}. Queue size: ${this.queue.length}`);
 
 		// Start processing if not already running
@@ -47,8 +51,8 @@ class GeocodeQueue {
 	enqueueBatch(items) {
 		if (!Array.isArray(items)) return;
 		
-		items.forEach(({ key, lat, lng }) => {
-			this.enqueue(key, lat, lng);
+		items.forEach(({ key, lat, lng, userID }) => {
+			this.enqueue(key, lat, lng, userID);
 		});
 	}
 
@@ -91,6 +95,9 @@ class GeocodeQueue {
 		try {
 			const geocoded = await getGeocode(batch);
 
+			// Group updates by userId for websocket geoloc updates
+			const userUpdates = new Map();
+
 			// Update DynamoDB with results
 			await Promise.all(geocoded.map(async ({ key, label }) => {
 				if (!label) {
@@ -106,15 +113,75 @@ class GeocodeQueue {
 						ExpressionAttributeValues: { ':loc': label },
 					}));
 					console.log(`Successfully geocoded ${key}: ${label}`);
+
+					// Group by user for websocket notification
+					const userId = this.imgOwners.get(key);
+					if (userId) {
+						if (!userUpdates.has(userId)) {
+							userUpdates.set(userId, []);
+						}
+						userUpdates.get(userId).push({ key, readableLocation: label });
+						
+						// Clean up the imgOwners map after processing
+						this.imgOwners.delete(key);
+					}
 				} catch (updateErr) {
 					console.error(`Failed to update readableLocation for ${key}:`, updateErr.message);
 					throw updateErr; // Re-throw to trigger re-queue
 				}
 			}));
+
+			// Send websocket updates to users
+			const wsManager = getWebSocketManager();
+			if (wsManager) {
+				userUpdates.forEach((updates, userId) => {
+					wsManager.sendToUser(userId, WS_UPLOAD, {
+						type: WS_GEOCODE_UPDATE,
+						updates
+					});
+					console.log(`Sent ${updates.length} geocode update(s) to user ${userId}`);
+				});
+			}
+
+			// Close websockets of clients that have no more items in the geoloc queue
+			this.checkAndCloseCompletedUsers(userUpdates);
 		} catch (error) {
 			console.error("Error processing geocode batch:", error.message);
 			throw error;
 		}
+	}
+
+	/**
+	 * Check and close websockets for clients that have no more items in the queue
+	 * @param {Map<string, Array>} processedUsers - Map of userId to their processed updates from this batch
+	 */
+	checkAndCloseCompletedUsers(processedUsers) {
+		const wsManager = getWebSocketManager();
+		if (!wsManager) return;
+
+		// Get all unique user IDs that still have items in the queue
+		const usersWithPendingItems = new Set();
+		this.queue.forEach(item => {
+			const userId = this.imgOwners.get(item.key);
+			if (userId) {
+				usersWithPendingItems.add(userId);
+			}
+		});
+
+		// Check each user that was processed in this batch
+		processedUsers.forEach((updates, userId) => {
+			if (!usersWithPendingItems.has(userId)) {
+				// This user has no more items in the queue
+				const userSockets = wsManager.wsClients.get(userId);
+				if (userSockets) {
+					const uploadSocket = userSockets.get(WS_UPLOAD);
+					if (uploadSocket && uploadSocket.readyState === uploadSocket.OPEN) {
+						console.log(`Closing WebSocket for user ${userId} - all geocode jobs completed`);
+						uploadSocket.close(1000, 'All geocode jobs completed');
+					}
+				}
+			}
+		});
 	}
 
 	/**
@@ -141,6 +208,6 @@ class GeocodeQueue {
 
 // Export a singleton instance
 export const geocodeQueue = new GeocodeQueue({
-	maxRatePerSecond: 45,
-	batchSize: 10
+	maxRatePerSecond: GEOCODE_RATE,
+	batchSize: GEOCODE_BATCH
 });

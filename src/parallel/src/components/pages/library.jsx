@@ -3,10 +3,10 @@ import { CSSTransition } from 'react-transition-group'
 import Button from "../shared/Button";
 import { isMobile } from "../../mixins/screen";
 import Popup from "../shared/Popup";
-import { ALERTS, BTN_VARIANTS, PAGES, POPUP_VARIANTS } from "../../mixins/constants";
+import { ALERTS, BTN_VARIANTS, PAGES, POPUP_VARIANTS, WS_GEOCODE_UPDATE, WS_UPLOAD_OPEN } from "../../mixins/constants";
 import Input from "../shared/Input";
 import FilePicker from "../shared/FilePicker";
-import { authGet, authPost } from "../../mixins/api";
+import { authGet, authPost, openWS } from "../../mixins/api";
 import useAuthUser from "../../hooks/useAuthUser";
 import { useAlert } from "../../contexts/AlertContext";
 import Spinner from "../shared/Spinner";
@@ -21,7 +21,7 @@ export default function Library() {
 	// Hooks
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
-	const { libImages, setLibImages, setImagesLoaded } = useGlobalState();
+	const { libImages, setLibImages, setImagesLoaded, setLibImgMetadata } = useGlobalState();
 
 	// State
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -108,11 +108,8 @@ export default function Library() {
 		try {
 			const list = await authGet("/api/image/get-user-images", authUser.authToken);
 			if (list?.length) {
-				setLibImages(list.map(i => ({
-					url: i.url,
-					key: i.key,
-					metadata: i.metadata
-				})));
+				setLibImages(list.map(i => ({ url: i.url, key: i.key })));
+				setLibImgMetadata(new Map(list.map(i => [ i.key, i.metadata ])));
 			} else {
 				setLibImages(null);
 			}
@@ -146,9 +143,44 @@ export default function Library() {
 			setLoadingPopupOpen(true);
 			setImagesToUpload([]);
 
+			// Because we use a queue for geolocation fetching, it almost always hasn't populated by the time we call to re-fetch the user library
+			// So we silently update the metadata in the background over WebSocket, so that the metadata populates without a refresh
+			const uploadSocket = openWS(WS_UPLOAD_OPEN, authUser.uuid);
+			uploadSocket.onmessage = (evt) => {
+				console.log("Received geocode update", evt);
+				const message = JSON.parse(evt.data);
+				
+				// Expecting: { type: 'geocode-update', updates: [{ key: '...', readableLocation: '...' }, ...] }
+				if (message.type === WS_GEOCODE_UPDATE && Array.isArray(message.updates)) {
+					setLibImgMetadata(prevMetadata => {
+						let hasChanges = false;
+						const newMetadata = new Map(prevMetadata);
+						
+						// Process each update in the batch
+						message.updates.forEach(({ key, readableLocation }) => {
+							if (!key) return;
+							
+							const existingMeta = prevMetadata.get(key);
+							
+							// Only update if the key exists and data actually changed
+							if (existingMeta && existingMeta.readableLocation !== readableLocation) {
+								newMetadata.set(key, {
+									...existingMeta,
+									readableLocation
+								});
+								hasChanges = true;
+							}
+						});
+						
+						// Return same reference if nothing changed = no rerender
+						return hasChanges ? newMetadata : prevMetadata;
+					});
+				}
+			};
+
 			await authPost(`/api/image${endpoint}`, authUser.authToken, data);
-			
 			launchAlert(ALERTS.SUCCESS, `Image${imageArray.length > 1 ? 's' : ''} uploaded successfully!`);
+
 			// Refresh gallery after upload
 			refreshLibrary();
 		} catch (e) {

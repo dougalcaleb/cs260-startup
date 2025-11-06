@@ -17,7 +17,7 @@ const s3 = new S3Client({
 });
 
 // Extract and store image metadata (with exif library)
-async function extractAndStoreMetadata(buffer, uid, key) {
+async function extractAndStoreMetadata(buffer, key, userID) {
 	const metadata = await exifr.parse(buffer, { gps: true, exif: true, xmp: false, icc: false, iptc: false });
 
 	// Extract timestamp
@@ -39,7 +39,7 @@ async function extractAndStoreMetadata(buffer, uid, key) {
 		};
 		
 		// Add to geocode queue for async processing
-		geocodeQueue.enqueue(key, location.lat, location.lng);
+		geocodeQueue.enqueue(key, location.lat, location.lng, userID);
 	}
 	
 	// Store metadata without readableLocation (will be filled by queue)
@@ -186,7 +186,7 @@ router.post("/upload-single", requireAuth, upload.single("image"), async (req, r
 	}
 
 	try {
-		const metadata = await extractAndStoreMetadata(req.file.buffer, req.body.uuid, key);
+		const metadata = await extractAndStoreMetadata(req.file.buffer, key, req.user.sub);
 		res.json({ message: "Upload successful", key, metadata });
 	} catch (e) {
 		res.status(500).json({ error: "Metadata upload error: " + e.message });
@@ -216,7 +216,7 @@ router.post("/upload-multiple", requireAuth, upload.array("images", BATCH_IMAGES
 
 			let metadata = null;
 			try {
-				metadata = await extractAndStoreMetadata(file.buffer, req.body.uuid, key);
+				metadata = await extractAndStoreMetadata(file.buffer, key, req.user.sub);
 			} catch (metadataError) {
 				console.error(`Metadata extraction failed for ${key}:`, metadataError.message);
 				// Continue batch even if metadata extraction fails

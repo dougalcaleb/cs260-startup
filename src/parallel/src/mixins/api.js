@@ -1,6 +1,12 @@
+import { WS_NEARBY_OPEN, WS_UPLOAD_OPEN } from "./constants";
+
 const API_BASE_URL = import.meta.env.PROD 
 	? 'https://startup.dougalcaleb.click' 
 	: 'http://localhost:4000';
+const acceptedWsTypes = new Set([
+	WS_UPLOAD_OPEN,
+	WS_NEARBY_OPEN
+]);
 
 /**
  * Make an authenticated API request
@@ -104,4 +110,43 @@ export async function publicFetch(endpoint, options = {}) {
 	}
 
 	return response.json();
+}
+
+/**
+ * Open a WebSocket connection
+ * 
+ * @param {string} typeID - WS type constant (WS_UPLOAD_OPEN or WS_NEARBY_OPEN)
+ * @param {string} uuid - User's UUID (Cognito sub)
+ * @returns {WebSocket} WebSocket instance
+ */
+export function openWS(typeID, uuid) {
+	if (!acceptedWsTypes.has(typeID)) {
+		throw new Error("Invalid WS type: " + typeID);
+	}
+
+	if (!uuid) {
+		throw new Error("UUID is required for WebSocket connection");
+	}
+
+	const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+	const wsHost = import.meta.env.PROD 
+		? 'startup.dougalcaleb.click' 
+		: 'localhost:4000';
+	
+	const ws = new WebSocket(`${wsScheme}://${wsHost}`);
+
+	ws.onopen = () => {
+		// Register this connection with the server
+		ws.send(JSON.stringify({ type: typeID, uuid }));
+	};
+
+	ws.onerror = (error) => {
+		console.error('WebSocket error:', error);
+	};
+
+	ws.onclose = (event) => {
+		console.log('WebSocket closed:', event.code, event.reason);
+	};
+
+	return ws;
 }

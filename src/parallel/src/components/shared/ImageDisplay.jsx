@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useGlobalState } from "../../contexts/StateProvider";
 import { ALERTS, BTN_VARIANTS, IMG_ORGANIZE, PAGES, POPUP_VARIANTS } from "../../mixins/constants";
 import { useAlert } from "../../contexts/AlertContext";
@@ -17,7 +17,7 @@ export default function ImageDisplay({ onPage }) {
 	 =============================================================*/
 	
 	// Hooks
-	const { libImages, setLibImages, imagesLoaded, setImagesLoaded } = useGlobalState();
+	const { libImages, setLibImages, imagesLoaded, setImagesLoaded, libImgMetadata } = useGlobalState();
 	const { launchAlert } = useAlert();
 	const authUser = useAuthUser();
 
@@ -38,12 +38,31 @@ export default function ImageDisplay({ onPage }) {
 
 		return [[], () => { }];
 	}, [onPage, libImages]);
+
+	const imageSetMdata = useMemo(() => {
+		if (onPage === PAGES.LIBRARY) {
+			return libImgMetadata;
+		}
+
+		return new Map();
+	}, [onPage, libImgMetadata]);
+
+	const mergedImageSet = useMemo(() => (imageSet || []).map(i => ({
+		...i,
+		metadata: imageSetMdata.get(i.key) || { loc: null, time: null }
+	})), [imageSet, imageSetMdata]);
+
 	const [locationSortedImageSet, dateSortedImageSet] = useMemo(() => {
-		if (!imageSet || !imageSet.length) return [[], []];
-		return [sortByLocation(imageSet), sortByTime(imageSet)];
+		if (!imageSet || !imageSet.length || !mergedImageSet || !mergedImageSet.length) return [[], []];
+		return [sortByLocation(mergedImageSet), sortByTime(mergedImageSet)];
 	}, [imageSet]);
+
 	const imagesByKey = useMemo(() => Object.fromEntries((imageSet || []).map(img => [img.key, img])), [imageSet]);
-	const imageMetadata = useMemo(() => (formatMetadata(imagesByKey?.[viewImage])), [viewImage]);
+
+	const imageMetadata = useMemo(() => {
+		const metadata = imageSetMdata.get(viewImage);
+		return formatMetadata(metadata ? { metadata } : null);
+	}, [viewImage, imageSetMdata]);
 	
 	/**===========================================================
 	 * WATCHERS

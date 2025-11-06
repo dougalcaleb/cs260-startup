@@ -1,8 +1,10 @@
 export const BUCKET_NAME = "parallel-image-library-1";
 export const BATCH_IMAGES = 25;
-export const MAX_FILESIZE = 10 * 1024 * 1024;
-export const SIGNED_URL_EXPIRE = 60 * 60 * 24;
+export const MAX_FILESIZE = 10 * 1024 * 1024; // 10MB
+export const SIGNED_URL_EXPIRE = 60 * 60 * 24; // 1d
 export const USER_TABLE = "userdata";
 export const MDATA_TABLE = "image-metadata";
 export const USER_ACTIVE_TTL = 60 * 60 * 2; // 2 hours
+export const GEOCODE_RATE = 45; // max number of geocode requests per second (api limit is a hard 50)
+export const GEOCODE_BATCH = 10;
 export const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;

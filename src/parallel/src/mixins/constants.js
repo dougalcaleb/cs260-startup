@@ -32,3 +32,6 @@ export const IMG_ORGANIZE = {
 	BY_LOC: "location",
 	BY_DATE: "date"
 };
+export const WS_UPLOAD_OPEN = "$ws_upload_open";
+export const WS_NEARBY_OPEN = "$ws_nearby_open";
+export const WS_GEOCODE_UPDATE = "%ws_geocode_update";
