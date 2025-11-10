@@ -30,7 +30,7 @@ export default function Header() {
 	const [profilePopupOpen, setProfilePopupOpen] = useState(false);
 	const [bigLogoStyle, setBigLogoStyle] = useState({top: 0});
 	const [smallLogoStyle, setSmallLogoStyle] = useState({ opacity: 1 });
-	// const [username, setUsername] = useState("");
+	const [tmpUsername, setTmpUsername] = useState("");
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
 
 	useEffect(() => {
@@ -70,14 +70,14 @@ export default function Header() {
 		try {
 			await authPost("/api/user/set-username", authUser.authToken, {
 				uuid: authUser.uuid,
-				username: username
+				username: tmpUsername
 			});
-			setUsername(username);
+			setUsername(tmpUsername);
 			// Persist to session storage so future opens reflect the saved name
 			try {
 				const stored = window.sessionStorage.getItem(USER_PROFILE_KEY);
 				const data = stored ? JSON.parse(stored) : {};
-				data.username = username;
+				data.username = tmpUsername;
 				window.sessionStorage.setItem(USER_PROFILE_KEY, JSON.stringify(data));
 			} catch { /* ignore malformed session storage */ }
 		} catch (e) {
@@ -85,6 +85,11 @@ export default function Header() {
 		} finally {
 			setLoadingPopupOpen(false);
 		}
+	}
+
+	const openProfilePopup = () => {
+		setProfilePopupOpen(true);
+		setTmpUsername(username);
 	}
 
 	return (
@@ -103,7 +108,7 @@ export default function Header() {
 						<p className="font-header text-white-0 ml-2.5 sm:text-2xl font-black">PARALLEL</p>
 					</div>
 					<div className="relative">
-						<div className="flex items-center cursor-pointer sm:hover:bg-gray-5 px-6 py-2 rounded-md" onClick={() => setProfilePopupOpen(true)}>
+						<div className="flex items-center cursor-pointer sm:hover:bg-gray-5 px-6 py-2 rounded-md" onClick={openProfilePopup}>
 							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4 select-none">{username || authUser.username}</p>
 							<div className="text-green-2 bg-green-0 rounded-full w-7 h-7 sm:h-8 sm:w-8 flex justify-center items-center overflow-hidden">
 								{authUser.picture ? (
@@ -126,12 +131,12 @@ export default function Header() {
 							]}
 							open={profilePopupOpen}
 							xClicked={() => setProfilePopupOpen(false)}
-							originalState={username}
-							setState={setUsername}
+							originalState={tmpUsername}
+							setState={setTmpUsername}
 						>
 							<div className="flex flex-col justify-between items-center h-full py-4 px-4">
 								<div className="flex flex-col-reverse sm:flex-row">
-									<Input value={username} onChange={ (d) => setUsername(d) } placeholder="Username" className="mr-4 h-max" />
+									<Input value={tmpUsername} onChange={ (d) => setTmpUsername(d) } placeholder="Username" className="mr-4 h-max" />
 									<p className="text-gray-7 font-main font-bold italic mb-2">Your username. This is how you will be displayed to others, and how they can search for you.</p>
 								</div>
 								<Button className="px-4 py-2 w-1/2" onClick={authUser.signOut}>Sign out</Button>
