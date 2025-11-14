@@ -1,6 +1,6 @@
 import { ddClient } from "./dynamodb.js";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { GEOCODE_BATCH, GEOCODE_RATE, MDATA_TABLE } from "../config.js";
+import { GEOCODE_BATCH, GEOCODE_RATE, MDATA_TABLE, SUMMARY_TABLE } from "../config.js";
 import { getGeocode } from "./geocode.js";
 import { getWebSocketManager } from "./websocket.js";
 import { WS_GEOCODE_UPDATE, WS_UPLOAD } from "../constants.js";
@@ -13,6 +13,7 @@ class GeocodeQueue {
 		this.batchSize = options.batchSize || GEOCODE_BATCH;
 		this.processIntervalMs = Math.ceil((this.batchSize / this.maxRatePerSecond) * 1000);
 		this.imgOwners = new Map();
+		this.imgCallbacks = new Map();
 	}
 
 	/**
@@ -21,7 +22,7 @@ class GeocodeQueue {
 	 * @param {number} lat - Latitude
 	 * @param {number} lng - Longitude
 	 */
-	enqueue(key, lat, lng, userID) {
+	enqueue(key, lat, lng, userID, onComplete = () => {}) {
 		if (!key || typeof lat !== "number" || typeof lng !== "number") {
 			console.warn("Invalid geocode job parameters:", { key, lat, lng });
 			return;
@@ -36,6 +37,7 @@ class GeocodeQueue {
 
 		this.queue.push({ key, lat, lng });
 		this.imgOwners.set(key, userID);
+		this.imgCallbacks.set(key, onComplete);
 		console.log(`Added geocode job for ${key}. Queue size: ${this.queue.length}`);
 
 		// Start processing if not already running
@@ -121,13 +123,23 @@ class GeocodeQueue {
 							userUpdates.set(userId, []);
 						}
 						userUpdates.get(userId).push({ key, readableLocation: label });
-						
-						// Clean up the imgOwners map after processing
-						this.imgOwners.delete(key);
 					}
 				} catch (updateErr) {
 					console.error(`Failed to update readableLocation for ${key}:`, updateErr.message);
 					throw updateErr; // Re-throw to trigger re-queue
+				}
+
+				const imgCb = this.imgCallbacks.get(key);
+				if (imgCb) {
+					imgCb(label);
+				}
+
+				// Clean up maps after processing
+				if (this.imgOwners.get(key)) {
+					this.imgOwners.delete(key);
+				}
+				if (imgCb) {
+					this.imgCallbacks.delete(key);
 				}
 			}));
 

@@ -4,12 +4,13 @@ import { BATCH_IMAGES, BUCKET_NAME, MAX_FILESIZE, MDATA_TABLE, SERVER_REGION, SI
 import multer from "multer";
 import { S3Client, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { formatFileSize } from "../common/util.js";
+import { formatDate, formatFileSize } from "../common/util.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ddClient } from "../common/dynamodb.js";
 import { PutCommand, BatchGetCommand } from "@aws-sdk/lib-dynamodb";
 import exifr from "exifr";
 import { geocodeQueue } from "../common/geocodeQueue.js";
+import { summaryQueue } from "../common/summaryQueue.js";
 
 const router = Router();
 const s3 = new S3Client({
@@ -32,6 +33,7 @@ async function extractAndStoreMetadata(buffer, key, userID) {
 	
 	// Extract GPS coordinates
 	let location = null;
+	const dateString = timestamp ? formatDate(timestamp * 1000) : null;
 	if (metadata?.latitude && metadata?.longitude) {
 		location = {
 			lat: metadata.latitude,
@@ -39,7 +41,9 @@ async function extractAndStoreMetadata(buffer, key, userID) {
 		};
 		
 		// Add to geocode queue for async processing
-		geocodeQueue.enqueue(key, location.lat, location.lng, userID);
+		geocodeQueue.enqueue(key, location.lat, location.lng, userID, (result) => summaryQueue.enqueue(userID, dateString, result));
+	} else {
+		summaryQueue.enqueue(userID, dateString);
 	}
 	
 	// Store metadata without readableLocation (will be filled by queue)

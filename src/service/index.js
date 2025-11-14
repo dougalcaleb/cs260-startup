@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import imageAPI from "./modules/imageAPI.js";
 import userAPI from "./modules/userAPI.js";
 import { geocodeQueue } from "./common/geocodeQueue.js";
+import { summaryQueue } from './common/summaryQueue.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -53,4 +54,5 @@ const websocketManager = initWebSocket(server);
 server.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
 	console.log('Geocode queue initialized:', geocodeQueue.getStatus());
+	console.log('Summary queue initialized:', summaryQueue.getStatus());
 });
