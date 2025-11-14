@@ -280,7 +280,7 @@ export default function Library() {
 				setState={setImagesToUpload}
 			>
 				<div className="flex pt-4 px-4">
-					<FilePicker multiple showPicked accept={isMobileDevice() ? "" : "image/*"} onChange={setImagesToUpload} />
+					<FilePicker multiple showPicked accept={isMobileDevice() ? "image/*, text/plain" : "image/*"} onChange={setImagesToUpload} />
 				</div>
 			</Popup>
 
