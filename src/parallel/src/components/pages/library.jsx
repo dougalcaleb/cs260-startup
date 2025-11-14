@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { CSSTransition } from 'react-transition-group'
 import Button from "../shared/Button";
-import { isMobile } from "../../mixins/screen";
+import { isMobileScreen, isMobileDevice } from "../../mixins/screen";
 import Popup from "../shared/Popup";
 import { ALERTS, BTN_VARIANTS, PAGES, POPUP_VARIANTS, WS_GEOCODE_UPDATE, WS_UPLOAD_OPEN } from "../../mixins/constants";
 import Input from "../shared/Input";
@@ -226,7 +226,7 @@ export default function Library() {
 				</Button>
 				
 				<div className={`flex flex-col my-2 z-10 sm:z-30 relative items-end`}>
-					{ isMobile()
+					{ isMobileScreen()
 						? [imgButton, locButton]
 						: [locButton, imgButton] }
 				</div>
@@ -280,7 +280,7 @@ export default function Library() {
 				setState={setImagesToUpload}
 			>
 				<div className="flex pt-4 px-4">
-					<FilePicker multiple showPicked accept="image/*" onChange={setImagesToUpload} />
+					<FilePicker multiple showPicked accept={isMobileDevice() ? "" : "image/*"} onChange={setImagesToUpload} />
 				</div>
 			</Popup>
 
