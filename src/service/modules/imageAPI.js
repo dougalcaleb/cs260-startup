@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, optionalAuth } from "../common/cognitoAuth.js";
-import { BATCH_IMAGES, BUCKET_NAME, MAX_FILESIZE, MDATA_TABLE, SIGNED_URL_EXPIRE } from "../config.js";
+import { BATCH_IMAGES, BUCKET_NAME, MAX_FILESIZE, MDATA_TABLE, SERVER_REGION, SIGNED_URL_EXPIRE } from "../config.js";
 import multer from "multer";
 import { S3Client, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
@@ -13,7 +13,7 @@ import { geocodeQueue } from "../common/geocodeQueue.js";
 
 const router = Router();
 const s3 = new S3Client({
-	region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || "us-east-1",
+	region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || SERVER_REGION,
 });
 
 // Extract and store image metadata (with exif library)

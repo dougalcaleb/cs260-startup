@@ -8,3 +8,4 @@ export const USER_ACTIVE_TTL = 60 * 60 * 2; // 2 hours
 export const GEOCODE_RATE = 45; // max number of geocode requests per second (api limit is a hard 50)
 export const GEOCODE_BATCH = 10;
 export const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
+export const SERVER_REGION = "us-east-1";
