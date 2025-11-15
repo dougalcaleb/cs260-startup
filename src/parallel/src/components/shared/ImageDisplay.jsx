@@ -95,14 +95,6 @@ export default function ImageDisplay({ onPage }) {
 		if (!viewImage) return;
 		const {lat, lng} = pickedLoc;
 		try {
-			await authPost("/api/image/set-location", authUser.authToken, { key: viewImage, lat, lng });
-			// Optimistically set raw coords so UI (e.g., grouping) can update
-			setLibImgMetadata(prev => {
-				const next = new Map(prev);
-				const existing = next.get(viewImage) || {};
-				next.set(viewImage, { ...existing, location: { lat, lng }, readableLocation: null });
-				return next;
-			});
 			// Open a WS to receive the readable address update
 			const uploadSocket = openWS(WS_UPLOAD_OPEN, authUser.uuid);
 			uploadSocket.onmessage = (evt) => {
@@ -124,6 +116,15 @@ export default function ImageDisplay({ onPage }) {
 					console.warn('WS message parse error', e);
 				}
 			};
+			
+			await authPost("/api/image/set-location", authUser.authToken, { key: viewImage, lat, lng });
+			// Optimistically set raw coords so UI (e.g., grouping) can update
+			setLibImgMetadata(prev => {
+				const next = new Map(prev);
+				const existing = next.get(viewImage) || {};
+				next.set(viewImage, { ...existing, location: { lat, lng }, readableLocation: null });
+				return next;
+			});
 			setLocPickerOpen(false);
 			launchAlert(ALERTS.SUCCESS, "Location saved! It may take a few moments to display correctly.");
 		} catch (e) {
