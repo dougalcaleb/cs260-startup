@@ -21,12 +21,9 @@ export default function Popup({
 }) {
 	const bgRef = useRef(null);
 	const popupRef = useRef(null);
-	const popupHeaderRef = useRef(null);
-	const popupFooterRef = useRef(null);
 
 	const [renderComp, setRenderComp] = useState(false);
 	const [popupOpen, setPopupOpen] = useState(false);
-	const [popupBodyStyle, setPopupBodyStyle] = useState({});
 
 	// Holds a snapshot of originalState when the popup first opens.
 	const stateOnOpenRef = useRef(null);
@@ -51,21 +48,6 @@ export default function Popup({
 		}
 	}, [open, originalState]);
 
-	useEffect(() => {
-		if (!open) return;
-		
-		setTimeout(() => {
-			const headerBBox = popupHeaderRef.current.getBoundingClientRect();
-			const footerBBox = popupFooterRef?.current?.getBoundingClientRect();
-			const lowerBound = footerBBox
-				? footerBBox.top
-				: popupRef.current.getBoundingClientRect().bottom;
-			
-			const height = lowerBound - headerBBox.bottom;
-			setPopupBodyStyle({ height: `${height}px` });
-		}, 0);
-	}, [open, popupHeaderRef, popupFooterRef, popupRef]);
-	
 	if (!renderComp) {
 		return null;
 	}
@@ -115,8 +97,8 @@ export default function Popup({
 			</CSSTransition>
 
 			<CSSTransition nodeRef={popupRef} in={popupOpen} timeout={150} classNames="pop-in">
-				<div ref={popupRef} className={`invisible fixed top-0 bottom-0 right-0 left-0 m-auto shadow-gray-0 overflow-hidden ${bodyVariantStyle} ${bodyStyle} ${zLayers[layer+1]}`}>
-					<div ref={popupHeaderRef} className={`w-full h-12 flex justify-between items-center px-4 ${headerVariantStyle}`}>
+				<div ref={popupRef} className={`fixed top-0 bottom-0 right-0 left-0 m-auto shadow-gray-0 overflow-hidden flex flex-col ${popupOpen ? '' : 'invisible'} ${bodyVariantStyle} ${bodyStyle} ${zLayers[layer+1]}`}>
+					<div className={`w-full h-12 flex justify-between items-center px-4 ${headerVariantStyle}`}>
 						{header || (
 							<p className="font-main text-white-0 font-bold">
 								{headerText}
@@ -129,11 +111,11 @@ export default function Popup({
 						</div>}
 					</div>
 
-					<div className="overflow-y-auto" style={popupBodyStyle}>
+					<div className="flex-1 overflow-y-auto">
 						{children}
 					</div>
 
-					{(buttons && buttons.length || "") && <div ref={popupFooterRef} className={`absolute bottom-0 h-12 w-full flex items-center px-4 ${footerVariantStyle}`}>
+					{(buttons && buttons.length || "") && <div className={`h-12 w-full flex items-center px-4 ${footerVariantStyle}`}>
 						{buttons.map((btn, i) => (
 							<Button key={`popup-${headerText}-btn-${i}`} className={`py-1 text-sm rounded-sm ${buttonVariantStyle}`} onClick={() => buttonClicked(btn)} variant={btn.variant}>{btn.text}</Button>
 						))}

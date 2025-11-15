@@ -123,7 +123,7 @@ export default function Header() {
 							</div>
 						</div>
 						<Popup
-							bodyStyle="h-2/3 w-full sm:w-1/3"
+							bodyStyle="h-2/3 w-full md:w-2/3 md:h-1/2 lg:w-1/2 xl:w-1/3 lg:h-2/3"
 							headerText="PROFILE"
 							buttons={[
 								{ text: "Cancel", onClick: () => setProfilePopupOpen(false), variant: BTN_VARIANTS.CANCEL },

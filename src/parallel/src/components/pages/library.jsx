@@ -233,7 +233,7 @@ export default function Library() {
 			</div>
 
 			<Popup
-				bodyStyle="h-2/3 w-full sm:w-1/3"
+				bodyStyle="h-2/3 w-full md:w-2/3 md:h-1/2 lg:w-1/3 lg:h-2/3"
 				open={uploadLocPopupOpen}
 				headerText="ADD LOCATIONS"
 				xClicked={() => setLocPopupOpen(false)}
@@ -268,7 +268,7 @@ export default function Library() {
 			</Popup>
 
 			<Popup
-				bodyStyle="h-2/3 w-full sm:w-1/3"
+				bodyStyle="h-2/3 w-full md:w-2/3 md:h-1/2 lg:w-1/3 lg:h-2/3"
 				open={uploadImgPopupOpen}
 				headerText="UPLOAD IMAGES"
 				xClicked={() => setImgPopupOpen(false)}
@@ -280,7 +280,7 @@ export default function Library() {
 				setState={setImagesToUpload}
 			>
 				<div className="flex pt-4 px-4">
-					<FilePicker multiple showPicked accept={isMobileDevice() ? "image/*, text/plain" : "image/*"} onChange={setImagesToUpload} />
+					<FilePicker multiple showPicked onChange={setImagesToUpload} />
 				</div>
 			</Popup>
 
