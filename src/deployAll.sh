@@ -20,6 +20,7 @@ printf "\n----> Build the distribution package\n"
 rm -rf ./build
 mkdir ./build
 cd ./parallel
+echo "export const VERSION_STAMP = $(date +%s);" > src/version.js # set version timestamp
 npm install # make sure vite is installed so that we can bundle
 npm run build # build the React front end
 cd ..
@@ -56,3 +57,4 @@ ENDSSH
 printf "\n----> Removing local copy of the distribution package\n"
 rm -rf ./build
 rm -rf ./parallel/dist
+echo "export const VERSION_STAMP = \"DEV\";" > ./parallel/src/version.js
