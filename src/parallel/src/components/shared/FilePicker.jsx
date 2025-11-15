@@ -19,6 +19,10 @@ export default function FilePicker({ id, multiple = false, onChange = () => {}, 
 		onChange(newFiles);
 	}
 
+	if (!accept) {
+		accept = "*/*";
+	}
+
 	return (
 		<>
 			<div className="flex flex-col w-full">
