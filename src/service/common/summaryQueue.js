@@ -29,10 +29,12 @@ class SummaryQueue {
 			}
 			console.log(`Updated existing summary update job for ${userID}. Queue size: ${this.queue.length}`);
 		} else {
+			const dateSet = dateStr ? new Set([dateStr]) : new Set();
+			const locSet = locationStr ? new Set([locationStr]) : new Set();
 			this.queue.push({
 				userID,
-				locations: new Set([ locationStr ]),
-				dates: new Set([ dateStr ])
+				locations: locSet,
+				dates: dateSet
 			});
 			console.log(`Added summary update job for ${userID}. Queue size: ${this.queue.length}`);
 		}

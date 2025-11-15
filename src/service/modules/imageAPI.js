@@ -7,7 +7,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { formatDate, formatFileSize } from "../common/util.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ddClient } from "../common/dynamodb.js";
-import { PutCommand, BatchGetCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand, BatchGetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import exifr from "exifr";
 import { geocodeQueue } from "../common/geocodeQueue.js";
 import { summaryQueue } from "../common/summaryQueue.js";
@@ -254,6 +254,98 @@ router.post("/delete-single", requireAuth, async (req, res) => {
 		return res.json({ message: "Delete successful", key });
 	} catch (e) {
 		res.status(500).json({ error: e.message });
+	}
+});
+
+// Manually set image location (for images without GPS EXIF)
+router.post("/set-location", requireAuth, async (req, res) => {
+	try {
+		const { key, lat, lng } = req.body || {};
+
+		if (!key || typeof key !== "string") {
+			return res.status(400).json({ error: "Missing or invalid 'key' in request body" });
+		}
+
+		const latNum = typeof lat === "string" ? parseFloat(lat) : lat;
+		const lngNum = typeof lng === "string" ? parseFloat(lng) : lng;
+
+		if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
+			return res.status(400).json({ error: "Missing or invalid 'lat'/'lng' in request body" });
+		}
+
+		// Update raw coordinates and clear readableLocation (will be set by geocode queue)
+		await ddClient.send(new UpdateCommand({
+			TableName: MDATA_TABLE,
+			Key: { uid: key },
+			UpdateExpression: 'SET #loc = :loc, readableLocation = :null',
+			ExpressionAttributeNames: { '#loc': 'location' },
+			ExpressionAttributeValues: {
+				':loc': { lat: latNum, lng: lngNum },
+				':null': null
+			}
+		}));
+
+		// Enqueue for readable address resolution and websocket update
+		geocodeQueue.enqueue(key, latNum, lngNum, req.user.sub, (result) => summaryQueue.enqueue(req.user.sub, null, result));
+
+		return res.json({ message: "Location set", key, location: { lat: latNum, lng: lngNum } });
+	} catch (e) {
+		return res.status(500).json({ error: e.message });
+	}
+});
+
+// Manually set (or override) image date (timestamp) when EXIF time missing/incorrect
+router.post("/set-date", requireAuth, async (req, res) => {
+	try {
+		const { key, year, month, day, timestamp } = req.body || {};
+
+		if (!key || typeof key !== "string") {
+			return res.status(400).json({ error: "Missing or invalid 'key' in request body" });
+		}
+
+		// Ensure user only updates own images
+		const userPrefix = `images/${req.user.sub}/`;
+		if (!key.startsWith(userPrefix)) {
+			return res.status(403).json({ error: "Forbidden: cannot modify images outside your namespace" });
+		}
+
+		let tsSeconds = null;
+		if (Number.isFinite(timestamp)) {
+			// Allow direct timestamp (seconds) if provided
+			tsSeconds = Number(timestamp);
+		} else {
+			// Validate parts
+			const y = Number(year);
+			const m = Number(month);
+			const d = Number(day);
+			if (!Number.isInteger(y) || y < 1900 || y > 2100) {
+				return res.status(400).json({ error: "Invalid 'year'" });
+			}
+			if (!Number.isInteger(m) || m < 1 || m > 12) {
+				return res.status(400).json({ error: "Invalid 'month'" });
+			}
+			const maxDay = new Date(y, m, 0).getDate();
+			if (!Number.isInteger(d) || d < 1 || d > maxDay) {
+				return res.status(400).json({ error: "Invalid 'day'" });
+			}
+			tsSeconds = Math.floor(new Date(y, m - 1, d).getTime() / 1000);
+		}
+
+		await ddClient.send(new UpdateCommand({
+			TableName: MDATA_TABLE,
+			Key: { uid: key },
+			UpdateExpression: 'SET #ts = :ts',
+			ExpressionAttributeNames: { '#ts': 'timestamp' },
+			ExpressionAttributeValues: { ':ts': tsSeconds }
+		}));
+
+		// Enqueue summary update (no geocode here). Pass date string for summary aggregation.
+		const dateString = tsSeconds ? formatDate(tsSeconds * 1000) : null;
+		summaryQueue.enqueue(req.user.sub, dateString);
+
+		return res.json({ message: 'Date set', key, timestamp: tsSeconds });
+	} catch (e) {
+		return res.status(500).json({ error: e.message });
 	}
 });
 

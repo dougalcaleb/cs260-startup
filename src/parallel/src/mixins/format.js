@@ -47,13 +47,6 @@ export function formatMetadata(data) {
 	
 	if (!loc && !time) {
 		return { none: "No data" };
-	} else {
-		if (!loc) {
-			loc = "No location data";
-		}
-		if (!time) {
-			time = "No time data";
-		}
 	}
 
 	return { loc, time };

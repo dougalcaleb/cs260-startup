@@ -1,14 +1,17 @@
 import { useMemo, useState } from "react";
 import { useGlobalState } from "../../contexts/StateProvider";
-import { ALERTS, BTN_VARIANTS, IMG_ORGANIZE, PAGES, POPUP_VARIANTS } from "../../mixins/constants";
+import { ALERTS, BTN_VARIANTS, IMG_ORGANIZE, PAGES, POPUP_VARIANTS, WS_GEOCODE_UPDATE, WS_UPLOAD_OPEN } from "../../mixins/constants";
 import { useAlert } from "../../contexts/AlertContext";
 import useAuthUser from "../../hooks/useAuthUser";
 import Popup from "./Popup";
 import Spinner from "./Spinner";
-import { authPost } from "../../mixins/api";
+import { authPost, openWS } from "../../mixins/api";
 import Dropdown from "./Dropdown";
 import { formatMetadata } from "../../mixins/format";
 import { sortByLocation, sortByTime } from "../../mixins/sort";
+import LocationPicker from "./LocationPicker";
+import DatePicker from "./DatePicker";
+import Button from "./Button";
 
 
 export default function ImageDisplay({ onPage }) {
@@ -17,7 +20,7 @@ export default function ImageDisplay({ onPage }) {
 	 =============================================================*/
 	
 	// Hooks
-	const { libImages, setLibImages, imagesLoaded, setImagesLoaded, libImgMetadata } = useGlobalState();
+	const { libImages, setLibImages, imagesLoaded, setImagesLoaded, libImgMetadata, setLibImgMetadata } = useGlobalState();
 	const { launchAlert } = useAlert();
 	const authUser = useAuthUser();
 
@@ -29,6 +32,10 @@ export default function ImageDisplay({ onPage }) {
 	const [infoPopupOpen, setInfoPopupOpen] = useState(false);
 	const [organization, setOrganization] = useState(IMG_ORGANIZE.DEFAULT);
 	const [tmpOrg, setTmpOrg] = useState(IMG_ORGANIZE.DEFAULT);
+	const [locPickerOpen, setLocPickerOpen] = useState(false);
+	const [pickedLoc, setPickedLoc] = useState(null);
+	const [datePickerOpen, setDatePickerOpen] = useState(false);
+	const [pickedDate, setPickedDate] = useState(null); // shape {year, month, day, date}
 
 	// Computeds
 	const [imageSet, setImageSet] = useMemo(() => {
@@ -37,7 +44,7 @@ export default function ImageDisplay({ onPage }) {
 		}
 
 		return [[], () => { }];
-	}, [onPage, libImages]);
+	}, [onPage, libImages, setLibImages]);
 
 	const imageSetMdata = useMemo(() => {
 		if (onPage === PAGES.LIBRARY) {
@@ -55,7 +62,7 @@ export default function ImageDisplay({ onPage }) {
 	const [locationSortedImageSet, dateSortedImageSet] = useMemo(() => {
 		if (!imageSet || !imageSet.length || !mergedImageSet || !mergedImageSet.length) return [[], []];
 		return [sortByLocation(mergedImageSet), sortByTime(mergedImageSet)];
-	}, [imageSet]);
+	}, [imageSet, mergedImageSet]);
 
 	const imagesByKey = useMemo(() => Object.fromEntries((imageSet || []).map(img => [img.key, img])), [imageSet]);
 
@@ -83,6 +90,66 @@ export default function ImageDisplay({ onPage }) {
 		setViewImage(null);
 		setInfoPopupOpen(false);
 	}
+
+	const saveImageLocation = async () => {
+		if (!viewImage) return;
+		const {lat, lng} = pickedLoc;
+		try {
+			await authPost("/api/image/set-location", authUser.authToken, { key: viewImage, lat, lng });
+			// Optimistically set raw coords so UI (e.g., grouping) can update
+			setLibImgMetadata(prev => {
+				const next = new Map(prev);
+				const existing = next.get(viewImage) || {};
+				next.set(viewImage, { ...existing, location: { lat, lng }, readableLocation: null });
+				return next;
+			});
+			// Open a WS to receive the readable address update
+			const uploadSocket = openWS(WS_UPLOAD_OPEN, authUser.uuid);
+			uploadSocket.onmessage = (evt) => {
+				try {
+					const message = JSON.parse(evt.data);
+					if (message.type === WS_GEOCODE_UPDATE && Array.isArray(message.updates)) {
+						message.updates.forEach(({ key, readableLocation }) => {
+							if (key === viewImage && readableLocation) {
+								setLibImgMetadata(prev => {
+									const next = new Map(prev);
+									const existing = next.get(viewImage) || {};
+									next.set(viewImage, { ...existing, readableLocation });
+									return next;
+								});
+							}
+						});
+					}
+				} catch (e) {
+					console.warn('WS message parse error', e);
+				}
+			};
+			setLocPickerOpen(false);
+			launchAlert(ALERTS.SUCCESS, "Location saved! It may take a few moments to display correctly.");
+		} catch (e) {
+			launchAlert(ALERTS.ERROR, "Failed to set location: " + (e.message || e.toString()));
+		}
+	};
+
+	const saveImageDate = async () => {
+		if (!viewImage || !pickedDate) return;
+		const { year, month, day } = pickedDate;
+		try {
+			const res = await authPost("/api/image/set-date", authUser.authToken, { key: viewImage, year, month, day });
+			const tsSeconds = res?.timestamp ?? Math.floor(new Date(year, month - 1, day).getTime() / 1000);
+			// Optimistically update timestamp for sorting/grouping
+			setLibImgMetadata(prev => {
+				const next = new Map(prev);
+				const existing = next.get(viewImage) || {};
+				next.set(viewImage, { ...existing, timestamp: tsSeconds });
+				return next;
+			});
+			setDatePickerOpen(false);
+			launchAlert(ALERTS.SUCCESS, "Date saved!");
+		} catch (e) {
+			launchAlert(ALERTS.ERROR, "Failed to set date: " + (e.message || e.toString()));
+		}
+	};
 
 	const deleteImage = async () => {
 		const deleteKey = imagesByKey?.[viewImage]?.key;
@@ -301,14 +368,79 @@ export default function ImageDisplay({ onPage }) {
 				layer={1}
 			>
 				<div className="p-4 w-full h-full font-main text-white-0 font-bold">
-					{imageMetadata.none || (
-						<div>
-							<p className="text-gray-8 italic">Location:</p>
-							<p>{imageMetadata.loc}</p>
-							<p className="text-gray-8 italic mt-4">Date:</p>
-							<p>{imageMetadata.time}</p>
-						</div>
-					)}
+					<div>
+						<p className="text-gray-8 italic">Location:</p>
+						{imageMetadata.loc ? (
+							<p className="mb-2">{imageMetadata.loc}</p>
+						): (
+							<Button
+								variant={BTN_VARIANTS.SECONDARY}
+								className="py-2 mt-1"
+								onClick={() => { setInfoPopupOpen(false); setLocPickerOpen(true); }}
+							>
+								Add location
+							</Button>
+						)}
+						<p className="text-gray-8 italic mt-2">Date:</p>
+						{imageMetadata.time ? (
+							<p className="mb-4">{imageMetadata.time}</p>
+						): (
+							<Button
+								variant={BTN_VARIANTS.SECONDARY}
+								className="py-2 mt-1"
+								onClick={() => { setInfoPopupOpen(false); setDatePickerOpen(true); }}
+							>
+								Add date
+							</Button>
+						)}
+					</div>
+				</div>
+			</Popup>
+
+			<Popup
+				bodyStyle="h-2/3 w-full md:w-5/6 lg:w-3/4 xl:w-2/3 xl:h-full"
+				headerText="SET IMAGE LOCATION"
+				open={locPickerOpen}
+				xClicked={() => setLocPickerOpen(false)}
+				layer={2}
+				originalState={pickedLoc}
+				setState={setPickedLoc}
+				buttons={[
+					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: () => setLocPickerOpen(false) },
+					{ text: "SAVE", onClick: saveImageLocation },
+				]}
+			>
+				<div className="w-full h-full">
+					<LocationPicker
+						onChange={setPickedLoc}
+					/>
+				</div>
+			</Popup>
+
+			<Popup
+				bodyStyle="h-1/3 w-5/6 sm:w-90 sm:h-1/2"
+				headerText="SET IMAGE DATE"
+				open={datePickerOpen}
+				xClicked={() => setDatePickerOpen(false)}
+				layer={2}
+				originalState={pickedDate}
+				setState={setPickedDate}
+				buttons={[
+					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: () => setDatePickerOpen(false) },
+					{ text: "SAVE", onClick: saveImageDate },
+				]}
+			>
+				<div className="w-full h-full flex flex-col p-4">
+					<p className="text-gray-7 font-main font-bold mb-2">Pick a date</p>
+					<DatePicker
+						onChange={setPickedDate}
+						value={pickedDate?.date || null}
+						className="flex gap-2"
+						yearClass="font-main font-bold my-2 bg-blue-0 p-2 rounded-sm text-white cursor-pointer outline-none"
+						monthClass="font-main font-bold my-2 bg-blue-0 p-2 rounded-sm text-white cursor-pointer outline-none"
+						dayClass="font-main font-bold my-2 bg-blue-0 p-2 rounded-sm text-white cursor-pointer outline-none"
+						optionClass="font-main"
+					/>
 				</div>
 			</Popup>
 		</>
