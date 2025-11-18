@@ -7,8 +7,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import imageAPI from "./modules/imageAPI.js";
 import userAPI from "./modules/userAPI.js";
+import userAPIMongo from "./modules/userAPIMongo.js";
 import { geocodeQueue } from "./common/geocodeQueue.js";
 import { summaryQueue } from './common/summaryQueue.js';
+import { connectToMongoDB } from './common/mongodb.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -38,6 +40,7 @@ app.use(express.static('public'));
 // Image endpoints
 app.use("/api/image", imageAPI);
 app.use("/api/user", userAPI);
+app.use("/api/mongo/user", userAPIMongo);
 
 // SPA fallback: send index.html for non-API routes so client-side routing works
 const __filename = fileURLToPath(import.meta.url);
@@ -48,7 +51,13 @@ app.get(/^\/(?!api).*/, (_req, res) => {
 
 
 // WebSocket setup
-const websocketManager = initWebSocket(server);
+const websocketManager = initWebSocket(server); 
+
+// Init mongo atlas connection
+connectToMongoDB().catch(err => {
+	console.error('Failed to connect to MongoDB:', err);
+	process.exit(1);
+});
 
 // Start server
 server.listen(port, () => {

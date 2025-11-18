@@ -13,3 +13,5 @@ export const SUMMARY_UPDATE_BATCH = 20;
 export const SUMMARY_UPDATE_DELAY = 200; // number of ms to wait to start processing after recieving the first job
 export const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 export const SERVER_REGION = "us-east-1";
+export const MONGO_URI = "startupdb.jogk8in.mongodb.net";
+export const MONGO_TABLE = "startupdb";
