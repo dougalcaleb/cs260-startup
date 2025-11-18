@@ -31,7 +31,8 @@ router.post("/login", requireAuth, async (req, res) => {
 			{
 				$set: {
 					username,
-					activeAt: Math.floor(Date.now() / 1000)
+					activeAt: Math.floor(Date.now() / 1000),
+					token: req.body.token
 				}
 			},
 			{ upsert: true }

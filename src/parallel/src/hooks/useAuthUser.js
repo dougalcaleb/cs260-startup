@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import {SKIP_SIGNIN_KEY} from "../mixins/constants";
+import {SKIP_SIGNIN_KEY, TOKEN_KEY} from "../mixins/constants";
 import { useAuth } from "react-oidc-context";
 
 export default function useAuthUser() {
@@ -37,6 +37,8 @@ export default function useAuthUser() {
 	// Cognito sign-in
 	const profile = auth.user?.profile;
 
+	const storedToken = window.sessionStorage.getItem(TOKEN_KEY) || "";
+
 	return {
 		loading: auth.isLoading,
 		username: profile?.nickname ?? profile?.preferred_username ?? profile?.["cognito:username"] ?? null,
@@ -44,7 +46,7 @@ export default function useAuthUser() {
 		email: profile?.email ?? null,
 		picture: profile?.picture ?? null,
 		signOut: signOutRedirect,
-		idToken: auth.user?.id_token,
+		idToken: storedToken || auth.user?.id_token,
 		accessToken: auth.user?.access_token,
 		authToken: auth.user?.id_token ?? auth.user?.access_token,
 		uuid: profile?.sub,

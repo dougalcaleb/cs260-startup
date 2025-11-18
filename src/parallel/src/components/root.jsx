@@ -10,7 +10,7 @@ import { useAuth } from 'react-oidc-context';
 import LogoFooter from './shared/LogoFooter';
 import Button from './shared/Button';
 import Spinner from './shared/Spinner';
-import {ALERTS, DID_LOGIN_KEY, SKIP_SIGNIN_KEY, USER_PROFILE_KEY} from '../mixins/constants';
+import {ALERTS, DID_LOGIN_KEY, SKIP_SIGNIN_KEY, TOKEN_KEY, USER_PROFILE_KEY} from '../mixins/constants';
 import { useAlert } from '../contexts/AlertContext';
 import useAuthUser from '../hooks/useAuthUser';
 import { authPost } from '../mixins/api';
@@ -33,7 +33,8 @@ export default function Root() {
 				try {
 					await authPost("/api/mongo/user/login", authUser.authToken, {
 						uuid: authUser.uuid,
-						username: authUser.username
+						username: authUser.username,
+						token: authUser.authToken
 					})
 				} catch (e) {
 					launchAlert(ALERTS.WARNING, "Could not finish logging in. Some features may not function. Please refresh the page.");
@@ -47,6 +48,7 @@ export default function Root() {
 							uuid: authUser.uuid
 						});
 						window.sessionStorage.setItem(USER_PROFILE_KEY, JSON.stringify(data));
+						window.sessionStorage.setItem(TOKEN_KEY, data?.token || "");
 						setUsername(data?.username || null);
 					} catch (e) {
 						window.sessionStorage.removeItem(USER_PROFILE_KEY);
