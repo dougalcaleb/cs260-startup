@@ -108,8 +108,8 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [x] **Stores data in MongoDB** - Persistent user data and image data stored (using DynamoDB instead of Mongo for security reasons since Google login is available and those are real accounts)
-- [x] **Stores credentials in MongoDB** - User credentials, tokens, usernames, etc stored/managed by DynamoDB and Cognito
+- [x] **Stores data in MongoDB** - Persistent user data stored in Mongo
+- [x] **Stores credentials in MongoDB** - User credentials stored in Mongo
 
 ## 🚀 WebSocket deliverable
 
