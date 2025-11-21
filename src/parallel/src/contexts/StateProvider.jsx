@@ -12,6 +12,8 @@ export default function StateProvider({ children }) {
 	const [connectImages, setConnectImages] = useState([]);
 	const [imagesLoaded, setImagesLoaded] = useState(new Set());
 	const [username, setUsername] = useState("");
+	const [connectedToNearby, setConnectedToNearby] = useState(false);
+	const [connectingToNearby, setConnectingToNearby] = useState(false);
 
 	return (
 		<StateContext.Provider value={{
@@ -19,7 +21,9 @@ export default function StateProvider({ children }) {
 			libImgMetadata, setLibImgMetadata,
 			connectImages, setConnectImages,
 			imagesLoaded, setImagesLoaded,
-			username, setUsername
+			username, setUsername,
+			connectedToNearby, setConnectedToNearby,
+			connectingToNearby, setConnectingToNearby,
 		}}>
 			{children}
 		</StateContext.Provider>

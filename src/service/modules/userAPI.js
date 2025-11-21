@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { requireAuth } from "../common/cognitoAuth.js";
-import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { USER_ACTIVE_TTL, USER_TABLE } from "../config.js";
 import { ddClient } from "../common/dynamodb.js";
+import { getRandomColorPair } from "../common/util.js";
 
 const router = Router();
 
@@ -11,7 +12,6 @@ function isActive(activeAt) {
 }
 
 // Ensures the user has an entry in the db, creates one if not
-// Also sets the user as "active"
 router.post("/login", requireAuth, async (req, res) => {
 	const getCommand = new GetCommand({
 		TableName: USER_TABLE,
@@ -31,13 +31,17 @@ router.post("/login", requireAuth, async (req, res) => {
 	const username = Boolean(getResponse?.Item)
 		? getResponse.Item.username
 		: req.body.username;
+	
+	const profileColorPair = Boolean(getResponse?.Item?.profileColors)
+		? getResponse?.Item?.profileColors
+		: getRandomColorPair();
 
 	const updateCommand = new PutCommand({
 		TableName: USER_TABLE,
 		Item: {
 			uid: req.body.uuid,
 			username,
-			activeAt: Math.floor(Date.now() / 1000)
+			profileColors: profileColorPair
 		}
 	});
 
@@ -52,13 +56,12 @@ router.post("/login", requireAuth, async (req, res) => {
 });
 
 router.post("/set-username", requireAuth, async (req, res) => {
-	const updateCommand = new PutCommand({
+	const updateCommand = new UpdateCommand({
 		TableName: USER_TABLE,
-		Item: {
-			uid: req.body.uuid,
-			username: req.body.username,
-			activeAt: Math.floor(Date.now() / 1000)
-		}
+		Key: { uid: req.body.uuid },
+		UpdateExpression: 'SET #username = :username',
+		ExpressionAttributeNames: { '#username': 'username' },
+		ExpressionAttributeValues: { ':username': req.body.username }
 	});
 
 	try {
@@ -90,7 +93,7 @@ router.post("/get-user", requireAuth, async (req, res) => {
 	if (getResponse.Item) {
 		res.json({
 			username: getResponse.Item.username,
-			isActive: isActive(getResponse.Item.activeAt)
+			profileColors: getResponse.Item.profileColors
 		});
 	} else {
 		res.status(404).json({ error: "User not found" });

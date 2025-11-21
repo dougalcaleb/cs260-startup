@@ -28,7 +28,7 @@ export default function Header() {
 	const bigLogoRef = useRef(null);
 
 	const [profilePopupOpen, setProfilePopupOpen] = useState(false);
-	const [bigLogoStyle, setBigLogoStyle] = useState({top: 0});
+	const [bigLogoStyle, setBigLogoStyle] = useState({ top: 0 });
 	const [smallLogoStyle, setSmallLogoStyle] = useState({ opacity: 1 });
 	const [tmpUsername, setTmpUsername] = useState("");
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
@@ -58,10 +58,12 @@ export default function Header() {
 	}, []);
 
 	const placeholderUser = (
-		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-4 w-4 sm:h-5 :w-5">
-			<path fill="currentColor" d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z" />
-		</svg>
-	);
+		<div>
+			<p className="font-bold font-main">{(username || authUser.username || "").split("")[0]?.toUpperCase?.()}</p>
+		</div>
+	)
+
+	const userProfileColors = JSON.parse(window.sessionStorage.getItem(USER_PROFILE_KEY))?.profileColors || { "main": "hsl(138, 47%, 64%)", "contrast": "hsl(0, 0%, 86%)" };
 
 	const saveUsername = async () => {
 		setLoadingPopupOpen(true);
@@ -101,7 +103,7 @@ export default function Header() {
 				</div>
 			</div>
 
-			<header ref={headerRef} className="sticky bg-gray-3 flex justify-between h-[7vh] w-full m-0 sm:h-[max(7vh,70px)] top-0 items-center">
+			<header ref={headerRef} className="sticky bg-gray-3 flex justify-between h-[7vh] w-full m-0 sm:h-[max(7vh,70px)] top-0 items-center z-10">
 				<div  className="flex items-center justify-between w-full sm:mr-8" >
 					<div className="flex items-center"  style={smallLogoStyle}>
 						<img src={parallelLogo} className="h-4 ml-5 sm:h-5 sm:ml-8" />
@@ -110,7 +112,7 @@ export default function Header() {
 					<div className="relative">
 						<div className="flex items-center cursor-pointer sm:hover:bg-gray-5 px-6 py-2 rounded-md" onClick={openProfilePopup}>
 							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4 select-none text-right">{username || authUser.username}</p>
-							<div className="text-green-2 bg-green-0 rounded-full w-7 h-7 sm:h-8 sm:w-8 flex justify-center items-center overflow-hidden">
+							<div className="rounded-full w-7 h-7 sm:h-8 sm:w-8 flex justify-center items-center overflow-hidden" style={{ background: userProfileColors.main, color: userProfileColors.contrast }}>
 								{authUser.picture ? (
 									<img
 										src={authUser.picture}
