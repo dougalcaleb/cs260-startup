@@ -31,10 +31,9 @@ export default function Root() {
 			if (authUser?.uuid && !window.sessionStorage.getItem(DID_LOGIN_KEY)) {
 				window.sessionStorage.setItem(DID_LOGIN_KEY, true);
 				try {
-					await authPost("/api/mongo/user/login", authUser.authToken, {
+					await authPost("/api/user/login", authUser.authToken, {
 						uuid: authUser.uuid,
-						username: authUser.username,
-						token: authUser.authToken
+						username: authUser.username
 					})
 				} catch (e) {
 					launchAlert(ALERTS.WARNING, "Could not finish logging in. Some features may not function. Please refresh the page.");
@@ -44,11 +43,10 @@ export default function Root() {
 				if (!window.sessionStorage.getItem(USER_PROFILE_KEY)) {
 					window.sessionStorage.setItem(USER_PROFILE_KEY, "{}");
 					try {
-						const data = await authPost("/api/mongo/user/get-user", authUser.authToken, {
+						const data = await authPost("/api/user/get-user", authUser.authToken, {
 							uuid: authUser.uuid
 						});
 						window.sessionStorage.setItem(USER_PROFILE_KEY, JSON.stringify(data));
-						window.sessionStorage.setItem(TOKEN_KEY, data?.token || "");
 						setUsername(data?.username || null);
 					} catch (e) {
 						window.sessionStorage.removeItem(USER_PROFILE_KEY);

@@ -40,7 +40,7 @@ app.use(express.static('public'));
 // Image endpoints
 app.use("/api/image", imageAPI);
 app.use("/api/user", userAPI);
-app.use("/api/mongo/user", userAPIMongo);
+// app.use("/api/mongo/user", userAPIMongo);
 
 // SPA fallback: send index.html for non-API routes so client-side routing works
 const __filename = fileURLToPath(import.meta.url);
@@ -54,10 +54,10 @@ app.get(/^\/(?!api).*/, (_req, res) => {
 const websocketManager = initWebSocket(server); 
 
 // Init mongo atlas connection
-connectToMongoDB().catch(err => {
-	console.error('Failed to connect to MongoDB:', err);
-	process.exit(1);
-});
+// connectToMongoDB().catch(err => {
+// 	console.error('Failed to connect to MongoDB:', err);
+// 	process.exit(1);
+// });
 
 // Start server
 server.listen(port, () => {

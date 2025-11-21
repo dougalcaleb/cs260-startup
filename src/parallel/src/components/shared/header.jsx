@@ -68,7 +68,7 @@ export default function Header() {
 		setProfilePopupOpen(false);
 
 		try {
-			await authPost("/api/mongo/user/set-username", authUser.authToken, {
+			await authPost("/api/user/set-username", authUser.authToken, {
 				uuid: authUser.uuid,
 				username: tmpUsername
 			});

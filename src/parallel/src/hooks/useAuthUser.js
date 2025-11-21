@@ -37,8 +37,6 @@ export default function useAuthUser() {
 	// Cognito sign-in
 	const profile = auth.user?.profile;
 
-	const storedToken = window.sessionStorage.getItem(TOKEN_KEY) || "";
-
 	return {
 		loading: auth.isLoading,
 		username: profile?.nickname ?? profile?.preferred_username ?? profile?.["cognito:username"] ?? null,
@@ -46,7 +44,7 @@ export default function useAuthUser() {
 		email: profile?.email ?? null,
 		picture: profile?.picture ?? null,
 		signOut: signOutRedirect,
-		idToken: storedToken || auth.user?.id_token,
+		idToken: auth.user?.id_token,
 		accessToken: auth.user?.access_token,
 		authToken: auth.user?.id_token ?? auth.user?.access_token,
 		uuid: profile?.sub,
