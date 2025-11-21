@@ -109,7 +109,7 @@ export default function Header() {
 					</div>
 					<div className="relative">
 						<div className="flex items-center cursor-pointer sm:hover:bg-gray-5 px-6 py-2 rounded-md" onClick={openProfilePopup}>
-							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4 select-none">{username || authUser.username}</p>
+							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4 select-none text-right">{username || authUser.username}</p>
 							<div className="text-green-2 bg-green-0 rounded-full w-7 h-7 sm:h-8 sm:w-8 flex justify-center items-center overflow-hidden">
 								{authUser.picture ? (
 									<img
