@@ -108,7 +108,7 @@ export default function Root() {
 				</div>
 				<div className="text-center text-sub text-gray-7 mt-8">Auth error: ({auth.error.message})</div>
 
-				<Button className="mt-8" onClick={forceReload}>Reload</Button>
+				<Button className="mt-8 p-4" onClick={forceReload}>Reload</Button>
 
 				<LogoFooter />
 			</div>

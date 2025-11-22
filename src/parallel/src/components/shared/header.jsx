@@ -97,7 +97,7 @@ export default function Header() {
 	return (
 		<>
 			<div id="pre-header" className="flex sm:hidden justify-center h-[20vh]">
-				<div ref={bigLogoRef} id="pre-header-logo" className="fixed z-10 flex flex-col items-center w-full" style={bigLogoStyle}>
+				<div ref={bigLogoRef} id="pre-header-logo" className="fixed flex flex-col items-center w-full z-20" style={bigLogoStyle}>
 					<img src={parallelLogo} className="h-8" />
 					<p className="font-header text-white-0 text-4xl mt-4 font-black">PARALLEL</p>
 				</div>

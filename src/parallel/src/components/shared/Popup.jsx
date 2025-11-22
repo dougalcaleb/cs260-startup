@@ -117,7 +117,7 @@ export default function Popup({
 
 					{(buttons && buttons.length || "") && <div className={`h-12 w-full flex items-center px-4 ${footerVariantStyle}`}>
 						{buttons.map((btn, i) => (
-							<Button key={`popup-${headerText}-btn-${i}`} className={`py-1 text-sm rounded-sm ${buttonVariantStyle}`} onClick={() => buttonClicked(btn)} variant={btn.variant}>{btn.text}</Button>
+							<Button key={`popup-${headerText}-btn-${i}`} className={`px-4 py-1 text-sm rounded-sm ${buttonVariantStyle}`} onClick={() => buttonClicked(btn)} variant={btn.variant}>{btn.text}</Button>
 						))}
 					</div>}
 				</div>

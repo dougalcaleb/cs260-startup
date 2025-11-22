@@ -376,7 +376,7 @@ export default function ImageDisplay({ onPage }) {
 						): (
 							<Button
 								variant={BTN_VARIANTS.SECONDARY}
-								className="py-2 mt-1"
+								className="py-2 px-4 mt-1"
 								onClick={() => { setInfoPopupOpen(false); setLocPickerOpen(true); }}
 							>
 								Add location
@@ -388,7 +388,7 @@ export default function ImageDisplay({ onPage }) {
 						): (
 							<Button
 								variant={BTN_VARIANTS.SECONDARY}
-								className="py-2 mt-1"
+								className="py-2 px-4 mt-1"
 								onClick={() => { setInfoPopupOpen(false); setDatePickerOpen(true); }}
 							>
 								Add date

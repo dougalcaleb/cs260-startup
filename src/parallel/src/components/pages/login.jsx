@@ -55,7 +55,7 @@ function loginInput(mode, auth) {
 		case LOGIN_MODES.LOGIN_COGNITO:
 			return (
 				<>
-					<Button className="bg-green-1 text-gray-3 cursor-pointer px-8" onClick={() => auth.signinRedirect()}>
+					<Button className="bg-green-1 text-gray-3 cursor-pointer py-4 px-8" onClick={() => auth.signinRedirect()}>
 						<div>
 							<p className="px-14 text-xl">SIGN IN</p>
 							<div className="flex justify-around h-7 mt-4 text-white-0">
@@ -91,7 +91,7 @@ function loginInput(mode, auth) {
 					<Input type="password" placeholder="Password" className="mb-4"></Input>
 					<Input type="Password" placeholder="Retype password" className="mb-4"></Input>
 					<Link to="/library">
-						<Button className="text-gray-3 cursor-pointer">SIGN UP</Button>
+						<Button className="text-gray-3 cursor-pointer p-4">SIGN UP</Button>
 					</Link>
 				</>
 			);

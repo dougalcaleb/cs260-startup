@@ -52,13 +52,13 @@ export default function Nearby() {
 			{nearbyUsers.map((u, idx) => (
 				<PersonCard key={`${u.name}-${u.connections}-${idx}`} name={u.name} connections={u.connections} />
 			))}
-			<div className="flex flex-col sm:flex-row flex-wrap w-full pb-30 sm:pb-20">
-				<PersonCard className="m-8"></PersonCard>
-				<PersonCard className="m-8"></PersonCard>
-				<PersonCard className="m-8"></PersonCard>
-				<PersonCard className="m-8"></PersonCard>
-				<PersonCard className="m-8"></PersonCard>
-				<PersonCard className="m-8"></PersonCard>
+			<div className="flex flex-col flex-wrap w-full p-4">
+				<PersonCard className="my-2"></PersonCard>
+				<PersonCard className="my-2"></PersonCard>
+				<PersonCard className="my-2"></PersonCard>
+				<PersonCard className="my-2"></PersonCard>
+				<PersonCard className="my-2"></PersonCard>
+				<PersonCard className="my-2"></PersonCard>
 			</div>
 		</div>
 	);

@@ -20,7 +20,7 @@ export default function Button({ className, children, onClick, variant = BTN_VAR
 	return (
 		<button
 			className={
-				`p-4 cursor-pointer font-main font-bold flex flex-col items-center select-none rounded-lg box-border
+				`cursor-pointer font-main font-bold flex flex-col items-center select-none rounded-lg box-border
 				${variantStyle}
 				${className}`
 			}

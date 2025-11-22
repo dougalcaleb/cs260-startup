@@ -1,42 +1,30 @@
+import Button from "./Button";
+
 export default function PersonCard({ name, connections, className }) {
 	
 	return (
-		<div className={`sm:w-120 h-40 relative mb-20 ${className}`}>
-			<div className="rounded-full bg-green-2 h-20 w-20 sm:w-24 sm:h-24 ml-4 sm:ml-10 relative z-2 border-8 border-gray-1"></div>
-			<div className="w-full -top-10 sm:-top-12 relative bg-gray-5 rounded-lg flex flex-col sm:flex-row h-50">
-				<div className="pt-2 sm:pt-15 pb-4 flex flex-col items-center w-full sm:w-auto sm:min-w-44">
-					<p className="font-main font-bold text-white-0 relative w-full text-right sm:text-center pt-2 px-2">John Scooby Dooby Doo</p>
-					<p className="font-main font-bold text-gray-7 relative w-full text-right sm:text-center px-2 italic sm:mt-4">4 connections</p>
+		<div className={`bg-gray-5 w-full rounded-xl flex flex-col p-2 ${className}`}>
+			<div className="flex flex-col sm:flex-row justify-between">
+				<div className="flex items-center">
+					<div className="rounded-full bg-amber-500 h-10 w-10 m-1 my-2 sm:my-4"></div>
+					<p className="font-main font-bold text-white ml-2">John Super Duper Internet</p>
 				</div>
+				<div className="flex justify-between items-center mb-4 sm:mb-0">
+					<p className="font-main font-semibold italic text-gray-7 ml-1">4 connections</p>
+					<Button className="h-max py-2 px-4 sm:mx-4">Connect</Button>
+				</div>
+			</div>
+			<div className="bg-gray-3 w-full flex rounded-lg py-2 px-1 overflow-hidden relative">
+				<div className="absolute h-full w-20 right-0 pointer-events-none bg-gradient-to-l from-gray-3 to-transparent"></div>
 				
-				<div className="bg-gray-3 rounded-sm m-2 grow p-1 overflow-y-auto">
-					<div className="flex flex-wrap">
-						<div className="bg-green-0 rounded-md m-1 h-max">
-							<p className="font-main font-bold text-white p-2">Saratoga Springs, UT</p>
-						</div>
-						<div className="bg-green-0 rounded-md m-1 h-max">
-							<p className="font-main font-bold text-white p-2">New York, NY</p>
-						</div>
-						<div className="bg-green-0 rounded-md m-1 h-max">
-							<p className="font-main font-bold text-white p-2">Syracruse, UT</p>
-						</div>
-						<div className="bg-green-0 rounded-md m-1 h-max">
-							<p className="font-main font-bold text-white p-2">Syracruse, UT</p>
-						</div>
-						<div className="bg-green-0 rounded-md m-1 h-max">
-							<p className="font-main font-bold text-white p-2">Syracruse, UT</p>
-						</div>
-						<div className="bg-green-0 rounded-md m-1 h-max">
-							<p className="font-main font-bold text-white p-2">Syracruse, UT</p>
-						</div>
-						<div className="bg-green-0 rounded-md m-1 h-max">
-							<p className="font-main font-bold text-white p-2">Syracruse, UT</p>
-						</div>
-						<div className="bg-green-0 rounded-md m-1 h-max">
-							<p className="font-main font-bold text-white p-2">Syracruse, UT</p>
-						</div>
-					</div>
-				</div>
+				<div className="bg-blue-1 px-4 py-2 rounded w-max font-main font-semibold text-white-1 mx-1 whitespace-nowrap">Saratoga Springs, UT</div>
+				<div className="bg-blue-1 px-4 py-2 rounded w-max font-main font-semibold text-white-1 mx-1 whitespace-nowrap">Saratoga Springs, UT</div>
+				<div className="bg-blue-1 px-4 py-2 rounded w-max font-main font-semibold text-white-1 mx-1 whitespace-nowrap">Saratoga Springs, UT</div>
+				<div className="bg-blue-1 px-4 py-2 rounded w-max font-main font-semibold text-white-1 mx-1 whitespace-nowrap">Saratoga Springs, UT</div>
+				<div className="bg-blue-1 px-4 py-2 rounded w-max font-main font-semibold text-white-1 mx-1 whitespace-nowrap">Saratoga Springs, UT</div>
+				<div className="bg-blue-1 px-4 py-2 rounded w-max font-main font-semibold text-white-1 mx-1 whitespace-nowrap">Saratoga Springs, UT</div>
+				<div className="bg-blue-1 px-4 py-2 rounded w-max font-main font-semibold text-white-1 mx-1 whitespace-nowrap">Saratoga Springs, UT</div>
+				<div className="bg-blue-1 px-4 py-2 rounded w-max font-main font-semibold text-white-1 mx-1 whitespace-nowrap">Saratoga Springs, UT</div>
 			</div>
 		</div>
 	)
