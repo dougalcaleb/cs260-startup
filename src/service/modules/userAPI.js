@@ -1,15 +1,16 @@
 import { Router } from "express";
 import { requireAuth } from "../common/cognitoAuth.js";
 import { GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { USER_ACTIVE_TTL, USER_TABLE } from "../config.js";
+import { USER_TABLE } from "../config.js";
 import { ddClient } from "../common/dynamodb.js";
 import { getRandomColorPair } from "../common/util.js";
+import { getWebSocketManager } from "../common/websocket.js";
+import { WS_NEARBY_CLOSE, WS_NEARBY_OPEN } from "../constants.js";
+import { getNearbyUsersManager } from "../common/nearbyUsers.js";
 
 const router = Router();
-
-function isActive(activeAt) {
-	return (Math.floor(Date.now() / 1000) - activeAt) < USER_ACTIVE_TTL;
-}
+const wsManager = getWebSocketManager();
+const nuManager = getNearbyUsersManager();
 
 // Ensures the user has an entry in the db, creates one if not
 router.post("/login", requireAuth, async (req, res) => {

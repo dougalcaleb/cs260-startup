@@ -135,18 +135,18 @@ export function openWS(typeID, uuid) {
 	
 	const ws = new WebSocket(`${wsScheme}://${wsHost}`);
 
-	ws.onopen = () => {
+	ws.addEventListener("open", () => {
 		// Register this connection with the server
-		ws.send(JSON.stringify({ type: typeID, uuid }));
-	};
+		ws.send(JSON.stringify({ type: typeID, userID: uuid }));
+	});
 
-	ws.onerror = (error) => {
+	ws.addEventListener("error", (error) => {
 		console.error('WebSocket error:', error);
-	};
+	});
 
-	ws.onclose = (event) => {
+	ws.addEventListener("close", (event) => {
 		console.log('WebSocket closed:', event.code, event.reason);
-	};
+	});
 
 	return ws;
 }

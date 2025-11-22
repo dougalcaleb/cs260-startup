@@ -11,6 +11,8 @@ import userAPIMongo from "./modules/userAPIMongo.js";
 import { geocodeQueue } from "./common/geocodeQueue.js";
 import { summaryQueue } from './common/summaryQueue.js';
 import { connectToMongoDB } from './common/mongodb.js';
+import { initNearbyUsersManager } from './common/nearbyUsers.js';
+import { WS_NEARBY_CLOSE, WS_NEARBY_OPEN } from './constants.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -51,7 +53,16 @@ app.get(/^\/(?!api).*/, (_req, res) => {
 
 
 // WebSocket setup
-const websocketManager = initWebSocket(server); 
+const websocketManager = initWebSocket(server);
+const nearbyUsersManager = initNearbyUsersManager();
+
+websocketManager.subscribe(WS_NEARBY_OPEN, (sdata) => {
+	nearbyUsersManager.userConnected(sdata.userID);
+});
+
+websocketManager.subscribe(WS_NEARBY_CLOSE, (sdata) => {
+	nearbyUsersManager.userDisconnected(sdata.userID);
+});
 
 // Init mongo atlas connection
 // connectToMongoDB().catch(err => {

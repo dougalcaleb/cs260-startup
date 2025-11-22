@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws";
-import { WS_NEARBY, WS_NEARBY_OPEN, WS_UPLOAD, WS_UPLOAD_OPEN } from "../constants.js";
+import { WS_NEARBY, WS_NEARBY_CLOSE, WS_NEARBY_OPEN, WS_UPLOAD, WS_UPLOAD_OPEN } from "../constants.js";
 
 class WebSocketManager {
 	constructor(server) {
@@ -8,7 +8,11 @@ class WebSocketManager {
 		this.wsClients = new Map();
 		this.acceptedOps = new Set([
 			WS_UPLOAD_OPEN,
-			WS_NEARBY_OPEN
+			WS_NEARBY_OPEN,
+			WS_NEARBY_CLOSE
+		]);
+		this.opPairs = new Map([
+			[WS_NEARBY_OPEN, WS_NEARBY_CLOSE]
 		]);
 		this.opMap = new Map([
 			[WS_UPLOAD_OPEN, WS_UPLOAD],
@@ -16,7 +20,7 @@ class WebSocketManager {
 			[WS_UPLOAD, WS_UPLOAD],
 			[WS_NEARBY, WS_NEARBY]
 		]);
-		this.opMap
+		this.subscriptions = new Map([]);
 		this.setup();
 	}
 
@@ -40,7 +44,11 @@ class WebSocketManager {
 						throw new Error("Invalid WS operation " + data.type);
 					}
 
-					ws.userID = data.uuid;
+					ws.userID = data.userID;
+					ws.openType = data.type;
+					if (this.opPairs.has(ws.openType)) {
+						ws.closeType = this.opPairs.get(ws.openType);
+					}
 					ws.connType = this.opMap.get(data.type);
 
 					if (!this.wsClients.has(ws.userID)) {
@@ -51,6 +59,8 @@ class WebSocketManager {
 					if (!userSockets.get(this.opMap.get(data.type))) {
 						userSockets.set(this.opMap.get(data.type), ws);
 					}
+
+					this.subscriptions.get(data.type).forEach(callback => callback(data));
 				} catch (e) {
 					ws.send(JSON.stringify({ type: "error", error: "Invalid message format" }));
 				}
@@ -61,6 +71,10 @@ class WebSocketManager {
 					this.wsClients.get(ws.userID).delete(ws.connType);
 					if (this.wsClients.get(ws.userID).size === 0) {
 						this.wsClients.delete(ws.userID);
+					}
+					
+					if (this.subscriptions.has(ws.closeType)) {
+						this.subscriptions.get(ws.closeType).forEach(callback => callback({ userID: ws.userID }));
 					}
 				}
 			});
@@ -85,6 +99,11 @@ class WebSocketManager {
 
 		this.wss.on("close", () => {
 			clearInterval(this.interval);
+		});
+
+		// Set up empty arrays for each operation subscription
+		this.acceptedOps.forEach(val => {
+			this.subscriptions.set(val, []);
 		});
 	}
 
@@ -111,6 +130,17 @@ class WebSocketManager {
 				ws.send(JSON.stringify(payload));
 			}
 		});
+	}
+
+	// Add a callback that runs when a connection event happens
+	subscribe(connectionType, callback) {
+		if (!this.acceptedOps.has(connectionType)) {
+			throw new Error("Invalid connection type " + connectionType);
+		}
+
+		const subs = this.subscriptions.get(connectionType);
+		subs.push(callback);
+		this.subscriptions.set(connectionType, subs);
 	}
 }
 
