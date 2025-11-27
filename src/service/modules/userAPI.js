@@ -42,7 +42,8 @@ router.post("/login", requireAuth, async (req, res) => {
 		Item: {
 			uid: req.body.uuid,
 			username,
-			profileColors: profileColorPair
+			profileColors: profileColorPair,
+			picture: req.body.picture || null
 		}
 	});
 

@@ -42,7 +42,9 @@ class NearbyUsers {
 		this.connectedUsers.set(userID, {
 			locations: JSON.parse(summaryData.Item?.locations || "[]"),
 			dates: JSON.parse(summaryData.Item?.dates || "[]"),
-			username: userData.Item?.username || "[No username]"
+			username: userData.Item?.username || "[No username]",
+			profileColors: userData.Item?.profileColors || null,
+			picture: userData.Item?.picture || null,
 		});
 
 		this.socket.broadcast({

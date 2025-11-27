@@ -1,6 +1,13 @@
+import ProfileImage from "../pages/ProfileImage";
 import Button from "./Button";
 
-export default function PersonCard({ name, connections, className }) {
+export default function PersonCard({
+	name,
+	connections,
+	className,
+	profileColors,
+	profileImg,
+}) {
 
 	connections = Object.assign({ locations: new Set(), dates: new Set() }, connections);
 
@@ -9,11 +16,22 @@ export default function PersonCard({ name, connections, className }) {
 	const combined = [...(connections?.locations ?? []), ...(connections?.dates ?? [])];
 	const shuffled = combined.sort(() => Math.random() - 0.5);
 
+	const profileData = {
+		username: name,
+		colors: profileColors,
+		src: profileImg
+	};
+
 	return (
 		<div className={`bg-gray-5 w-full rounded-xl flex flex-col p-2 ${className}`}>
 			<div className="flex flex-col sm:flex-row justify-between">
 				<div className="flex items-center">
-					<div className="rounded-full bg-amber-500 h-10 w-10 m-1 my-2 sm:my-4"></div>
+					<ProfileImage
+						username={profileData.username}
+						colors={profileData.colors}
+						src={profileData.src}
+						className="w-10 h-10 m-1 my-2 sm:my-4"
+					/>
 					<p className="font-main font-bold text-white ml-2">{name}</p>
 				</div>
 				<div className="flex justify-between items-center mb-4 sm:mb-0">
@@ -25,7 +43,6 @@ export default function PersonCard({ name, connections, className }) {
 				<div className="absolute h-full w-20 right-0 pointer-events-none bg-gradient-to-l from-gray-3 to-transparent"></div>
 
 				{shuffled.map((item, index) => (
-					// <diKv key={index}>{item}</diKv>
 					<div
 						key={`connection-tile-${item}-${index}`}
 						className="bg-blue-1 px-4 py-2 rounded w-max font-main font-semibold text-white-1 mx-1 whitespace-nowrap"

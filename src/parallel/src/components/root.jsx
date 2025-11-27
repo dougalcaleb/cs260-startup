@@ -33,7 +33,8 @@ export default function Root() {
 				try {
 					await authPost("/api/user/login", authUser.authToken, {
 						uuid: authUser.uuid,
-						username: authUser.username
+						username: authUser.username,
+						picture: authUser.picture || null
 					})
 				} catch (e) {
 					launchAlert(ALERTS.WARNING, "Could not finish logging in. Some features may not function. Please refresh the page.");

@@ -10,6 +10,7 @@ import { useAlert } from "../../contexts/AlertContext";
 import Input from "./Input";
 import Spinner from "./Spinner";
 import { useGlobalState } from "../../contexts/StateProvider";
+import ProfileImage from "../pages/ProfileImage";
 
 export default function Header() {
 	const location = useLocation();
@@ -57,14 +58,6 @@ export default function Header() {
 		return () => window.removeEventListener("scroll", onScroll);
 	}, []);
 
-	const placeholderUser = (
-		<div>
-			<p className="font-bold font-main">{(username || authUser.username || "").split("")[0]?.toUpperCase?.()}</p>
-		</div>
-	)
-
-	const userProfileColors = JSON.parse(window.sessionStorage.getItem(USER_PROFILE_KEY))?.profileColors || { "main": "hsl(138, 47%, 64%)", "contrast": "hsl(0, 0%, 86%)" };
-
 	const saveUsername = async () => {
 		setLoadingPopupOpen(true);
 		setProfilePopupOpen(false);
@@ -97,32 +90,22 @@ export default function Header() {
 	return (
 		<>
 			<div id="pre-header" className="flex sm:hidden justify-center h-[20vh]">
-				<div ref={bigLogoRef} id="pre-header-logo" className="fixed flex flex-col items-center w-full z-20" style={bigLogoStyle}>
+				<div ref={bigLogoRef} id="pre-header-logo" className="fixed flex flex-col items-center w-full" style={bigLogoStyle}>
 					<img src={parallelLogo} className="h-8" />
 					<p className="font-header text-white-0 text-4xl mt-4 font-black">PARALLEL</p>
 				</div>
 			</div>
 
-			<header ref={headerRef} className="sticky bg-gray-3 flex justify-between h-[7vh] w-full m-0 sm:h-[max(7vh,70px)] top-0 items-center z-10">
+			<header ref={headerRef} className="sticky flex justify-between h-[7vh] w-full m-0 sm:h-[max(7vh,70px)] top-0 items-center z-10">
 				<div  className="flex items-center justify-between w-full sm:mr-8" >
 					<div className="flex items-center"  style={smallLogoStyle}>
 						<img src={parallelLogo} className="h-4 ml-5 sm:h-5 sm:ml-8" />
 						<p className="font-header text-white-0 ml-2.5 sm:text-2xl font-black">PARALLEL</p>
 					</div>
-					<div className="relative">
-						<div className="flex items-center cursor-pointer sm:hover:bg-gray-5 px-6 py-2 rounded-md" onClick={openProfilePopup}>
+					<div className="relative z-30">
+						<div className="flex items-center cursor-pointer sm:hover:bg-gray-5 px-6 py-2 rounded-md z-30" onClick={openProfilePopup}>
 							<p className="font-main text-gray-7 font-bold mr-3 sm:mr-4 select-none text-right">{username || authUser.username}</p>
-							<div className="rounded-full w-7 h-7 sm:h-8 sm:w-8 flex justify-center items-center overflow-hidden" style={{ background: userProfileColors.main, color: userProfileColors.contrast }}>
-								{authUser.picture ? (
-									<img
-										src={authUser.picture}
-										alt="Profile"
-										referrerPolicy="no-referrer"
-										crossOrigin="anonymous"
-										className="w-full h-full object-cover"
-									/>
-								) : placeholderUser}
-							</div>
+							<ProfileImage isSelf className="w-7 h-7 sm:h-8 sm:w-8" />
 						</div>
 						<Popup
 							bodyStyle="h-2/3 w-full md:w-2/3 md:h-1/2 lg:w-1/2 xl:w-1/3 lg:h-2/3"

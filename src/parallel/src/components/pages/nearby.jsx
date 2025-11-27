@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import PersonCard from "../shared/PersonCard";
 import Spinner from "../shared/Spinner";
 import { useGlobalState } from "../../contexts/StateProvider";
@@ -13,28 +13,47 @@ export default function Nearby() {
 	const [nearbyUsers, setNearbyUsers] = useState([]);
 	const [selfData, setSelfData] = useState(null);
 
-	if (!connectingToNearby && !connectedToNearby) {
-		setConnectingToNearby(true);
+	const socketRef = useRef(null);
 
-		const nearbySocket = openWS(WS_NEARBY_OPEN, authUser.uuid);
-		nearbySocket.addEventListener("open", () => {
-			setConnectingToNearby(false);
-			setConnectedToNearby(true);
-		});
-		nearbySocket.addEventListener("message", (evt) => {
-			const data = JSON.parse(evt.data);
-			
-			if (data.type === WS_NEARBY_USER_CONNECT || data.type === WS_NEARBY_USER_DISCONNECT) {
-				const users = Object.entries(data.data).filter(([userID, _]) => userID !== authUser.uuid).map(([userID, userData]) => ({ userID, ...userData }));
-				setNearbyUsers(users);
-				setSelfData(data.data[authUser.uuid]);
-			}
-		});
-		nearbySocket.addEventListener("close", () => {
-			setConnectedToNearby(false);
-			setNearbyUsers([]);
-		});
+	const socketOpen = () => {
+		setConnectingToNearby(false);
+		setConnectedToNearby(true);
 	}
+	const socketMessage = (evt) => {
+		const data = JSON.parse(evt.data);
+		
+		if (data.type === WS_NEARBY_USER_CONNECT || data.type === WS_NEARBY_USER_DISCONNECT) {
+			const users = Object.entries(data.data).filter(([userID, _]) => userID !== authUser.uuid).map(([userID, userData]) => ({ userID, ...userData }));
+			setNearbyUsers(users);
+			setSelfData(data.data[authUser.uuid]);
+		}
+	}
+	const socketClose = () => {
+		setConnectedToNearby(false);
+		setNearbyUsers([]);
+	}
+
+	useEffect(() => {
+		if (!connectingToNearby && !connectedToNearby) {
+			setConnectingToNearby(true);
+
+			const nearbySocket = openWS(WS_NEARBY_OPEN, authUser.uuid);
+			nearbySocket.addEventListener("open", socketOpen);
+			nearbySocket.addEventListener("message", socketMessage);
+			nearbySocket.addEventListener("close", socketClose);
+
+			socketRef.current = nearbySocket;
+		}
+
+		return () => {
+			if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+				socketRef.current.close();
+			}
+
+			setConnectedToNearby(false);
+			setConnectingToNearby(false);
+		}
+	}, []);
 
 	const connections = useMemo(() => {
 		if (!selfData || !nearbyUsers.length) return [];
@@ -45,6 +64,8 @@ export default function Nearby() {
 		return nearbyUsers.map(userData => ({
 			userID: userData.userID,
 			name: userData.username,
+			profileColors: userData.profileColors,
+			picture: userData.picture,
 			connections: {
 				locations:  selfLocSet.intersection(new Set(userData.locations)),
 				dates: selfDateSet.intersection(new Set(userData.dates))
@@ -66,7 +87,7 @@ export default function Nearby() {
 			{connectedToNearby && (
 				<div className="flex justify-center sm:justify-start mx-4 sm:mx-0">
 					<div className="flex items-center sm:ml-8 mb-4 sm:justify-normal px-4 py-2 bg-gray-4 w-max rounded select-none text-green-2 ghost-loader">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-4 w-4 text-green-2 mr-3">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-6 w-6 sm:h-4 sm:w-4 text-green-2 mr-3">
 							<path fill="currentColor" d="M0 64c0-17.7 14.3-32 32-32 229.8 0 416 186.2 416 416 0 17.7-14.3 32-32 32s-32-14.3-32-32C384 253.6 226.4 96 32 96 14.3 96 0 81.7 0 64zM0 416a64 64 0 1 1 128 0 64 64 0 1 1 -128 0zM32 160c159.1 0 288 128.9 288 288 0 17.7-14.3 32-32 32s-32-14.3-32-32c0-123.7-100.3-224-224-224-17.7 0-32-14.3-32-32s14.3-32 32-32z"/>
 						</svg>
 
@@ -81,7 +102,14 @@ export default function Nearby() {
 			)}
 			<div className="mx-4 sm:mx-8">
 				{connections.map((u, idx) => (
-					<PersonCard className="my-2" key={`conn-${u.userID}-${idx}`} name={u.name} connections={u.connections} />
+					<PersonCard
+						className="my-2"
+						key={`conn-${u.userID}-${idx}`}
+						name={u.name}
+						connections={u.connections}
+						profileColors={u.profileColors}
+						profileImg={u.picture}
+					/>
 				))}
 			</div>
 		</div>
