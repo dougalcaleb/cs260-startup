@@ -24,6 +24,7 @@ export default function Header() {
 	const atSearch = location.pathname === '/search';
 
 	const selectedClass = "bg-green-2 text-gray-1";
+	const bgGray3 = "hsl(0, 0%, 16%)";
 
 	const headerRef = useRef(null);
 	const bigLogoRef = useRef(null);
@@ -31,6 +32,7 @@ export default function Header() {
 	const [profilePopupOpen, setProfilePopupOpen] = useState(false);
 	const [bigLogoStyle, setBigLogoStyle] = useState({ top: 0 });
 	const [smallLogoStyle, setSmallLogoStyle] = useState({ opacity: 1 });
+	const [headerStyle, setHeaderStyle] = useState({ background: bgGray3 });
 	const [tmpUsername, setTmpUsername] = useState("");
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
 
@@ -52,6 +54,12 @@ export default function Header() {
 
 				setBigLogoStyle({ top: `${headerBound.bottom / 2 - logoHeight / 2}px`, opacity: Math.min(1, 1 - percentScrolled * 3) });
 				setSmallLogoStyle({ opacity: Math.min(1, (percentScrolled - 0.3) * 3) });
+
+				if (percentScrolled >= 0.98) {
+					setHeaderStyle({ background: bgGray3})
+				} else {
+					setHeaderStyle({ background: "rgba(0,0,0,0)" });
+				}
 			}
 		};
 		window.addEventListener("scroll", onScroll);
@@ -96,7 +104,7 @@ export default function Header() {
 				</div>
 			</div>
 
-			<header ref={headerRef} className="sticky flex justify-between h-[7vh] w-full m-0 sm:h-[max(7vh,70px)] top-0 items-center z-10">
+			<header ref={headerRef} className="sticky flex justify-between h-[7vh] w-full m-0 sm:h-[max(7vh,70px)] top-0 items-center z-10" style={headerStyle}>
 				<div  className="flex items-center justify-between w-full sm:mr-8" >
 					<div className="flex items-center"  style={smallLogoStyle}>
 						<img src={parallelLogo} className="h-4 ml-5 sm:h-5 sm:ml-8" />
