@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileImage from "../pages/ProfileImage";
 import Button from "./Button";
 import { useGlobalState } from "../../contexts/StateProvider";
+import { isMobileDevice } from "../../mixins/screen";
 
 export default function PersonCard({
 	name,
@@ -46,7 +47,7 @@ export default function PersonCard({
 					/>
 					<p className="font-main font-bold text-white ml-2">{name}</p>
 				</div>
-				<div className={`flex justify-between items-center sm:mb-0 ${hideConnections ? 'mt-4' : 'mb-4'}`}>
+				<div className={`flex justify-between items-center sm:mb-0 ${(hideConnections && isMobileDevice()) ? 'mt-4' : 'mb-4'}`}>
 					{!hideConnections && <p className="font-main font-semibold italic text-gray-7 ml-1">{connectionCount} connections</p>}
 					<Button
 						onClick={navToConnect}
