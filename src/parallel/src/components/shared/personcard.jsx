@@ -10,6 +10,7 @@ export default function PersonCard({
 	className,
 	profileColors,
 	profileImg,
+	hideConnections = false,
 }) {
 	const navigate = useNavigate();
 	const { setComparingWith, setIsComparing } = useGlobalState();
@@ -45,8 +46,8 @@ export default function PersonCard({
 					/>
 					<p className="font-main font-bold text-white ml-2">{name}</p>
 				</div>
-				<div className="flex justify-between items-center mb-4 sm:mb-0">
-					<p className="font-main font-semibold italic text-gray-7 ml-1">{connectionCount} connections</p>
+				<div className={`flex justify-between items-center sm:mb-0 ${hideConnections ? 'mt-4' : 'mb-4'}`}>
+					{!hideConnections && <p className="font-main font-semibold italic text-gray-7 ml-1">{connectionCount} connections</p>}
 					<Button
 						onClick={navToConnect}
 						className="h-max py-2 px-4 sm:mx-4"

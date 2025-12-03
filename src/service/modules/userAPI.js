@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth } from "../common/cognitoAuth.js";
-import { GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, UpdateCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { SUMMARY_TABLE, USER_TABLE } from "../config.js";
 import { ddClient } from "../common/dynamodb.js";
 import { getRandomColorPair } from "../common/util.js";
@@ -121,6 +121,41 @@ router.get("/get-user-summary", requireAuth, async (req, res) => {
 	} else {
 		res.status(404).json({ error: "User not found" });
 	}
+});
+
+router.get("/get-all-users", requireAuth, async (req, res) => {
+	const result = {};
+	let lastEvaluatedKey;
+
+	try {
+		do {
+			const resp = await ddClient.send(new ScanCommand({
+				TableName: USER_TABLE,
+				ProjectionExpression: "uid, #un, #pic, #pc",
+				ExpressionAttributeNames: { "#un": "username", "#pic": "picture", "#pc": "profileColors" },
+				ExclusiveStartKey: lastEvaluatedKey
+			}));
+
+			if (resp.Items?.length) {
+				for (const item of resp.Items) {
+					if (item.uid !== undefined && item.username !== undefined) {
+						result[item.uid] = {
+							username: item.username,
+							profileColors: item.profileColors,
+							picture: item.picture || null
+						};
+					}
+				}
+			}
+
+			lastEvaluatedKey = resp.LastEvaluatedKey;
+		} while (lastEvaluatedKey); // wow, a do-while. This is best practice apparently because of pagination from Dynamo
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+		return;
+	}
+
+	res.json(result);
 });
 
 export default router;
