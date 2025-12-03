@@ -13,7 +13,7 @@ export default function Connect() {
 	
 	const refreshLibrary = useCallback(async () => {
 		try {
-			const list = await authPost("/api/image/get-user-images", authUser.authToken, { userID: comparingWith });
+			const list = await authPost("/api/image/get-user-images", authUser.authToken, { userID: comparingWith.userID });
 			if (list?.length) {
 				setConnectImages(list.map(i => ({ url: i.url, key: i.key })));
 				setConnectImgMetadata(new Map(list.map(i => [ i.key, i.metadata ])));

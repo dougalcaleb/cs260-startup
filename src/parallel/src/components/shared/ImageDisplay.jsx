@@ -20,7 +20,7 @@ export default function ImageDisplay({ onPage }) {
 	 =============================================================*/
 	
 	// Hooks
-	const { libImages, setLibImages, imagesLoaded, setImagesLoaded, libImgMetadata, setLibImgMetadata, connectImages, setConnectImages, connectImgMetadata, selfSummary } = useGlobalState();
+	const { libImages, setLibImages, imagesLoaded, setImagesLoaded, libImgMetadata, setLibImgMetadata, connectImages, setConnectImages, connectImgMetadata, selfSummary, comparingWith } = useGlobalState();
 	const { launchAlert } = useAlert();
 	const authUser = useAuthUser();
 
@@ -280,7 +280,7 @@ export default function ImageDisplay({ onPage }) {
 
 					<p className="font-main font-bold italic mr-1">
 						<span className="text-green-2">Connecting with </span>
-						<span className="text-green-2">John Doe III</span>
+						<span className="text-green-2">{comparingWith.username}</span>
 					</p>
 				</div>
 			</div>

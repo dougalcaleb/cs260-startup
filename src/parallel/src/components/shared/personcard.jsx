@@ -29,7 +29,7 @@ export default function PersonCard({
 	};
 
 	const navToConnect = () => {
-		setComparingWith(userID);
+		setComparingWith({userID, username: name});
 		setIsComparing(true);
 		navigate("/connect");
 	}
