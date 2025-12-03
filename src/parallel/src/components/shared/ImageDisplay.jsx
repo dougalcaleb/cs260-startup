@@ -7,7 +7,7 @@ import Popup from "./Popup";
 import Spinner from "./Spinner";
 import { authPost, openWS } from "../../mixins/api";
 import Dropdown from "./Dropdown";
-import { formatMetadata } from "../../mixins/format";
+import { formatDate, formatMetadata } from "../../mixins/format";
 import { sortByLocation, sortByTime } from "../../mixins/sort";
 import LocationPicker from "./LocationPicker";
 import DatePicker from "./DatePicker";
@@ -20,7 +20,7 @@ export default function ImageDisplay({ onPage }) {
 	 =============================================================*/
 	
 	// Hooks
-	const { libImages, setLibImages, imagesLoaded, setImagesLoaded, libImgMetadata, setLibImgMetadata } = useGlobalState();
+	const { libImages, setLibImages, imagesLoaded, setImagesLoaded, libImgMetadata, setLibImgMetadata, connectImages, setConnectImages, connectImgMetadata, selfSummary } = useGlobalState();
 	const { launchAlert } = useAlert();
 	const authUser = useAuthUser();
 
@@ -41,23 +41,32 @@ export default function ImageDisplay({ onPage }) {
 	const [imageSet, setImageSet] = useMemo(() => {
 		if (onPage === PAGES.LIBRARY) {
 			return [libImages, setLibImages];
+		} else if (onPage === PAGES.CONNECT) {
+			return [connectImages, setConnectImages]
 		}
 
 		return [[], () => { }];
-	}, [onPage, libImages, setLibImages]);
+	}, [onPage, libImages, setLibImages, connectImages, setConnectImages]);
 
 	const imageSetMdata = useMemo(() => {
 		if (onPage === PAGES.LIBRARY) {
 			return libImgMetadata;
+		} else if (onPage === PAGES.CONNECT) {
+			return connectImgMetadata;
 		}
 
 		return new Map();
-	}, [onPage, libImgMetadata]);
+	}, [onPage, libImgMetadata, connectImgMetadata]);
 
-	const mergedImageSet = useMemo(() => (imageSet || []).map(i => ({
-		...i,
-		metadata: imageSetMdata.get(i.key) || { loc: null, time: null }
-	})), [imageSet, imageSetMdata]);
+	const mergedImageSet = useMemo(() =>
+		(imageSet || [])
+			.map(i => ({
+				...i,
+				metadata: imageSetMdata.get(i.key) || { loc: null, time: null, readableLocation: "" }
+			}))
+			.filter(i => onPage === PAGES.LIBRARY || selfSummary.locations.has(i.metadata.readableLocation) || selfSummary.dates.has(formatDate(i.metadata.time)))
+		, [imageSet, imageSetMdata, onPage, selfSummary]
+	);
 
 	const [locationSortedImageSet, dateSortedImageSet] = useMemo(() => {
 		if (!imageSet || !imageSet.length || !mergedImageSet || !mergedImageSet.length) return [[], []];
@@ -213,7 +222,7 @@ export default function ImageDisplay({ onPage }) {
 		</div>
 	);
 
-	const compactView = (imageSet || []).map(createImage);
+	const compactView = (mergedImageSet || []).map(createImage);
 
 	const dateView = (
 		dateSortedImageSet.map(dateSet => (
@@ -253,18 +262,47 @@ export default function ImageDisplay({ onPage }) {
 			break;
 	}
 
+	let bodyHeader = null;
+	if (onPage === PAGES.LIBRARY) {
+		bodyHeader = <div>LIBRARY</div>
+	} else if (onPage === PAGES.CONNECT) {
+		bodyHeader = <div>CONNECT</div>
+	}
+
+	let bodySubHeader = null;
+	if (onPage === PAGES.CONNECT) {
+		bodySubHeader = (
+			<div className="flex justify-center sm:justify-start mx-4 sm:mx-0 mt-2">
+				<div className="flex items-center sm:ml-8 mb-4 sm:justify-normal px-4 py-2 bg-gray-4 w-max rounded select-none">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-6 w-6 sm:h-4 sm:w-4 text-green-2 mr-2">
+						<path fill="currentColor" d="M418.4 157.9c35.3-8.3 61.6-40 61.6-77.9 0-44.2-35.8-80-80-80-43.4 0-78.7 34.5-80 77.5L136.2 151.1C121.7 136.8 101.9 128 80 128 35.8 128 0 163.8 0 208s35.8 80 80 80c12.2 0 23.8-2.7 34.1-7.6L259.7 407.8c-2.4 7.6-3.7 15.8-3.7 24.2 0 44.2 35.8 80 80 80s80-35.8 80-80c0-27.7-14-52.1-35.4-66.4l37.8-207.7zM156.3 232.2c2.2-6.9 3.5-14.2 3.7-21.7l183.8-73.5c3.6 3.5 7.4 6.7 11.6 9.5L317.6 354.1c-5.5 1.3-10.8 3.1-15.8 5.5L156.3 232.2z" />
+					</svg>
+
+					<p className="font-main font-bold italic mr-1">
+						<span className="text-green-2">Connecting with </span>
+						<span className="text-green-2">John Doe III</span>
+					</p>
+				</div>
+			</div>
+		)
+	}
+
 	/**===========================================================
 	 * EMPTY RENDER
 	 =============================================================*/
 
-	if (imageSet === null) {
+	if (imageSet === null || !mergedImageSet.length) {
 		if (onPage === PAGES.LIBRARY) {
 			return (
 				<div className="text-gray-7 italic font-bold w-full p-8">No library images found. Upload some!</div>
 			);
 		} else {
 			return (
-				<div className="text-gray-7 italic font-bold w-full p-8">No images to show.</div>
+				<>
+					<div className="font-main font-black text-gray-6 sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8 px-4 sm:px-0 sm:justify-start">{bodyHeader}</div>
+					{bodySubHeader}
+					<div className="text-gray-7 italic font-bold w-full px-8 mt-4">No images to show.</div>
+				</>
 			);
 		}
 	}
@@ -284,13 +322,15 @@ export default function ImageDisplay({ onPage }) {
 		<>
 			<div className="font-main font-black text-gray-6 flex justify-between sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8 px-4 sm:px-0 sm:justify-start">
 				<div className="h-8 w-8 sm:hidden"></div>
-				<div>LIBRARY</div>
+				{ bodyHeader }
 				<div className="h-8 w-8 sm:px-4 sm:w-auto sm:h-auto flex items-center" onClick={() => setSettingsPopupOpen(true)}>
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-6 w-6 sm:h-5 sm:w-5 cursor-pointer hover:text-gray-7">
 						<path fill="currentColor" d="M232.5 5.2c14.9-6.9 32.1-6.9 47 0l218.6 101c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L13.9 149.8C5.4 145.8 0 137.3 0 128s5.4-17.9 13.9-21.8L232.5 5.2zM48.1 218.4l164.3 75.9c27.7 12.8 59.6 12.8 87.3 0l164.3-75.9 34.1 15.8c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L13.9 277.8C5.4 273.8 0 265.3 0 256s5.4-17.9 13.9-21.8l34.1-15.8zM13.9 362.2l34.1-15.8 164.3 75.9c27.7 12.8 59.6 12.8 87.3 0l164.3-75.9 34.1 15.8c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L13.9 405.8C5.4 401.8 0 393.3 0 384s5.4-17.9 13.9-21.8z" />
 					</svg>
 				</div>
 			</div>
+
+			{bodySubHeader}
 
 			<div className="grid p-4 gap-2.5 sm:flex flex-wrap" id="library-content">
 				{imageView}

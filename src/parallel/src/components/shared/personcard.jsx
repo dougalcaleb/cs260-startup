@@ -1,13 +1,18 @@
+import { Link, useNavigate } from "react-router-dom";
 import ProfileImage from "../pages/ProfileImage";
 import Button from "./Button";
+import { useGlobalState } from "../../contexts/StateProvider";
 
 export default function PersonCard({
 	name,
+	userID,
 	connections,
 	className,
 	profileColors,
 	profileImg,
 }) {
+	const navigate = useNavigate();
+	const { setComparingWith, setIsComparing } = useGlobalState();
 
 	connections = Object.assign({ locations: new Set(), dates: new Set() }, connections);
 
@@ -21,6 +26,12 @@ export default function PersonCard({
 		colors: profileColors,
 		src: profileImg
 	};
+
+	const navToConnect = () => {
+		setComparingWith(userID);
+		setIsComparing(true);
+		navigate("/connect");
+	}
 
 	return (
 		<div className={`bg-gray-5 w-full rounded-xl flex flex-col p-2 ${className}`}>
@@ -36,7 +47,12 @@ export default function PersonCard({
 				</div>
 				<div className="flex justify-between items-center mb-4 sm:mb-0">
 					<p className="font-main font-semibold italic text-gray-7 ml-1">{connectionCount} connections</p>
-					<Button className="h-max py-2 px-4 sm:mx-4">Connect</Button>
+					<Button
+						onClick={navToConnect}
+						className="h-max py-2 px-4 sm:mx-4"
+					>
+						Connect
+					</Button>
 				</div>
 			</div>
 			{!!combined.length && <div className="bg-gray-3 w-full flex rounded-lg py-2 px-1 overflow-hidden relative">

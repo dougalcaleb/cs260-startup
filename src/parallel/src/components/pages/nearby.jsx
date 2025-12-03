@@ -106,6 +106,7 @@ export default function Nearby() {
 						className="my-2"
 						key={`conn-${u.userID}-${idx}`}
 						name={u.name}
+						userID={u.userID}
 						connections={u.connections}
 						profileColors={u.profileColors}
 						profileImg={u.picture}

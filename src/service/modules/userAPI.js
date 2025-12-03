@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../common/cognitoAuth.js";
 import { GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { USER_TABLE } from "../config.js";
+import { SUMMARY_TABLE, USER_TABLE } from "../config.js";
 import { ddClient } from "../common/dynamodb.js";
 import { getRandomColorPair } from "../common/util.js";
 import { getWebSocketManager } from "../common/websocket.js";
@@ -97,6 +97,27 @@ router.post("/get-user", requireAuth, async (req, res) => {
 			username: getResponse.Item.username,
 			profileColors: getResponse.Item.profileColors
 		});
+	} else {
+		res.status(404).json({ error: "User not found" });
+	}
+});
+
+router.get("/get-user-summary", requireAuth, async (req, res) => {
+	let summaryData;
+	try {
+		summaryData = await ddClient.send(new GetCommand({
+			TableName: SUMMARY_TABLE,
+			Key: {
+				uid: req.user.sub
+			}
+		}));
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+		return;
+	}
+
+	if (summaryData.Item) {
+		res.json(summaryData.Item);
 	} else {
 		res.status(404).json({ error: "User not found" });
 	}

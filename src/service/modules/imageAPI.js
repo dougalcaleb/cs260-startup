@@ -136,31 +136,47 @@ async function getMetadataForImages(keys) {
 	return allMetadata;
 }
 
+const getImages = async (id) => {
+	const data = await s3.send(new ListObjectsV2Command({
+		Bucket: BUCKET_NAME,
+		Prefix: `images/${id}/`,
+		MaxKeys: 1000,
+	}));
+
+	let returnData = null;
+
+	if (data.Contents) {
+		const keys = data.Contents.map(c => c.Key);
+		
+		// Get signed URLs and metadata in parallel
+		const [signedUrls, metadata] = await Promise.all([
+			signURLs(keys),
+			getMetadataForImages(keys)
+		]);
+
+		returnData = signedUrls.map(item => ({
+			...item,
+			metadata: metadata[item.key] || { location: null, readableLocation: null, timestamp: null }
+		}));
+	}
+
+	return returnData;
+}
+
+// Gets images for the logged-in user
 router.get("/get-user-images", requireAuth, async (req, res) => {
 	try {
-		const data = await s3.send(new ListObjectsV2Command({
-			Bucket: BUCKET_NAME,
-			Prefix: `images/${req.user.sub}/`,
-			MaxKeys: 1000,
-		}));
+		const returnData = await getImages(req.user.sub);
+		res.json(returnData);
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
 
-		let returnData = null;
-
-		if (data.Contents) {
-			const keys = data.Contents.map(c => c.Key);
-			
-			// Get signed URLs and metadata in parallel
-			const [signedUrls, metadata] = await Promise.all([
-				signURLs(keys),
-				getMetadataForImages(keys)
-			]);
-
-			returnData = signedUrls.map(item => ({
-				...item,
-				metadata: metadata[item.key] || { location: null, readableLocation: null, timestamp: null }
-			}));
-		}
-
+// Gets images that are not the logged-in user's (for comparing)
+router.post("/get-user-images", requireAuth, async (req, res) => {
+	try {
+		const returnData = await getImages(req.body.userID);
 		res.json(returnData);
 	} catch (e) {
 		res.status(500).json({ error: e.message });

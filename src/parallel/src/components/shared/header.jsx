@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import parallelLogo from "../../assets/parallel-icon.svg"
 import { useEffect, useRef, useState } from "react";
 import Button from "./Button";
@@ -15,9 +15,10 @@ import ProfileImage from "../pages/ProfileImage";
 export default function Header() {
 	const location = useLocation();
 	const authUser = useAuthUser();
+	const navigate = useNavigate();
 	const { launchAlert } = useAlert();
 
-	const { username, setUsername } = useGlobalState();
+	const { username, setUsername, isComparing, setIsComparing } = useGlobalState();
 
 	const atLibrary = location.pathname === '/library' || location.pathname === "/";
 	const atNearby = location.pathname === '/nearby';
@@ -95,6 +96,11 @@ export default function Header() {
 		setTmpUsername(username);
 	}
 
+	const returnToHome = () => {
+		setIsComparing(false);
+		navigate("/library");
+	}
+
 	return (
 		<>
 			<div id="pre-header" className="flex sm:hidden justify-center h-[20vh]">
@@ -151,19 +157,29 @@ export default function Header() {
 					</div>
 				</div>
 			
-				<div className="w-[30vw] min-w-max mr-8 hidden sm:inline">
-					<nav className="bg-gray-1 w-full h-6 rounded-4xl flex justify-between items-center">
-						<Link to={!atLibrary ? '/library' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atLibrary ? selectedClass : 'text-white-0'}`}>
-							<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">YOU</div>
-						</Link>
-						<Link to={!atNearby ? '/nearby' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atNearby ? selectedClass : 'text-white-0'}`}>
-							<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">NEARBY</div>
-						</Link>
-						<Link to={!atSearch ? '/search' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atSearch ? selectedClass : 'text-white-0'}`}>
-							<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">SEARCH</div>
-						</Link>
-					</nav>
-				</div>
+				{!isComparing && (
+					<div className="w-[30vw] min-w-max mr-8 hidden sm:inline">
+						<nav className="bg-gray-1 w-full h-6 rounded-4xl flex justify-between items-center">
+							<Link to={!atLibrary ? '/library' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atLibrary ? selectedClass : 'text-white-0'}`}>
+								<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">YOU</div>
+							</Link>
+							<Link to={!atNearby ? '/nearby' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atNearby ? selectedClass : 'text-white-0'}`}>
+								<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">NEARBY</div>
+							</Link>
+							<Link to={!atSearch ? '/search' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atSearch ? selectedClass : 'text-white-0'}`}>
+								<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">SEARCH</div>
+							</Link>
+						</nav>
+					</div>
+				)}
+
+				{isComparing && (
+					<div className="pr-8 hidden sm:inline">
+						<Button onClick={returnToHome}>
+							<p className="text-nowrap px-4 py-2">RETURN TO HOME</p>
+						</Button>
+					</div>
+				)}
 			</header>
 		</>
 	);
