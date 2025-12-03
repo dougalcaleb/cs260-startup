@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "../shared/Input";
 import PersonCard from "../shared/PersonCard";
+import { useGlobalState } from "../../contexts/StateProvider";
 
 export default function Search() {
+	const { nearbySocket, setNearbySocket, setConnectedToNearby, setConnectingToNearby } = useGlobalState();
+
+	
+
 	const [searchTerm, setSearchTerm] = useState("");
 	const [foundUsers, setFoundUsers] = useState([
 		{
@@ -39,6 +44,16 @@ export default function Search() {
 		setSearchTerm(term);
 	}
 
+	// Close Nearby page websocket if open
+	useEffect(() => {
+		if (nearbySocket && nearbySocket.readyState === WebSocket.OPEN) {
+			nearbySocket.close();
+			
+			setNearbySocket(null);
+			setConnectedToNearby(false);
+			setConnectingToNearby(false);
+		}
+	});
 
 	return (
 		<div className="bg-gray-1 w-full min-h-[175vh] sm:min-h-[calc(100vh-max(7vh,70px))]">

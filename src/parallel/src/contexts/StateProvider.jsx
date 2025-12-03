@@ -18,6 +18,7 @@ export default function StateProvider({ children }) {
 	const [comparingWith, setComparingWith] = useState(null);
 	const [selfSummary, setSelfSummary] = useState(null);
 	const [isComparing, setIsComparing] = useState(false);
+	const [nearbySocket, setNearbySocket] = useState(null);
 
 	return (
 		<StateContext.Provider value={{
@@ -32,6 +33,7 @@ export default function StateProvider({ children }) {
 			comparingWith, setComparingWith,
 			selfSummary, setSelfSummary,
 			isComparing, setIsComparing,
+			nearbySocket, setNearbySocket,
 		}}>
 			{children}
 		</StateContext.Provider>

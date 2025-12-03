@@ -8,7 +8,7 @@ import useAuthUser from "../../hooks/useAuthUser";
 
 export default function Nearby() {
 	const authUser = useAuthUser();
-	const { connectingToNearby, setConnectingToNearby, connectedToNearby, setConnectedToNearby } = useGlobalState();
+	const { connectingToNearby, setConnectingToNearby, connectedToNearby, setConnectedToNearby, setNearbySocket } = useGlobalState();
 	
 	const [nearbyUsers, setNearbyUsers] = useState([]);
 	const [selfData, setSelfData] = useState(null);
@@ -43,15 +43,7 @@ export default function Nearby() {
 			nearbySocket.addEventListener("close", socketClose);
 
 			socketRef.current = nearbySocket;
-		}
-
-		return () => {
-			if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-				socketRef.current.close();
-			}
-
-			setConnectedToNearby(false);
-			setConnectingToNearby(false);
+			setNearbySocket(nearbySocket);
 		}
 	}, []);
 

@@ -21,7 +21,7 @@ export default function Library() {
 	// Hooks
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
-	const { libImages, setLibImages, setImagesLoaded, setLibImgMetadata } = useGlobalState();
+	const { libImages, setLibImages, setImagesLoaded, setLibImgMetadata, nearbySocket, setNearbySocket, setConnectedToNearby, setConnectingToNearby } = useGlobalState();
 
 	// State
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -205,6 +205,17 @@ export default function Library() {
 			}, 0);
 		}
 	}, [refreshLibrary, libImages]);
+
+	// Close Nearby page websocket if open
+	useEffect(() => {
+		if (nearbySocket && nearbySocket.readyState === WebSocket.OPEN) {
+			nearbySocket.close();
+			
+			setNearbySocket(null);
+			setConnectedToNearby(false);
+			setConnectingToNearby(false);
+		}
+	});
 
 	/**===========================================================
 	 * RENDER
