@@ -5,6 +5,7 @@ import { SUMMARY_TABLE, SUMMARY_UPDATE_BATCH, SUMMARY_UPDATE_DELAY, SUMMARY_UPDA
 class SummaryQueue {
 	constructor(options = {}) {
 		this.queue = [];
+		this.completeCallbacks = new Map();
 		this.processing = false;
 		this.willProcess = false;
 		this.maxRatePerSecond = options.maxRatePerSecond || SUMMARY_UPDATE_RATE;
@@ -16,7 +17,7 @@ class SummaryQueue {
 	/**
 	 * Add a new job to the queue
 	 */
-	enqueue(userID, dateStr = "", locationStr = "") {
+	enqueue(userID, dateStr = "", locationStr = "", onComplete = () => {}) {
 		if (!dateStr && !locationStr) return;
 		
 		const existingUpdate = this.queue.find(j => j.userID === userID);
@@ -38,6 +39,8 @@ class SummaryQueue {
 			});
 			console.log(`Added summary update job for ${userID}. Queue size: ${this.queue.length}`);
 		}
+
+		this.completeCallbacks.set(userID, onComplete);
 
 		// Start processing if not already running
 		if (!this.processing && !this.willProcess) {
@@ -113,7 +116,13 @@ class SummaryQueue {
 							locations: JSON.stringify(Array.from(locSummary)),
 							dates: JSON.stringify(Array.from(dateSummary))
 						}
-					}))
+					}));
+
+					const completeCb = this.completeCallbacks.get(userID);
+					if (completeCb) {
+						completeCb();
+						this.completeCallbacks.delete(userID);
+					}
 				} catch (e) {
 					console.error(`Failed to update summary data for ${userID}:`, e.message);
 				}

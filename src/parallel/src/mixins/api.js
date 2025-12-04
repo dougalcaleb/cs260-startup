@@ -1,11 +1,12 @@
-import { WS_NEARBY_OPEN, WS_UPLOAD_OPEN } from "./constants";
+import { WS_ADD_LOC_OPEN, WS_NEARBY_OPEN, WS_UPLOAD_OPEN } from "./constants";
 
 const API_BASE_URL = import.meta.env.PROD 
 	? 'https://startup.dougalcaleb.click' 
 	: 'http://localhost:4000';
 const acceptedWsTypes = new Set([
 	WS_UPLOAD_OPEN,
-	WS_NEARBY_OPEN
+	WS_NEARBY_OPEN,
+	WS_ADD_LOC_OPEN
 ]);
 
 /**

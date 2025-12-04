@@ -3,7 +3,7 @@ import { CSSTransition } from 'react-transition-group'
 import Button from "../shared/Button";
 import { isMobileScreen, isMobileDevice } from "../../mixins/screen";
 import Popup from "../shared/Popup";
-import { ALERTS, BTN_VARIANTS, PAGES, POPUP_VARIANTS, WS_GEOCODE_UPDATE, WS_UPLOAD_OPEN } from "../../mixins/constants";
+import { ALERTS, BTN_VARIANTS, PAGES, POPUP_VARIANTS, WS_ADD_LOC_OPEN, WS_ADD_LOC_UPDATE, WS_GEOCODE_UPDATE, WS_UPLOAD_OPEN } from "../../mixins/constants";
 import Input from "../shared/Input";
 import FilePicker from "../shared/FilePicker";
 import { authGet, authPost, openWS } from "../../mixins/api";
@@ -12,6 +12,7 @@ import { useAlert } from "../../contexts/AlertContext";
 import Spinner from "../shared/Spinner";
 import { useGlobalState } from "../../contexts/StateProvider";
 import ImageDisplay from "../shared/ImageDisplay";
+import LocationPicker from "../shared/LocationPicker";
 
 export default function Library() {
 	/**===========================================================
@@ -21,7 +22,7 @@ export default function Library() {
 	// Hooks
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
-	const { libImages, setLibImages, setImagesLoaded, setLibImgMetadata, nearbySocket, setNearbySocket, setConnectedToNearby, setConnectingToNearby } = useGlobalState();
+	const { libImages, setLibImages, setImagesLoaded, setLibImgMetadata, nearbySocket, setNearbySocket, setConnectedToNearby, setConnectingToNearby, setSelfSummary } = useGlobalState();
 
 	// State
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -30,7 +31,9 @@ export default function Library() {
 	const [uploadLocPopupOpen, setLocPopupOpen] = useState(false);
 	const [uploadImgPopupOpen, setImgPopupOpen] = useState(false);
 	const [loadingPopupOpen, setLoadingPopupOpen] = useState(false);
+	const [locPickerOpen, setLocPickerOpen] = useState(false);
 	const [locations, setLocations] = useState([""]);
+	const [pendingLocations, setPendingLocations] = useState([]);
 	const [imagesToUpload, setImagesToUpload] = useState([]);
 
 	// Refs
@@ -64,8 +67,25 @@ export default function Library() {
 		setImgPopupOpen(true);
 	};
 
-	const addLocation = () => {
-		setLocations([...locations, ""]);
+	const addLocation = (value = "") => {
+		setLocations(prevLocations => [...prevLocations, value]);
+	};
+
+	const addPendingLocation = () => {
+		setPendingLocations([...pendingLocations, {}]);
+		setLocPickerOpen(true);
+	};
+
+	const removePendingLocation = (index) => {
+		const newLocations = [...pendingLocations];
+		newLocations.splice(index, 1);
+		setPendingLocations(newLocations);
+	}
+
+	const setLastPendingLocation = (value) => {
+		const newLocations = [...pendingLocations];
+		newLocations[newLocations.length - 1] = value;
+		setPendingLocations(newLocations);
 	};
 
 	const setLocation = (index, value) => {
@@ -74,10 +94,45 @@ export default function Library() {
 		setLocations(newLocations);
 	};
 
+	const setLastLocation = (value) => {
+		setLocation(locations.length - 1, value);
+	}
+
+	const cancelLocPicker = () => {
+		const newLocations = pendingLocations.slice(0, -1);
+		setPendingLocations(newLocations);
+		setLocPickerOpen(false);
+	}
+
 	const removeLocation = (index) => {
 		const newLocations = [...locations];
 		newLocations.splice(index, 1);
 		setLocations(newLocations);
+	};
+
+	const saveLocations = async () => {
+		setLocPopupOpen(false);
+		await authPost("/api/user/set-locations", authUser.authToken, { locations });
+	}
+
+	const processLocation = async () => {
+		const processingLoc = pendingLocations[pendingLocations.length - 1];
+		setLocPickerOpen(false);
+		const processWS = openWS(WS_ADD_LOC_OPEN, authUser.uuid);
+		processWS.onmessage = (evt) => {
+			const message = JSON.parse(evt.data);
+				
+			if (message.type === WS_ADD_LOC_UPDATE) {
+				removePendingLocation(pendingLocations.findIndex(l => l === processingLoc));
+				if (message.updates) {
+					message.updates.forEach(update => {
+						addLocation(update.readableLocation);
+					});
+				}
+			}
+		}
+
+		await authPost("/api/user/add-location", authUser.authToken, processingLoc);
 	}
 
 	/**===========================================================
@@ -119,6 +174,20 @@ export default function Library() {
 		}
 	}, [authUser.authToken, setLibImages, setImagesLoaded]);
 
+	const getSelfSummary = useCallback(async () => {
+		try {
+			const data = await authGet("/api/user/get-user-summary", authUser.authToken);
+			const parsed = {
+				dates: new Set(JSON.parse(data.dates || "[]")),
+				locations: new Set(JSON.parse(data.locations || "[]")),
+			};
+			setSelfSummary(parsed);
+			setLocations(Array.from(parsed.locations));
+		} catch (e) {
+			launchAlert(ALERTS.ERROR, "Failed to get own user data summary: " + (e.message || e.toString()));
+		}
+	}, [authUser.authToken, setSelfSummary]);
+
 	const uploadImages = async () => {
 		const imageArray = Array.from(imagesToUpload);
 
@@ -147,7 +216,7 @@ export default function Library() {
 			// So we silently update the metadata in the background over WebSocket, so that the metadata populates without a refresh
 			const uploadSocket = openWS(WS_UPLOAD_OPEN, authUser.uuid);
 			uploadSocket.onmessage = (evt) => {
-				console.log("Received geocode update", evt);
+				// console.log("Received geocode update", evt);
 				const message = JSON.parse(evt.data);
 				
 				// Expecting: { type: 'geocode-update', updates: [{ key: '...', readableLocation: '...' }, ...] }
@@ -215,7 +284,11 @@ export default function Library() {
 			setConnectedToNearby(false);
 			setConnectingToNearby(false);
 		}
-	});
+	}, []);
+
+	useEffect(() => {
+		getSelfSummary();
+	}, []);
 
 	/**===========================================================
 	 * RENDER
@@ -250,31 +323,47 @@ export default function Library() {
 				xClicked={() => setLocPopupOpen(false)}
 				buttons={[
 					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: () => setLocPopupOpen(false) },
-					{ text: "SAVE", onClick: () => setLocPopupOpen(false) },
+					{ text: "SAVE", onClick: saveLocations },
 				]}
 				originalState={locations}
 				setState={setLocations}
 			>
 				<div className="flex flex-col items-center pt-4 px-4">
 					{locations.map((value, i) => (
-						<div className="flex justify-center items-center mb-4" key={`loc-input-wrap-${i}`}>
-							<Input
-								className="w-4/5"
-								key={`loc-input-${i}`}
-								value={value}
-								placeholder="Enter a location"
-								onChange={(v) => setLocation(i, v)}
-							></Input>
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-6 w-6 ml-2 cursor-pointer text-gray-7 hover:text-red-2" onClick={() => removeLocation(i)}>
+						<div className="p-2 bg-blue-0 rounded w-full mx-4 my-1 flex justify-between items-center">
+							<p className="font-main font-bold text-white-1">{value}</p>
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-5 w-5 ml-2 cursor-pointer text-white-0 hover:text-red-2" onClick={() => removeLocation(i)}>
 								<path fill="currentColor" d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z" />
 							</svg>
 						</div>
 					))}
-					<Button className="py-2 px-2 mb-4" onClick={addLocation}>
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="h-6 w-6">
-							<path fill="currentColor" d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z" />
-						</svg>
-					</Button>
+
+					{pendingLocations.map(v => (
+						<div className="p-2 rounded w-full mx-4 my-1 flex items-center ghost-loader">
+							<Spinner className="h-5 w-5 text-white-0 mr-2" />
+							<p className="font-main font-bold text-white-0 italic">Processing location data, please wait...</p>
+						</div>
+					))}
+
+					<Button className="px-4 py-2 mt-2" onClick={addPendingLocation}>ADD LOCATION</Button>
+				</div>
+			</Popup>
+
+			<Popup
+				bodyStyle="h-2/3 w-full md:w-5/6 lg:w-3/4 xl:w-2/3 xl:h-full"
+				headerText="PICK LOCATION"
+				open={locPickerOpen}
+				xClicked={cancelLocPicker}
+				layer={2}
+				buttons={[
+					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: cancelLocPicker },
+					{ text: "SAVE", onClick: processLocation },
+				]}
+			>
+				<div className="w-full h-full">
+					<LocationPicker
+						onChange={setLastPendingLocation}
+					/>
 				</div>
 			</Popup>
 

@@ -5,8 +5,9 @@ import { SUMMARY_TABLE, USER_TABLE } from "../config.js";
 import { ddClient } from "../common/dynamodb.js";
 import { getRandomColorPair } from "../common/util.js";
 import { getWebSocketManager } from "../common/websocket.js";
-import { WS_NEARBY_CLOSE, WS_NEARBY_OPEN } from "../constants.js";
+import { QUEUE_ADD_LOC_KEY, WS_NEARBY_CLOSE, WS_NEARBY_OPEN } from "../constants.js";
 import { getNearbyUsersManager } from "../common/nearbyUsers.js";
+import { geocodeQueue } from "../common/geocodeQueue.js";
 
 const router = Router();
 const wsManager = getWebSocketManager();
@@ -156,6 +157,74 @@ router.get("/get-all-users", requireAuth, async (req, res) => {
 	}
 
 	res.json(result);
+});
+
+router.post("/add-location", requireAuth, async (req, res) => {
+	try {
+		const { lat, lng } = req.body || {};
+
+		const latNum = typeof lat === "string" ? parseFloat(lat) : lat;
+		const lngNum = typeof lng === "string" ? parseFloat(lng) : lng;
+
+		if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
+			return res.status(400).json({ error: "Missing or invalid 'lat'/'lng' in request body" });
+		}
+
+		const geocodeComplete = (result) => {
+			summaryQueue.enqueue(req.user.sub, null, result, () => {
+				const userSockets = wsManager.wsClients.get(req.user.sub);
+				if (userSockets) {
+					const updateSocket = userSockets.get(WS_ADD_LOC);
+					if (updateSocket && updateSocket.readyState === updateSocket.OPEN) {
+						console.log(`Closing Location Update WebSocket for user ${userId} - update completed`);
+						updateSocket.close(1000, 'Job completed');
+					}
+				}
+			});
+			wsManager.sendToUser(req.user.sub, WS_ADD_LOC, {
+				type: WS_GEOCODE_UPDATE,
+				result
+			});
+		}
+
+		geocodeQueue.enqueue(`${QUEUE_ADD_LOC_KEY}-${req.user.sub}`, latNum, lngNum, req.user.sub, geocodeComplete);
+
+		res.status(200);
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+		return;
+	}
+});
+
+router.post("/set-locations", requireAuth, async (req, res) => {
+	try {
+		const summaryData = await ddClient.send(new GetCommand({
+			TableName: SUMMARY_TABLE,
+			Key: {
+				uid: req.user.sub
+			}
+		}));
+
+		let locSummary = new Set();
+
+		req.body.locations.forEach(loc => {
+			locSummary.add(loc);
+		});
+
+		await ddClient.send(new PutCommand({
+			TableName: SUMMARY_TABLE,
+			Item: {
+				uid: req.user.sub,
+				locations: JSON.stringify(Array.from(locSummary)),
+				dates: summaryData.Item?.dates || "[]"
+			}
+		}));
+
+		res.status(200);
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+		return;
+	}
 });
 
 export default router;

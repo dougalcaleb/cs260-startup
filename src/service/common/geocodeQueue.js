@@ -3,7 +3,7 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { GEOCODE_BATCH, GEOCODE_RATE, MDATA_TABLE, SUMMARY_TABLE } from "../config.js";
 import { getGeocode } from "./geocode.js";
 import { getWebSocketManager } from "./websocket.js";
-import { WS_GEOCODE_UPDATE, WS_UPLOAD } from "../constants.js";
+import { QUEUE_ADD_LOC_KEY, WS_ADD_LOC, WS_ADD_LOC_UPDATE, WS_GEOCODE_UPDATE, WS_UPLOAD } from "../constants.js";
 
 class GeocodeQueue {
 	constructor(options = {}) {
@@ -107,6 +107,20 @@ class GeocodeQueue {
 					return;
 				}
 
+				const userId = this.imgOwners.get(key);
+
+				if (key.includes(QUEUE_ADD_LOC_KEY)) {
+					if (userId) {
+						if (!userUpdates.has(userId)) {
+							userUpdates.set(userId, []);
+						}
+						userUpdates.get(userId).push({ key, readableLocation: label });
+					}
+
+					console.log("Skipping DB update for standalone location", key);
+					return;
+				}
+
 				try {
 					await ddClient.send(new UpdateCommand({
 						TableName: MDATA_TABLE,
@@ -117,7 +131,6 @@ class GeocodeQueue {
 					console.log(`Successfully geocoded ${key}: ${label}`);
 
 					// Group by user for websocket notification
-					const userId = this.imgOwners.get(key);
 					if (userId) {
 						if (!userUpdates.has(userId)) {
 							userUpdates.set(userId, []);
@@ -147,11 +160,21 @@ class GeocodeQueue {
 			const wsManager = getWebSocketManager();
 			if (wsManager) {
 				userUpdates.forEach((updates, userId) => {
-					wsManager.sendToUser(userId, WS_UPLOAD, {
-						type: WS_GEOCODE_UPDATE,
-						updates
-					});
-					console.log(`Sent ${updates.length} geocode update(s) to user ${userId}`);
+					if (wsManager.wsClients.get(userId)?.get(WS_UPLOAD)) {
+							wsManager.sendToUser(userId, WS_UPLOAD, {
+							type: WS_GEOCODE_UPDATE,
+							updates
+						});
+						console.log(`Sent ${updates.length} geocode update(s) to user ${userId}`);
+					}
+
+					if (wsManager.wsClients.get(userId)?.get(WS_ADD_LOC)) {
+							wsManager.sendToUser(userId, WS_ADD_LOC, {
+							type: WS_ADD_LOC_UPDATE,
+							updates
+						});
+						console.log(`Sent ${updates.length} standalone geocode update(s) to user ${userId}`);
+					}
 				});
 			}
 

@@ -1,8 +1,12 @@
 export const WS_UPLOAD_OPEN = "$ws_upload_open";
 export const WS_NEARBY_OPEN = "$ws_nearby_open";
+export const WS_ADD_LOC_OPEN = "$ws_add_loc_open";
 export const WS_NEARBY_CLOSE = "$ws_nearby_close";
 export const WS_NEARBY_USER_CONNECT = "$ws_nearby_user_connect";
 export const WS_NEARBY_USER_DISCONNECT = "$ws_nearby_user_disconnect";
 export const WS_UPLOAD = "$ws_upload_existing";
 export const WS_NEARBY = "$ws_nearby_existing";
+export const WS_ADD_LOC = "$ws_add_loc_existing";
 export const WS_GEOCODE_UPDATE = "%ws_geocode_update";
+export const WS_ADD_LOC_UPDATE = "$ws_add_loc_update";
+export const QUEUE_ADD_LOC_KEY = "ADD_STANDALONE_LOCATION";

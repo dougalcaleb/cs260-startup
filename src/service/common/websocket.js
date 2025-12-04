@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws";
-import { WS_NEARBY, WS_NEARBY_CLOSE, WS_NEARBY_OPEN, WS_UPLOAD, WS_UPLOAD_OPEN } from "../constants.js";
+import { WS_ADD_LOC, WS_ADD_LOC_OPEN, WS_NEARBY, WS_NEARBY_CLOSE, WS_NEARBY_OPEN, WS_UPLOAD, WS_UPLOAD_OPEN } from "../constants.js";
 
 class WebSocketManager {
 	constructor(server) {
@@ -9,7 +9,8 @@ class WebSocketManager {
 		this.acceptedOps = new Set([
 			WS_UPLOAD_OPEN,
 			WS_NEARBY_OPEN,
-			WS_NEARBY_CLOSE
+			WS_NEARBY_CLOSE,
+			WS_ADD_LOC_OPEN,
 		]);
 		this.opPairs = new Map([
 			[WS_NEARBY_OPEN, WS_NEARBY_CLOSE]
@@ -18,7 +19,9 @@ class WebSocketManager {
 			[WS_UPLOAD_OPEN, WS_UPLOAD],
 			[WS_NEARBY_OPEN, WS_NEARBY],
 			[WS_UPLOAD, WS_UPLOAD],
-			[WS_NEARBY, WS_NEARBY]
+			[WS_NEARBY, WS_NEARBY],
+			[WS_ADD_LOC_OPEN, WS_ADD_LOC],
+			[WS_ADD_LOC, WS_ADD_LOC],
 		]);
 		this.subscriptions = new Map([]);
 		this.setup();
