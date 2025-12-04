@@ -36,6 +36,7 @@ export default function ImageDisplay({ onPage }) {
 	const [pickedLoc, setPickedLoc] = useState(null);
 	const [datePickerOpen, setDatePickerOpen] = useState(false);
 	const [pickedDate, setPickedDate] = useState(null); // shape {year, month, day, date}
+	const [confirmDeletePopupOpen, setConfirmDeletePopupOpen] = useState(false);
 
 	// Computeds
 	const [imageSet, setImageSet] = useMemo(() => {
@@ -162,6 +163,7 @@ export default function ImageDisplay({ onPage }) {
 	};
 
 	const deleteImage = async () => {
+		setConfirmDeletePopupOpen(false);
 		const deleteKey = imagesByKey?.[viewImage]?.key;
 		if (!deleteKey) {
 			launchAlert(ALERTS.ERROR, "Cannot delete: No image key");
@@ -213,9 +215,12 @@ export default function ImageDisplay({ onPage }) {
 	);
 
 	const viewPopupHeader = (
-		<div className="text-white-0 hover:text-green-2 cursor-pointer" onClick={() => setInfoPopupOpen(true)}>
-			<div className="flex">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="h-6 w-6">
+		<div className="w-full flex justify-end">
+			<div className="text-white-0 h-8 rounded-tl rounded-bl flex items-center bg-gray-6">
+				{onPage === PAGES.LIBRARY && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="min-w-5 min-h-5 mx-2 hover:text-red-2 cursor-pointer" onClick={() => setConfirmDeletePopupOpen(true)}>
+					<path fill="currentColor" d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z" />
+				</svg>}
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="min-h-5 min-w-5 mx-2 hover:text-green-2 cursor-pointer" onClick={() => setInfoPopupOpen(true)}>
 					<path fill="currentColor" d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512zM224 160a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm-8 64l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z" />
 				</svg>
 			</div>
@@ -344,9 +349,6 @@ export default function ImageDisplay({ onPage }) {
 				variant={POPUP_VARIANTS.BLUR}
 				originalState={popupImageLoaded}
 				setState={setPopupImageLoaded}
-				buttons={onPage === PAGES.LIBRARY ? [
-					{ text: "Delete", variant: BTN_VARIANTS.CANCEL, preventReset: true, onClick: deleteImage }
-				] : null}
 			>
 				<div className="flex justify-center items-center px-4 pb-2 h-full relative">
 					{!popupImageLoaded && <Spinner className="h-14 w-14 text-white-0 absolute m-auto left-0 right-0 top-0 bottom-0" thickness="2.5" />}
@@ -482,6 +484,22 @@ export default function ImageDisplay({ onPage }) {
 						dayClass="font-main font-bold my-2 bg-blue-0 p-2 rounded-sm text-white cursor-pointer outline-none"
 						optionClass="font-main"
 					/>
+				</div>
+			</Popup>
+
+			<Popup
+				bodyStyle="h-1/4 w-2/3 sm:w-90"
+				headerText="DELETE IMAGE"
+				open={confirmDeletePopupOpen}
+				xClicked={() => setConfirmDeletePopupOpen(false)}
+				layer={2}
+				buttons={[
+					{ text: "CANCEL", variant: BTN_VARIANTS.CANCEL, onClick: () => setConfirmDeletePopupOpen(false) },
+					{ text: "DELETE", onClick: deleteImage },
+				]}
+			>
+				<div className="flex w-full h-full flex-col justify-center px-4">
+					<p class="font-main font-bold text-white-1">Are you sure you want to delete this image?</p>
 				</div>
 			</Popup>
 		</>
