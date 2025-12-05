@@ -31,7 +31,7 @@ export default function Login() {
 					<div className="mt-8 flex">
 						{/* {loginMode === LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectLogin}>Simple sign-in</p>)} */}
 						{loginMode !== LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectCognito}>Sign in</p>)}
-						<p className="text-blue-0 font-main cursor-pointer border-gray-6 pl-4" onClick={skipSignIn}>Skip sign-in</p>
+						{/* <p className="text-blue-0 font-main cursor-pointer border-gray-6 pl-4" onClick={skipSignIn}>Skip sign-in</p> */}
 					</div>
 				</div>
 			</div>
