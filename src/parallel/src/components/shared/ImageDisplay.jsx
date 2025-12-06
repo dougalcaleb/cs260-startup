@@ -271,7 +271,7 @@ export default function ImageDisplay({ onPage }) {
 	if (onPage === PAGES.LIBRARY) {
 		bodyHeader = <div>LIBRARY</div>
 	} else if (onPage === PAGES.CONNECT) {
-		bodyHeader = <div>CONNECT</div>
+		bodyHeader = <div className="text-center">CONNECT</div>
 	}
 
 	let bodySubHeader = null;
@@ -304,7 +304,9 @@ export default function ImageDisplay({ onPage }) {
 		} else {
 			return (
 				<>
-					<div className="font-main font-black text-gray-6 sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8 px-4 sm:px-0 sm:justify-start">{bodyHeader}</div>
+					<div className="font-main font-black text-gray-6 sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-2xl sm:pb-2 sm:ml-8 px-4 sm:px-0 justify-center sm:justify-start">
+						{bodyHeader}
+					</div>
 					{bodySubHeader}
 					<div className="text-gray-7 italic font-bold w-full px-8 mt-4">No images to show.</div>
 				</>
@@ -325,7 +327,7 @@ export default function ImageDisplay({ onPage }) {
 	
 	return (
 		<>
-			<div className="font-main font-black text-gray-6 flex justify-between sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-xl sm:pb-2 sm:ml-8 px-4 sm:px-0 sm:justify-start">
+			<div className="font-main font-black text-gray-6 flex justify-between sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-2xl sm:pb-2 sm:ml-8 px-4 sm:px-0 sm:justify-start">
 				<div className="h-8 w-8 sm:hidden"></div>
 				{ bodyHeader }
 				<div className="h-8 w-8 sm:px-4 sm:w-auto sm:h-auto flex items-center" onClick={() => setSettingsPopupOpen(true)}>

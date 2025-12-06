@@ -5,6 +5,7 @@ import { useAuth } from "react-oidc-context";
 import LogoFooter from "../shared/LogoFooter";
 import Button from "../shared/Button";
 import {LOGIN_MODES, SKIP_SIGNIN_KEY} from "../../mixins/constants";
+import { isMobileDevice } from "../../mixins/screen";
 
 export default function Login() {
 	const auth = useAuth();
@@ -23,7 +24,9 @@ export default function Login() {
 		<div className="bg-gray-3 h-full w-full">
 			<div className="bg-gray-3 h-max absolute top-14 sm:top-1/5 w-full">
 				<div className="flex flex-col items-center">
-					<p className="font-main text-gray-9 font-bold text-4xl px-10 text-center">Instantly connect with others.</p>
+					<p className="font-main text-gray-9 font-bold text-4xl px-4 text-center">
+						Instantly connect {isMobileDevice() && <br />} with others.
+					</p>
 					<p className="font-main text-gray-7 font-bold text-lg mt-12 mb-4">GET STARTED</p>
 					
 					{loginInput(loginMode, auth)}
