@@ -271,7 +271,7 @@ export default function ImageDisplay({ onPage }) {
 	if (onPage === PAGES.LIBRARY) {
 		bodyHeader = <div>LIBRARY</div>
 	} else if (onPage === PAGES.CONNECT) {
-		bodyHeader = <div className="text-center">CONNECT</div>
+		bodyHeader = <div className="text-center w-full sm:w-max">CONNECT</div>
 	}
 
 	let bodySubHeader = null;
