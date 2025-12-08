@@ -80,6 +80,10 @@ export default function ImageDisplay({ onPage }) {
 		const metadata = imageSetMdata.get(viewImage);
 		return formatMetadata(metadata ? { metadata } : null);
 	}, [viewImage, imageSetMdata]);
+
+	const hasAllMetadata = useMemo(() => {
+		return onPage !== PAGES.LIBRARY || (imageMetadata.loc && imageMetadata.time);
+	}, [onPage, imageMetadata]);
 	
 	/**===========================================================
 	 * WATCHERS
@@ -217,12 +221,19 @@ export default function ImageDisplay({ onPage }) {
 	const viewPopupHeader = (
 		<div className="w-full flex justify-end">
 			<div className="text-white-0 h-8 rounded-tl rounded-bl flex items-center bg-gray-6">
-				{onPage === PAGES.LIBRARY && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="min-w-5 min-h-5 mx-2 hover:text-red-2 cursor-pointer" onClick={() => setConfirmDeletePopupOpen(true)}>
-					<path fill="currentColor" d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z" />
-				</svg>}
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="min-h-5 min-w-5 mx-2 hover:text-green-2 cursor-pointer" onClick={() => setInfoPopupOpen(true)}>
-					<path fill="currentColor" d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512zM224 160a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm-8 64l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z" />
-				</svg>
+				{onPage === PAGES.LIBRARY && (
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="min-w-5 min-h-5 mx-2 hover:text-red-2 cursor-pointer" onClick={() => setConfirmDeletePopupOpen(true)}>
+						<path fill="currentColor" d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z" />
+					</svg>
+				)}
+				<div className="relative">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="min-h-5 min-w-5 mx-2 hover:text-green-2 cursor-pointer" onClick={() => setInfoPopupOpen(true)}>
+						<path fill="currentColor" d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512zM224 160a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm-8 64l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z" />
+					</svg>
+					{!hasAllMetadata && (
+						<div className="h-3 w-3 rounded-full bg-yellow-2 absolute -top-1 right-1 border-gray-6 border-2"></div>
+					)}
+				</div>
 			</div>
 		</div>
 	);
@@ -269,7 +280,7 @@ export default function ImageDisplay({ onPage }) {
 
 	let bodyHeader = null;
 	if (onPage === PAGES.LIBRARY) {
-		bodyHeader = <div>LIBRARY</div>
+		bodyHeader = <div className="text-center w-full sm:w-max">LIBRARY</div>
 	} else if (onPage === PAGES.CONNECT) {
 		bodyHeader = <div className="text-center w-full sm:w-max">CONNECT</div>
 	}
@@ -299,7 +310,14 @@ export default function ImageDisplay({ onPage }) {
 	if (imageSet === null || !mergedImageSet.length) {
 		if (onPage === PAGES.LIBRARY) {
 			return (
-				<div className="text-gray-7 italic font-bold w-full p-8">No library images found. Upload some!</div>
+				<>
+					<div className="font-main font-black text-gray-6 sm:text-left w-full sm:w-auto pt-4 sm:pt-6 text-2xl sm:pb-2 sm:ml-8 px-4 sm:px-0 justify-center sm:justify-start">
+						{bodyHeader}
+					</div>
+					<div className="flex justify-center sm:justify-start">
+						<div className="text-gray-8 italic font-bold px-4 py-2 sm:ml-8 mt-4 bg-gray-4 w-max rounded">No library images found. Upload some!</div>
+					</div>
+				</>
 			);
 		} else {
 			return (
@@ -308,7 +326,9 @@ export default function ImageDisplay({ onPage }) {
 						{bodyHeader}
 					</div>
 					{bodySubHeader}
-					<div className="text-gray-7 italic font-bold w-full px-8 mt-4">No images to show.</div>
+					<div className="flex justify-center sm:justify-start">
+						<div className="text-gray-8 italic font-bold px-4 py-2 sm:ml-8 mt-4 bg-gray-4 w-max rounded">No images to show.</div>
+					</div>
 				</>
 			);
 		}
@@ -407,12 +427,20 @@ export default function ImageDisplay({ onPage }) {
 
 			<Popup
 				headerText="IMAGE INFO"
-				bodyStyle="h-1/3 w-5/6 sm:w-90 sm:h-1/2"
+				bodyStyle={`h-1/2 w-5/6 sm:w-90 sm:h-2/3`}
 				open={infoPopupOpen}
 				xClicked={() => setInfoPopupOpen(false)}
 				layer={1}
 			>
 				<div className="p-4 w-full h-full font-main text-white-0 font-bold">
+					{!hasAllMetadata && (
+						<div className="flex mb-2 items-start bg-gray-5 rounded p-4">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="min-h-5 min-w-5 h-5 w-5 text-yellow-2 mr-2 mt-1">
+								<path fill="currentColor" d="M292.9 384c7.3-22.3 21.9-42.5 38.4-59.9 32.7-34.4 52.7-80.9 52.7-132.1 0-106-86-192-192-192S0 86 0 192c0 51.2 20 97.7 52.7 132.1 16.5 17.4 31.2 37.6 38.4 59.9l201.7 0zM288 432l-192 0 0 16c0 44.2 35.8 80 80 80l32 0c44.2 0 80-35.8 80-80l0-16zM184 112c-39.8 0-72 32.2-72 72 0 13.3-10.7 24-24 24s-24-10.7-24-24c0-66.3 53.7-120 120-120 13.3 0 24 10.7 24 24s-10.7 24-24 24z"/>
+							</svg>
+							<p className="font-main font-bold text-white-0">This image is missing one or more info fields. Fill out missing fields to enable user connections of that type.</p>
+						</div>
+					)}
 					<div>
 						<p className="text-gray-8 italic">Location:</p>
 						{imageMetadata.loc ? (
