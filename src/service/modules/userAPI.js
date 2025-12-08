@@ -120,7 +120,7 @@ router.get("/get-user-summary", requireAuth, async (req, res) => {
 	if (summaryData.Item) {
 		res.json(summaryData.Item);
 	} else {
-		res.status(404).json({ error: "User not found" });
+		res.json({ dates: [], locations: [] });
 	}
 });
 
