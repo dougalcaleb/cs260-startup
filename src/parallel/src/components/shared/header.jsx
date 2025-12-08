@@ -18,7 +18,7 @@ export default function Header() {
 	const navigate = useNavigate();
 	const { launchAlert } = useAlert();
 
-	const { username, setUsername, isComparing, setIsComparing } = useGlobalState();
+	const { username, setUsername, isComparing, setIsComparing, setConnectImages, setConnectImgMetadata, setImagesLoaded, setComparingWith } = useGlobalState();
 
 	const atLibrary = location.pathname === '/library' || location.pathname === "/";
 	const atNearby = location.pathname === '/nearby';
@@ -97,6 +97,10 @@ export default function Header() {
 	}
 
 	const returnToHome = () => {
+		setConnectImages([]);
+		setConnectImgMetadata(new Map());
+		setImagesLoaded(new Set());
+		setComparingWith(null);
 		setIsComparing(false);
 		navigate("/library");
 	}

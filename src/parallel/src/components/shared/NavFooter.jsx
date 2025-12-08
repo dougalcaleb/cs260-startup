@@ -5,7 +5,7 @@ import Button from "./Button";
 export default function Footer() {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const { isComparing, setIsComparing } = useGlobalState();
+	const { isComparing, setIsComparing, setConnectImages, setConnectImgMetadata, setImagesLoaded, setComparingWith } = useGlobalState();
 
 	const atLibrary = location.pathname === '/library' || location.pathname === "/";
 	const atNearby = location.pathname === '/nearby';
@@ -14,6 +14,10 @@ export default function Footer() {
 	const selectedClass = "bg-green-2 text-gray-1";
 
 	const returnToHome = () => {
+		setConnectImages([]);
+		setConnectImgMetadata(new Map());
+		setImagesLoaded(new Set());
+		setComparingWith(null);
 		setIsComparing(false);
 		navigate("/library");
 	}
