@@ -348,7 +348,7 @@ export default function Library() {
 						</div>
 					))}
 
-					<Button className="px-4 py-2 mt-2" onClick={addPendingLocation}>ADD LOCATION</Button>
+					<Button className="px-4 py-2 mt-2 mb-4" onClick={addPendingLocation}>ADD LOCATION</Button>
 				</div>
 			</Popup>
 

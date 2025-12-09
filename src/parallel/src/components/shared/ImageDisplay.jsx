@@ -439,7 +439,7 @@ export default function ImageDisplay({ onPage }) {
 
 			<Popup
 				headerText="IMAGE INFO"
-				bodyStyle={`h-1/2 w-5/6 sm:w-90 sm:h-2/3`}
+				bodyStyle={`w-5/6 sm:w-90 ${hasAllMetadata ? 'h-1/3 sm:h-1/2' : 'h-1/2 sm:h-2/3'}`}
 				open={infoPopupOpen}
 				xClicked={() => setInfoPopupOpen(false)}
 				layer={1}
