@@ -178,8 +178,8 @@ export default function Library() {
 		try {
 			const data = await authGet("/api/user/get-user-summary", authUser.authToken);
 			const parsed = {
-				dates: new Set(JSON.parse(data.dates || "[]")),
-				locations: new Set(JSON.parse(data.locations || "[]")),
+				dates: new Set(JSON.parse(String(data.dates) || "[]")),
+				locations: new Set(JSON.parse(String(data.locations) || "[]")),
 			};
 			setSelfSummary(parsed);
 			setLocations(Array.from(parsed.locations));

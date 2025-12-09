@@ -167,7 +167,7 @@ const getImages = async (id) => {
 router.get("/get-user-images", requireAuth, async (req, res) => {
 	try {
 		const returnData = await getImages(req.user.sub);
-		res.json(returnData);
+		res.json(returnData || []);
 	} catch (e) {
 		res.status(500).json({ error: e.message });
 	}
@@ -177,7 +177,7 @@ router.get("/get-user-images", requireAuth, async (req, res) => {
 router.post("/get-user-images", requireAuth, async (req, res) => {
 	try {
 		const returnData = await getImages(req.body.userID);
-		res.json(returnData);
+		res.json(returnData || []);
 	} catch (e) {
 		res.status(500).json({ error: e.message });
 	}
