@@ -146,7 +146,7 @@ export function openWS(typeID, uuid) {
 	});
 
 	ws.addEventListener("close", (event) => {
-		console.log('WebSocket closed:', event.code, event.reason);
+		// console.log('WebSocket closed:', event.code, event.reason);
 	});
 
 	return ws;

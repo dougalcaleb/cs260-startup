@@ -49,9 +49,3 @@ export function findSimilarUsernames(usernames, query, threshold = 0.7, limit) {
 
 	return typeof limit === "number" ? scored.slice(0, limit) : scored;
 }
-
-// Example usage:
-const users = ["caleb", "kaleb", "cable", "celebrant", "alice", "bob"];
-console.log(findSimilarUsernames(users, "caleb", 0.7));
-// => [{ username: "caleb", score: 1 }, { username: "kaleb", score: 0.8 }, { username: "cable", score: ... }]
-// ...existing code...
