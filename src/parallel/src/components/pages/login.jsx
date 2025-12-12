@@ -4,20 +4,21 @@ import { useState } from "react";
 import { useAuth } from "react-oidc-context";
 import LogoFooter from "../shared/LogoFooter";
 import Button from "../shared/Button";
-import {LOGIN_MODES, SKIP_SIGNIN_KEY} from "../../mixins/constants";
+import {LOGIN_MODES, SKIP_SIGNIN_KEY, URL_BASE} from "../../mixins/constants";
 import { isMobileDevice } from "../../mixins/screen";
 
 export default function Login() {
-	const auth = useAuth();
+	// const auth = useAuth();
+	const auth = {};
 	const navigate = useNavigate();
 
 	const [loginMode, setLoginMode] = useState(LOGIN_MODES.LOGIN_COGNITO);
 
-	const selectLogin = () => setLoginMode(LOGIN_MODES.LOGIN_SIMPLE);
-	const selectCognito = () => setLoginMode(LOGIN_MODES.LOGIN_COGNITO);
+	// const selectLogin = () => setLoginMode(LOGIN_MODES.LOGIN_SIMPLE);
+	// const selectCognito = () => setLoginMode(LOGIN_MODES.LOGIN_COGNITO);
 	const skipSignIn = () => {
 		window.sessionStorage.setItem(SKIP_SIGNIN_KEY, true);
-		navigate("/library");
+		navigate(`${URL_BASE}/library`);
 	};
 
 	return (
@@ -29,11 +30,11 @@ export default function Login() {
 					</p>
 					<p className="font-main text-gray-7 font-bold text-lg mt-12 mb-4">GET STARTED</p>
 					
-					{loginInput(loginMode, auth)}
+					{loginInput(loginMode, skipSignIn)}
 					
 					<div className="mt-8 flex">
 						{/* {loginMode === LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectLogin}>Simple sign-in</p>)} */}
-						{loginMode !== LOGIN_MODES.LOGIN_COGNITO && (<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={selectCognito}>Sign in</p>)}
+						{/* {(<p className="text-blue-0 font-main cursor-pointer mr-4" onClick={skipSignIn}>Sign in</p>)} */}
 						{/* <p className="text-blue-0 font-main cursor-pointer border-gray-6 pl-4" onClick={skipSignIn}>Skip sign-in</p> */}
 					</div>
 				</div>
@@ -53,12 +54,12 @@ export default function Login() {
 	);
 }
 
-function loginInput(mode, auth) {
+function loginInput(mode, skipSignIn) {
 	switch (mode) {
 		case LOGIN_MODES.LOGIN_COGNITO:
 			return (
 				<>
-					<Button className="bg-green-1 text-gray-3 cursor-pointer py-4 px-8" onClick={() => auth.signinRedirect()}>
+					<Button className="bg-green-1 text-gray-3 cursor-pointer py-4 px-8" onClick={skipSignIn}>
 						<div>
 							<p className="px-14 text-xl">SIGN IN</p>
 							<div className="flex justify-around h-7 mt-4 text-white-0">
@@ -82,7 +83,7 @@ function loginInput(mode, auth) {
 				<>
 					<Input type="text" placeholder="Username" className="mb-4"></Input>
 					<Input type="password" placeholder="Password" className="mb-4"></Input>
-					<Link to="/library">
+					<Link to={`${URL_BASE}/library`}>
 						<Button className="text-gray-3 cursor-pointer px-8 py-2">GO</Button>
 					</Link>
 				</>
@@ -93,7 +94,7 @@ function loginInput(mode, auth) {
 					<Input type="text" placeholder="Username" className="mb-4"></Input>
 					<Input type="password" placeholder="Password" className="mb-4"></Input>
 					<Input type="Password" placeholder="Retype password" className="mb-4"></Input>
-					<Link to="/library">
+					<Link to={`${URL_BASE}/library`}>
 						<Button className="text-gray-3 cursor-pointer p-4">SIGN UP</Button>
 					</Link>
 				</>

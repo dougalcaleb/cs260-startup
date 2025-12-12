@@ -6,20 +6,21 @@ import Nearby from './pages/Nearby';
 import Search from './pages/Search';
 import Connect from './pages/Connect';
 import NavFooter from './shared/NavFooter';
-import { useAuth } from 'react-oidc-context';
+// import { useAuth } from 'react-oidc-context';
 import LogoFooter from './shared/LogoFooter';
 import Button from './shared/Button';
 import Spinner from './shared/Spinner';
-import {ALERTS, DID_LOGIN_KEY, SKIP_SIGNIN_KEY, TOKEN_KEY, USER_PROFILE_KEY} from '../mixins/constants';
+import {ALERTS, DID_LOGIN_KEY, SKIP_SIGNIN_KEY, TOKEN_KEY, URL_BASE, USER_PROFILE_KEY} from '../mixins/constants';
 import { useAlert } from '../contexts/AlertContext';
 import useAuthUser from '../hooks/useAuthUser';
-import { authPost } from '../mixins/api';
+// import { authPost } from '../mixins/api';
 import { useEffect } from 'react';
 import { useGlobalState } from '../contexts/StateProvider';
 
 export default function Root() {
 	const location = useLocation();
-	const auth = useAuth();
+	// const auth = { isAuthenticated: true };
+	const auth = {};
 	const navigate = useNavigate();
 	const authUser = useAuthUser();
 	const { launchAlert } = useAlert();
@@ -30,23 +31,30 @@ export default function Root() {
 		const doReq = async () => {
 			if (authUser?.uuid && !window.sessionStorage.getItem(DID_LOGIN_KEY)) {
 				window.sessionStorage.setItem(DID_LOGIN_KEY, true);
-				try {
-					await authPost("/api/user/login", authUser.authToken, {
-						uuid: authUser.uuid,
-						username: authUser.username,
-						picture: authUser.picture || null
-					})
-				} catch (e) {
-					launchAlert(ALERTS.WARNING, "Could not finish logging in. Some features may not function. Please refresh the page.");
-					console.error(e);
-				}
+				// try {
+				// 	await authPost("/api/user/login", authUser.authToken, {
+				// 		uuid: authUser.uuid,
+				// 		username: authUser.username,
+				// 		picture: authUser.picture || null
+				// 	})
+				// } catch (e) {
+				// 	launchAlert(ALERTS.WARNING, "Could not finish logging in. Some features may not function. Please refresh the page.");
+				// 	console.error(e);
+				// }
 
 				if (!window.sessionStorage.getItem(USER_PROFILE_KEY)) {
 					window.sessionStorage.setItem(USER_PROFILE_KEY, "{}");
 					try {
-						const data = await authPost("/api/user/get-user", authUser.authToken, {
-							uuid: authUser.uuid
-						});
+						// const data = await authPost("/api/user/get-user", authUser.authToken, {
+						// 	uuid: authUser.uuid
+						// });
+						const data = {
+							username: "Parallel User",
+							profileColors: {
+								main: `hsla(220, 40%, 50%, 1)`,
+								contrast: "hsl(0, 0%, 86%)"
+							}
+						};
 						window.sessionStorage.setItem(USER_PROFILE_KEY, JSON.stringify(data));
 						setUsername(data?.username || null);
 					} catch (e) {
@@ -65,7 +73,7 @@ export default function Root() {
 	}, [authUser, setUsername]);
 
 	let rCorners = null;
-	if (!["/login"].includes(location.pathname)) {
+	if (location.pathname !== `${URL_BASE}/login`) {
 		rCorners = (
 			<div className="flex justify-between sticky top-[7vh] sm:top-[max(7vh,70px)] -mb-8 z-10">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" className="text-gray-3 h-8 w-8">
@@ -96,7 +104,7 @@ export default function Root() {
 
 	if (auth.error) {
 		const forceReload = () => {
-			navigate("/library", { replace: true });
+			navigate(`${URL_BASE}/library`, { replace: true });
 			window.location.href = `${window.location.href}`;
 		}
 
@@ -116,29 +124,29 @@ export default function Root() {
 		);
 	}
 
-	const navAllowed = auth.isAuthenticated || window.sessionStorage.getItem(SKIP_SIGNIN_KEY); // || import.meta.env.DEV;
+	const navAllowed = window.sessionStorage.getItem(SKIP_SIGNIN_KEY); // || import.meta.env.DEV;
 
 	return (
 		<>
-			{!["/login"].includes(location.pathname) && <Header />}
+			{location.pathname !== `${URL_BASE}/login` && <Header />}
 			
 			<main>
 
 				{rCorners}
 
 				<Routes>
-					<Route path="/" element={navAllowed ? <Library /> : <Navigate replace to="/login" />} />
-					<Route path="/login" element={<Login />} />
-					<Route path="/library" element={navAllowed ? <Library /> : <Navigate replace to="/login" />} />
-					<Route path="/nearby" element={navAllowed ? <Nearby /> : <Navigate replace to="/login" />} />
-					<Route path="/search" element={navAllowed ? <Search /> : <Navigate replace to="/login" />} />
-					<Route path="/connect" element={navAllowed ? <Connect /> : <Navigate replace to="/login" />} />
-					<Route path="*" element={navAllowed ? <Navigate replace to="/library" /> : <Navigate replace to="/login" />} />
+					<Route path={`${URL_BASE}/`} element={navAllowed ? <Library /> : <Navigate replace to={`${URL_BASE}/login`} />} />
+					<Route path={`${URL_BASE}/login`} element={<Login />} />
+					<Route path={`${URL_BASE}/library`} element={navAllowed ? <Library /> : <Navigate replace to={`${URL_BASE}/login`} />} />
+					<Route path={`${URL_BASE}/nearby`} element={navAllowed ? <Nearby /> : <Navigate replace to={`${URL_BASE}/login`} />} />
+					<Route path={`${URL_BASE}/search`} element={navAllowed ? <Search /> : <Navigate replace to={`${URL_BASE}/login`} />} />
+					<Route path={`${URL_BASE}/connect`} element={navAllowed ? <Connect /> : <Navigate replace to={`${URL_BASE}/login`} />} />
+					<Route path="*" element={navAllowed ? <Navigate replace to={`${URL_BASE}/library`} /> : <Navigate replace to={`${URL_BASE}/login`} />} />
 				</Routes>
 				
 			</main>
 
-			{!["/login"].includes(location.pathname) && <NavFooter />}
+			{location.pathname === `${URL_BASE}/login` && <NavFooter />}
 		</>
 	)	
 }

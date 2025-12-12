@@ -1,1 +1,0 @@
-./deployAll.sh -k "C:\Users\caleb\.ssh\260server.pem" -h dougalcaleb.click -s startup

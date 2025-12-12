@@ -13,6 +13,7 @@ import Spinner from "../shared/Spinner";
 import { useGlobalState } from "../../contexts/StateProvider";
 import ImageDisplay from "../shared/ImageDisplay";
 import LocationPicker from "../shared/LocationPicker";
+import { getRandomLocation } from "../../mixins/randomData";
 
 export default function Library() {
 	/**===========================================================
@@ -118,21 +119,21 @@ export default function Library() {
 	const processLocation = async () => {
 		const processingLoc = pendingLocations[pendingLocations.length - 1];
 		setLocPickerOpen(false);
-		const processWS = openWS(WS_ADD_LOC_OPEN, authUser.uuid);
-		processWS.onmessage = (evt) => {
-			const message = JSON.parse(evt.data);
+		// const processWS = openWS(WS_ADD_LOC_OPEN, authUser.uuid);
+		// processWS.onmessage = (evt) => {
+		// 	const message = JSON.parse(evt.data);
 				
-			if (message.type === WS_ADD_LOC_UPDATE) {
+			// if (message.type === WS_ADD_LOC_UPDATE) {
 				removePendingLocation(pendingLocations.findIndex(l => l === processingLoc));
-				if (message.updates) {
-					message.updates.forEach(update => {
-						addLocation(update.readableLocation);
-					});
-				}
-			}
-		}
+				// if (message.updates) {
+					// message.updates.forEach(update => {
+						addLocation(getRandomLocation());
+					// });
+				// }
+			// }
+		// }
 
-		await authPost("/api/user/add-location", authUser.authToken, processingLoc);
+		// await authPost("/api/user/add-location", authUser.authToken, processingLoc);
 	}
 
 	/**===========================================================
@@ -161,13 +162,19 @@ export default function Library() {
 
 	const refreshLibrary = useCallback(async () => {
 		try {
-			const list = await authGet("/api/image/get-user-images", authUser.authToken);
-			if (list?.length) {
-				setLibImages(list.map(i => ({ url: i.url, key: i.key })));
-				setLibImgMetadata(new Map(list.map(i => [ i.key, i.metadata ])));
-			} else {
-				setLibImages(null);
-			}
+			// const list = await authGet("/api/image/get-user-images", authUser.authToken);
+			// if (list?.length) {
+			const list = Array.from({ length: 17 }).map((_, i) =>({ url: `../../assets/images/ph-${i}`, key: `ph-image-${i}` }));
+			setLibImages(list);
+			{ loc: null, time: null, readableLocation: "" }
+			setLibImgMetadata(new Map(list.map(i => [i.key, {
+				loc: { lat: 0.0, lng: 0.0 },
+				time: ~~(Math.random() * 1000000),
+				readableLocation: getRandomLocation(),
+			} ])));
+			// } else {
+			// 	setLibImages(null);
+			// }
 			setImagesLoaded(new Set());
 		} catch (e) {
 			launchAlert(ALERTS.ERROR, "Failed to retrieve user image library: " + (e.message || e.toString()));
