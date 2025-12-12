@@ -226,40 +226,39 @@ export default function Library() {
 
 			// Because we use a queue for geolocation fetching, it almost always hasn't populated by the time we call to re-fetch the user library
 			// So we silently update the metadata in the background over WebSocket, so that the metadata populates without a refresh
-			const uploadSocket = openWS(WS_UPLOAD_OPEN, authUser.uuid);
-			uploadSocket.onmessage = (evt) => {
-				// console.log("Received geocode update", evt);
-				const message = JSON.parse(evt.data);
+			// const uploadSocket = openWS(WS_UPLOAD_OPEN, authUser.uuid);
+			// uploadSocket.onmessage = (evt) => {
+			// 	const message = JSON.parse(evt.data);
 				
-				// Expecting: { type: 'geocode-update', updates: [{ key: '...', readableLocation: '...' }, ...] }
-				if (message.type === WS_GEOCODE_UPDATE && Array.isArray(message.updates)) {
-					setLibImgMetadata(prevMetadata => {
-						let hasChanges = false;
-						const newMetadata = new Map(prevMetadata);
+			// 	// Expecting: { type: 'geocode-update', updates: [{ key: '...', readableLocation: '...' }, ...] }
+			// 	if (message.type === WS_GEOCODE_UPDATE && Array.isArray(message.updates)) {
+			// 		setLibImgMetadata(prevMetadata => {
+			// 			let hasChanges = false;
+			// 			const newMetadata = new Map(prevMetadata);
 						
-						// Process each update in the batch
-						message.updates.forEach(({ key, readableLocation }) => {
-							if (!key) return;
+			// 			// Process each update in the batch
+			// 			message.updates.forEach(({ key, readableLocation }) => {
+			// 				if (!key) return;
 							
-							const existingMeta = prevMetadata.get(key);
+			// 				const existingMeta = prevMetadata.get(key);
 							
-							// Only update if the key exists and data actually changed
-							if (existingMeta && existingMeta.readableLocation !== readableLocation) {
-								newMetadata.set(key, {
-									...existingMeta,
-									readableLocation
-								});
-								hasChanges = true;
-							}
-						});
+			// 				// Only update if the key exists and data actually changed
+			// 				if (existingMeta && existingMeta.readableLocation !== readableLocation) {
+			// 					newMetadata.set(key, {
+			// 						...existingMeta,
+			// 						readableLocation
+			// 					});
+			// 					hasChanges = true;
+			// 				}
+			// 			});
 						
-						// Return same reference if nothing changed = no rerender
-						return hasChanges ? newMetadata : prevMetadata;
-					});
-				}
-			};
+			// 			// Return same reference if nothing changed = no rerender
+			// 			return hasChanges ? newMetadata : prevMetadata;
+			// 		});
+			// 	}
+			// };
 
-			await authPost(`/api/image${endpoint}`, authUser.authToken, data);
+			// await authPost(`/api/image${endpoint}`, authUser.authToken, data);
 			launchAlert(ALERTS.SUCCESS, `Image${imageArray.length > 1 ? 's' : ''} uploaded successfully!`);
 
 			// Refresh gallery after upload

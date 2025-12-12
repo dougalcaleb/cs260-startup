@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import Popup from "./Popup";
 import useAuthUser from "../../hooks/useAuthUser";
-import { ALERTS, BTN_VARIANTS, USER_PROFILE_KEY } from "../../mixins/constants";
+import { ALERTS, BTN_VARIANTS, URL_BASE, USER_PROFILE_KEY } from "../../mixins/constants";
 import { authPost } from "../../mixins/api";
 import { useAlert } from "../../contexts/AlertContext";
 import Input from "./Input";
@@ -20,9 +20,9 @@ export default function Header() {
 
 	const { username, setUsername, isComparing, setIsComparing, setConnectImages, setConnectImgMetadata, setImagesLoaded, setComparingWith } = useGlobalState();
 
-	const atLibrary = location.pathname === '/library' || location.pathname === "/";
-	const atNearby = location.pathname === '/nearby';
-	const atSearch = location.pathname === '/search';
+	const atLibrary = location.pathname === `${URL_BASE}/library` || location.pathname === `${URL_BASE}/`;
+	const atNearby = location.pathname === `${URL_BASE}/nearby`;
+	const atSearch = location.pathname === `${URL_BASE}/search`;
 
 	const selectedClass = "bg-green-2 text-gray-1";
 	const bgGray3 = "hsl(0, 0%, 16%)";
@@ -102,7 +102,7 @@ export default function Header() {
 		setImagesLoaded(new Set());
 		setComparingWith(null);
 		setIsComparing(false);
-		navigate("/library");
+		navigate(`${URL_BASE}/library`);
 	}
 
 	return (
@@ -164,13 +164,13 @@ export default function Header() {
 				{!isComparing && (
 					<div className="w-[30vw] min-w-max mr-8 hidden sm:inline">
 						<nav className="bg-gray-1 w-full h-6 rounded-4xl flex justify-between items-center">
-							<Link to={!atLibrary ? '/library' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atLibrary ? selectedClass : 'text-white-0'}`}>
+							<Link to={!atLibrary ? `${URL_BASE}/library` : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atLibrary ? selectedClass : 'text-white-0'}`}>
 								<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">YOU</div>
 							</Link>
-							<Link to={!atNearby ? '/nearby' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atNearby ? selectedClass : 'text-white-0'}`}>
+							<Link to={!atNearby ? `${URL_BASE}/nearby` : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atNearby ? selectedClass : 'text-white-0'}`}>
 								<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">NEARBY</div>
 							</Link>
-							<Link to={!atSearch ? '/search' : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atSearch ? selectedClass : 'text-white-0'}`}>
+							<Link to={!atSearch ? `${URL_BASE}/search` : null} className={`w-1/4 min-w-max h-full flex flex-col justify-center rounded-4xl ${atSearch ? selectedClass : 'text-white-0'}`}>
 								<div className="w-full font-main font-black text-center flex justify-center text-xs px-6">SEARCH</div>
 							</Link>
 						</nav>
