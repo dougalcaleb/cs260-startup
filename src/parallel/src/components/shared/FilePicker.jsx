@@ -12,6 +12,15 @@ export default function FilePicker({ id, multiple = false, onChange = () => {}, 
 		onChange(e.target.files);
 	}
 
+	const mockFiles = () => {
+		setFiles([
+			{ name: "my_favorite_picture.jpg", size: 1024 * 52 },
+			{ name: "dsfg57gs6derg846d22dxg8g4ssdg.png", size: 1024 * 2102 },
+			{ name: "majestic view of mountains.png", size: 1024 * 198 },
+			{ name: "river.jpeg", size: 1024 * 300 },
+		]);
+	}
+
 	const removeFile = (index) => {
 		const newFiles = [...files];
 		newFiles.splice(index, 1);
@@ -26,7 +35,7 @@ export default function FilePicker({ id, multiple = false, onChange = () => {}, 
 	return (
 		<>
 			<div className="flex flex-col w-full">
-				<label htmlFor={inputId} className="font-main text-white-0 px-4 py-2 bg-blue-1 hover:bg-blue-0 rounded-md font-bold cursor-pointer text-center mb-4 w-full">
+				{/* <label htmlFor={inputId} className="font-main text-white-0 px-4 py-2 bg-blue-1 hover:bg-blue-0 rounded-md font-bold cursor-pointer text-center mb-4 w-full">
 					<input
 						id={inputId}
 						className="hidden"
@@ -36,7 +45,11 @@ export default function FilePicker({ id, multiple = false, onChange = () => {}, 
 						accept={accept}
 					/>
 					CHOOSE FILES
-				</label>
+				</label> */}
+
+				<div className="font-main text-white-0 px-4 py-2 bg-blue-1 hover:bg-blue-0 rounded-md font-bold cursor-pointer text-center mb-4 w-full" onClick={mockFiles}>
+					CHOOSE FILES
+				</div>
 
 				{showPicked && (
 					<>

@@ -146,7 +146,7 @@ export default function Root() {
 				
 			</main>
 
-			{location.pathname === `${URL_BASE}/login` && <NavFooter />}
+			{location.pathname !== `${URL_BASE}/login` && <NavFooter />}
 		</>
 	)	
 }
