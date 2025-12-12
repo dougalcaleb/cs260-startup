@@ -13,7 +13,13 @@ import Spinner from "../shared/Spinner";
 import { useGlobalState } from "../../contexts/StateProvider";
 import ImageDisplay from "../shared/ImageDisplay";
 import LocationPicker from "../shared/LocationPicker";
-import { getRandomLocation } from "../../mixins/randomData";
+import { getRandomLocation, getRandomTimestamp, pickByChance } from "../../mixins/randomData";
+import { formatDate } from "../../mixins/format";
+
+const placeholderImages = Object.entries(import.meta.glob("../../assets/images/ph-*.jpg", { eager: true, import: "default" }))
+	.map(([path, src]) => ({ src, index: Number(path.match(/ph-(\d+)\.jpg/)?.[1] ?? 0) }))
+	.sort((a, b) => a.index - b.index)
+	.map(({ src, index }) => ({ url: src, key: `ph-image-${index}` }));
 
 export default function Library() {
 	/**===========================================================
@@ -164,13 +170,12 @@ export default function Library() {
 		try {
 			// const list = await authGet("/api/image/get-user-images", authUser.authToken);
 			// if (list?.length) {
-			const list = Array.from({ length: 17 }).map((_, i) =>({ url: `../../assets/images/ph-${i}`, key: `ph-image-${i}` }));
+			const list = placeholderImages;
 			setLibImages(list);
-			{ loc: null, time: null, readableLocation: "" }
 			setLibImgMetadata(new Map(list.map(i => [i.key, {
-				loc: { lat: 0.0, lng: 0.0 },
-				time: ~~(Math.random() * 1000000),
-				readableLocation: getRandomLocation(),
+				location: { lat: 0.0, lng: 0.0 },
+				timestamp: pickByChance(0.7, getRandomTimestamp(), null),
+				readableLocation: pickByChance(0.7, getRandomLocation(), null),
 			} ])));
 			// } else {
 			// 	setLibImages(null);
@@ -183,10 +188,10 @@ export default function Library() {
 
 	const getSelfSummary = useCallback(async () => {
 		try {
-			const data = await authGet("/api/user/get-user-summary", authUser.authToken);
+			// const data = await authGet("/api/user/get-user-summary", authUser.authToken);
 			const parsed = {
-				dates: new Set(JSON.parse(String(data.dates) || "[]")),
-				locations: new Set(JSON.parse(String(data.locations) || "[]")),
+				dates: new Set(Array.from({length: 14}).map(_ => formatDate(getRandomTimestamp()))),
+				locations: new Set(Array.from({length: 8}).map(_ => getRandomLocation())),
 			};
 			setSelfSummary(parsed);
 			setLocations(Array.from(parsed.locations));

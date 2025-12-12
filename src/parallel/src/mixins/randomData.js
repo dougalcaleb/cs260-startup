@@ -32,3 +32,15 @@ export const dates = [
 export function getRandomLocation() {
 	return locations[Math.floor(Math.random() * locations.length)];
 }
+
+export function getRandomTimestamp() {
+	const jan1_2000 = new Date(2000, 0, 1).getTime() / 1000; // Unix timestamp in seconds
+	const today = Math.floor(Date.now() / 1000); // Current time in seconds
+	return Math.floor(Math.random() * (today - jan1_2000)) + jan1_2000;
+}
+
+// Returns firstValue with probability chance (0-1), otherwise secondValue
+export function pickByChance(chance, firstValue, secondValue) {
+	const clamped = Math.min(Math.max(chance, 0), 1);
+	return Math.random() < clamped ? firstValue : secondValue;
+}
