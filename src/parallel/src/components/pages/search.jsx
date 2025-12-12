@@ -40,8 +40,12 @@ export default function Search() {
 
 	const fetchUsers = async () => {
 		try {
-			const users = await authGet("/api/user/get-all-users", authUser.authToken);
-			setAllUsers(users);
+			// const users = await authGet("/api/user/get-all-users", authUser.authToken);
+			setAllUsers({
+				user1: { username: "John Doe" },
+				user2: { username: "Jane Smith" },
+				user3: { username: "Caleb Dougal" },
+			});
 		} catch (e) {
 			launchAlert(ALERTS.ERROR, "Failed to retrieve users: " + (e.message || e.toString()));
 		}

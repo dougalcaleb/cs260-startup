@@ -3,6 +3,7 @@ import ProfileImage from "../pages/ProfileImage";
 import Button from "./Button";
 import { useGlobalState } from "../../contexts/StateProvider";
 import { isMobileDevice } from "../../mixins/screen";
+import { URL_BASE } from "../../mixins/constants";
 
 export default function PersonCard({
 	name,
@@ -32,7 +33,7 @@ export default function PersonCard({
 	const navToConnect = () => {
 		setComparingWith({userID, username: name});
 		setIsComparing(true);
-		navigate("/connect");
+		navigate(`${URL_BASE}/connect`);
 	}
 
 	return (

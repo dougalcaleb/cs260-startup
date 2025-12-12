@@ -40,23 +40,23 @@ export default function ImageDisplay({ onPage }) {
 
 	// Computeds
 	const [imageSet, setImageSet] = useMemo(() => {
-		if (onPage === PAGES.LIBRARY) {
+		// if (onPage === PAGES.LIBRARY) {
 			return [libImages, setLibImages];
-		} else if (onPage === PAGES.CONNECT) {
-			return [connectImages, setConnectImages]
-		}
+		// } else if (onPage === PAGES.CONNECT) {
+		// 	return [connectImages, setConnectImages]
+		// }
 
-		return [[], () => { }];
+		// return [[], () => { }];
 	}, [onPage, libImages, setLibImages, connectImages, setConnectImages]);
 
 	const imageSetMdata = useMemo(() => {
-		if (onPage === PAGES.LIBRARY) {
+		// if (onPage === PAGES.LIBRARY) {
 			return libImgMetadata;
-		} else if (onPage === PAGES.CONNECT) {
-			return connectImgMetadata;
-		}
+		// } else if (onPage === PAGES.CONNECT) {
+		// 	return connectImgMetadata;
+		// }
 
-		return new Map();
+		// return new Map();
 	}, [onPage, libImgMetadata, connectImgMetadata]);
 
 	const mergedImageSet = useMemo(() =>

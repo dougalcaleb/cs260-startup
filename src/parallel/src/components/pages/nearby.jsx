@@ -5,6 +5,8 @@ import { useGlobalState } from "../../contexts/StateProvider";
 import { openWS } from "../../mixins/api";
 import { WS_NEARBY_OPEN, WS_NEARBY_USER_CONNECT, WS_NEARBY_USER_DISCONNECT } from "../../mixins/constants";
 import useAuthUser from "../../hooks/useAuthUser";
+import { getRandomLocation, getRandomTimestamp } from "../../mixins/randomData";
+import { formatDate } from "../../mixins/format";
 
 export default function Nearby() {
 	const authUser = useAuthUser();
@@ -12,6 +14,9 @@ export default function Nearby() {
 	
 	const [nearbyUsers, setNearbyUsers] = useState([]);
 	const [selfData, setSelfData] = useState(null);
+
+	const connectionLocations = Array.from({ length: 4 }).map(_ => getRandomLocation());
+	const connectionDates = Array.from({ length: 2 }).map(_ => formatDate(getRandomTimestamp()));
 
 	const socketRef = useRef(null);
 
@@ -37,18 +42,48 @@ export default function Nearby() {
 		if (!connectingToNearby && !connectedToNearby) {
 			setConnectingToNearby(true);
 
-			const nearbySocket = openWS(WS_NEARBY_OPEN, authUser.uuid);
-			nearbySocket.addEventListener("open", socketOpen);
-			nearbySocket.addEventListener("message", socketMessage);
-			nearbySocket.addEventListener("close", socketClose);
+			setTimeout(() => {
+				setConnectedToNearby(true);
+				setConnectingToNearby(false);
+			}, 800);
 
-			socketRef.current = nearbySocket;
-			setNearbySocket(nearbySocket);
+			setSelfData({
+				locations: connectionLocations,
+				dates: connectionDates
+			});
+
+			setTimeout(() => {
+				setNearbyUsers(prev => [
+					{ userID: "user1", username: "John Doe", locations: connectionLocations, dates: connectionDates },
+				]);
+			}, 1000);
+			setTimeout(() => {
+				setNearbyUsers(prev => [
+					{ userID: "user1", username: "John Doe", locations: connectionLocations, dates: connectionDates },
+					{ userID: "user2", username: "Jane Smith", locations: connectionLocations.slice(0, 2), dates: [connectionDates[0]] },
+				]);
+			}, 1400);
+			setTimeout(() => {
+				setNearbyUsers(prev => [
+					{ userID: "user1", username: "John Doe", locations: connectionLocations, dates: connectionDates },
+					{ userID: "user2", username: "Jane Smith", locations: connectionLocations.slice(0, 2), dates: [connectionDates[0]] },
+					{ userID: "user3", username: "Caleb Dougal", locations: connectionLocations.slice(2,4), dates: connectionDates }
+				]);
+			}, 1800);
+			
+
+			// const nearbySocket = openWS(WS_NEARBY_OPEN, authUser.uuid);
+			// nearbySocket.addEventListener("open", socketOpen);
+			// nearbySocket.addEventListener("message", socketMessage);
+			// nearbySocket.addEventListener("close", socketClose);
+
+			// socketRef.current = nearbySocket;
+			// setNearbySocket(nearbySocket);
 		}
 	}, []);
 
 	const connections = useMemo(() => {
-		if (!selfData || !nearbyUsers.length) return [];
+		if (!nearbyUsers.length) return [];
 
 		const selfLocSet = new Set(selfData.locations);
 		const selfDateSet = new Set(selfData.dates);
@@ -66,7 +101,7 @@ export default function Nearby() {
 	}, [nearbyUsers, selfData]);
 
 	return (
-		<div className="bg-gray-1 w-full min-h-[calc(100vh-max(7vh,70px))]">
+		<div className="bg-gray-1 w-full min-h-[calc(100vh-max(7vh,70px))] pb-40 sm:pb-0">
 			<div className="font-main font-black text-gray-6 text-center sm:text-left w-full sm:w-auto pt-4 sm:pt-6 pb-4 text-2xl sm:ml-8">NEARBY</div>
 			{connectingToNearby && (
 				<div className="flex justify-center sm:justify-start">

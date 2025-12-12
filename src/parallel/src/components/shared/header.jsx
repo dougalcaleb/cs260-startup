@@ -99,7 +99,7 @@ export default function Header() {
 	const returnToHome = () => {
 		setConnectImages([]);
 		setConnectImgMetadata(new Map());
-		setImagesLoaded(new Set());
+		// setImagesLoaded(new Set());
 		setComparingWith(null);
 		setIsComparing(false);
 		navigate(`${URL_BASE}/library`);
